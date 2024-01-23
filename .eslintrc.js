@@ -8,6 +8,8 @@ module.exports = {
         ecmaFeatures: {
             jsx: true,
         },
+        project: ['./tsconfig.json'],
+        tsconfigRootDir: __dirname,
     },
     plugins: ['import', '@typescript-eslint', 'react-hooks', 'jest', 'chai-friendly', 'react'],
     extends: [
@@ -39,8 +41,18 @@ module.exports = {
         'packages/protobuf/scripts/protobuf-patches/*',
         'packages/connect-examples',
         'ci/',
+        '*.config.js',
+        '.eslintrc.js',
     ],
     rules: {
+        '@typescript-eslint/strict-boolean-expressions': [
+            'warn',
+            {
+                allowString: false,
+                allowNumber: false,
+                allowNullableObject: false,
+            },
+        ],
         '@typescript-eslint/prefer-ts-expect-error': 'error',
         // I believe type is enforced by callers.
         '@typescript-eslint/explicit-function-return-type': 'off',
