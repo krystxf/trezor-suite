@@ -308,6 +308,10 @@ const SKIP = [
     'wire_type',
     'experimental',
     'include_in_bitcoin_only',
+    'channel_in',
+    'channel_out',
+    'pairing_in',
+    'pairing_out',
 ];
 
 module.exports = {

@@ -91,42 +91,38 @@ const parseMessage = (messageName, message, depth = 0) => {
     if (message.values) {
         return parseEnum(messageName, message);
     }
-    if (!message.fields || !Object.keys(message.fields).length) {
+    if (DEFINITION_PATCH[messageName]) {
+        // replace whole declaration with patch
+        value.push(DEFINITION_PATCH[messageName]);
+    } else if (!message.fields || !Object.keys(message.fields).length) {
         // few types are just empty objects, make it one line
         value.push(`export type ${messageName} = {};`);
         value.push('');
     } else {
-        // find patch
-        const definition = DEFINITION_PATCH[messageName];
-        if (definition) {
-            // replace whole declaration
-            value.push(definition);
-        } else {
-            // declare type
-            value.push(`export type ${messageName} = {`);
-            Object.keys(message.fields).forEach(fieldName => {
-                const field = message.fields[fieldName];
-                const fieldKey = `${messageName}.${fieldName}`;
-                // find patch for "rule"
-                const fieldRule = RULE_PATCH[fieldKey] || field.rule;
-                const rule = fieldRule === 'required' || fieldRule === 'repeated' ? ': ' : '?: ';
-                // find patch for "type"
-                let type = TYPE_PATCH[fieldKey] || FIELD_TYPES[field.type] || field.type;
-                // automatically convert all amount and fee fields to UINT_TYPE
-                if (['amount', 'fee'].includes(fieldName)) {
-                    type = UINT_TYPE;
-                }
-                // array
-                if (field.rule === 'repeated') {
-                    type = type.split('|').length > 1 ? `Array<${type}>` : `${type}[]`;
-                }
-                value.push(`    ${fieldName}${rule}${type};`);
-            });
-            // close type declaration
-            value.push('};');
-            // empty line
-            value.push('');
-        }
+        // declare type
+        value.push(`export type ${messageName} = {`);
+        Object.keys(message.fields).forEach(fieldName => {
+            const field = message.fields[fieldName];
+            const fieldKey = `${messageName}.${fieldName}`;
+            // find patch for "rule"
+            const fieldRule = RULE_PATCH[fieldKey] || field.rule;
+            const rule = fieldRule === 'required' || fieldRule === 'repeated' ? ': ' : '?: ';
+            // find patch for "type"
+            let type = TYPE_PATCH[fieldKey] || FIELD_TYPES[field.type] || field.type;
+            // automatically convert all amount and fee fields to UINT_TYPE
+            if (['amount', 'fee'].includes(fieldName)) {
+                type = UINT_TYPE;
+            }
+            // array
+            if (field.rule === 'repeated') {
+                type = type.split('|').length > 1 ? `Array<${type}>` : `${type}[]`;
+            }
+            value.push(`    ${fieldName}${rule}${type};`);
+        });
+        // close type declaration
+        value.push('};');
+        // empty line
+        value.push('');
     }
     // type doest have to be e
     const exact = message.fields && Object.values(message.fields).find(f => f.rule === 'required');
@@ -205,7 +201,6 @@ lines.push(
 );
 lines.push(content);
 
-// create custom definition
 
 lines.push('// custom connect definitions');
 lines.push('export type MessageType = {');
@@ -214,6 +209,7 @@ types
     .forEach(t => {
         lines.push(`    ${t.name}: ${t.name};`);
     });
+
 lines.push('};');
 
 // additional types utilities

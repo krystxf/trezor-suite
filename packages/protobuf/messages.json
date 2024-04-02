@@ -2976,6 +2976,10 @@
                 "wait_layout": {
                     "type": "bool",
                     "id": 3
+                },
+                "thp_channel_id": {
+                    "type": "uint32",
+                    "id": 4
                 }
             }
         },
@@ -3033,6 +3037,14 @@
                     "rule": "repeated",
                     "type": "string",
                     "id": 13
+                },
+                "thp_pairing_code_entry_code": {
+                    "type": "uint32",
+                    "id": 14
+                },
+                "thp_pairing_secret": {
+                    "type": "bytes",
+                    "id": 15
                 }
             }
         },
@@ -7823,6 +7835,26 @@
         "wire_no_fsm": {
             "type": "bool",
             "id": 50008,
+            "extend": "google.protobuf.EnumValueOptions"
+        },
+        "channel_in": {
+            "type": "bool",
+            "id": 50009,
+            "extend": "google.protobuf.EnumValueOptions"
+        },
+        "channel_out": {
+            "type": "bool",
+            "id": 50010,
+            "extend": "google.protobuf.EnumValueOptions"
+        },
+        "pairing_in": {
+            "type": "bool",
+            "id": 50011,
+            "extend": "google.protobuf.EnumValueOptions"
+        },
+        "pairing_out": {
+            "type": "bool",
+            "id": 50012,
             "extend": "google.protobuf.EnumValueOptions"
         },
         "bitcoin_only": {
