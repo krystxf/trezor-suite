@@ -1,8 +1,15 @@
 // original file https://github.com/trezor/connect/blob/develop/src/js/device/Device.js
 import { versionUtils, createDeferred, Deferred, TypedEmitter } from '@trezor/utils';
 import { Session } from '@trezor/transport';
-import { TransportProtocol, v1 as v1Protocol } from '@trezor/protocol';
+import {
+    TransportProtocol,
+    TransportProtocolState,
+    v1 as protocolV1,
+    v2 as protocolV2,
+    thp as protocolThp,
+} from '@trezor/protocol';
 import { DeviceCommands, PassphrasePromptResponse } from './DeviceCommands';
+import { createThpChannel, initThpChannel, getThpSession } from './thpCommands';
 import { PROTO, ERRORS, NETWORK } from '../constants';
 import { DEVICE, DeviceButtonRequestPayload, UI } from '../events';
 import { getAllNetworks } from '../data/coinInfo';
@@ -82,7 +89,26 @@ export interface DeviceEvents {
     [DEVICE.BUTTON]: (device: Device, payload: DeviceButtonRequestPayload) => void;
     [DEVICE.ACQUIRED]: () => void;
     [DEVICE.SAVE_STATE]: (state: string) => void;
+    [DEVICE.THP_PAIRING]: (device: Device, callback: (err: any, result: any) => void) => void;
+    [DEVICE.TRANSPORT_STATE_CHANGED]: () => void;
 }
+
+// type WalletSession = {
+//     internal: string | number; // string for devices without THP (from Initialize), number for devices with THP (from ThpCreateNewSession)
+//     external: string; // 1st testnet address
+// };
+
+type TransportState = TransportProtocolState & {
+    // protocol: TransportProtocol;
+    // // sessions: Record<number, string>; // { [key: new_session_id from ThpCreateNewSession]: value: 1rs address? }
+    // sessions: WalletSession[]; // { [key: new_session_id from ThpCreateNewSession]: value: 1rs address? }
+};
+
+// type DeviceTransport = {
+//     instance: Transport;
+//     descriptor: Descriptor;
+//     state: TransportState;
+// };
 
 /**
  * @export
@@ -92,6 +118,7 @@ export interface DeviceEvents {
 export class Device extends TypedEmitter<DeviceEvents> {
     transport: Transport;
     protocol: TransportProtocol;
+    transportState: TransportState;
 
     originalDescriptor: Descriptor;
 
@@ -109,6 +136,7 @@ export class Device extends TypedEmitter<DeviceEvents> {
 
     // @ts-expect-error: strictPropertyInitialization
     features: Features;
+    properties?: protocolThp.ThpDeviceProperties;
 
     featuresNeedsReload = false;
 
@@ -131,7 +159,7 @@ export class Device extends TypedEmitter<DeviceEvents> {
 
     instance = 0;
 
-    internalState: string[] = [];
+    internalState: string[] = []; // THP channel
 
     externalState: string[] = [];
 
@@ -154,7 +182,8 @@ export class Device extends TypedEmitter<DeviceEvents> {
     constructor(transport: Transport, descriptor: Descriptor) {
         super();
 
-        this.protocol = v1Protocol;
+        this.protocol = protocolV1;
+        this.transportState = new protocolThp.ThpProtocolState();
 
         // === immutable properties
         this.transport = transport;
@@ -233,6 +262,7 @@ export class Device extends TypedEmitter<DeviceEvents> {
                 }
             }
 
+            console.log('Device.this.releasePromise');
             this.releasePromise = this.transport.release({
                 session: this.activitySessionID,
                 path: this.originalDescriptor.path,
@@ -253,6 +283,7 @@ export class Device extends TypedEmitter<DeviceEvents> {
         this.removeAllListeners();
         // make sure that Device_CallInProgress will not be thrown
         delete this.runPromise;
+        console.log('Device.cleanup.release');
         await this.release();
         // restore DEVICE.ACQUIRED listeners
         acquiredListeners.forEach(l => this.once(DEVICE.ACQUIRED, l));
@@ -292,13 +323,16 @@ export class Device extends TypedEmitter<DeviceEvents> {
     async interruptionFromUser(error: Error) {
         _log.debug('interruptionFromUser');
 
+        if (this.commands) {
+            console.warn('Cancel commands!');
+            await this.commands.cancel();
+            console.warn('Cancel commands end');
+        }
+
         if (this.runPromise) {
             // reject inner defer
             this.runPromise.reject(error);
             delete this.runPromise;
-        }
-        if (this.commands) {
-            await this.commands.cancel();
         }
     }
 
@@ -336,12 +370,19 @@ export class Device extends TypedEmitter<DeviceEvents> {
 
         if (!this.isUsedHere() || this.commands?.disposed || !this.getExternalState()) {
             // acquire session
-            await this.acquire();
+            if (!this.isUsedHere()) {
+                await this.acquire();
+            }
 
             // update features
             try {
+                console.warn('..._runInner', typeof fn);
+
                 if (fn) {
                     await this.initialize(!!options.useCardanoDerivation);
+                } else if (this.protocol.name === 'v2') {
+                    console.warn('..._runInner with protocol v2');
+                    await createThpChannel(this);
                 } else {
                     const getFeaturesTimeout =
                         DataManager.getSettings('env') === 'react-native'
@@ -377,6 +418,19 @@ export class Device extends TypedEmitter<DeviceEvents> {
                     this.inconsistent = true;
 
                     return this._runInner(() => Promise.resolve({}), options);
+                }
+                if (
+                    error.code === 'Failure_UnexpectedMessage' &&
+                    error.message === 'Invalid protocol'
+                ) {
+                    if (this.protocol.name === 'v2') {
+                        // TODO: is this possible?
+                    }
+                    _log.info('Changing device protocol to THP');
+                    // switch to THP and try again
+                    this.protocol = protocolV2;
+
+                    return this._runInner(undefined, options);
                 }
 
                 if (TRANSPORT_ERROR.ABORTED_BY_TIMEOUT === error.message) {
@@ -424,6 +478,7 @@ export class Device extends TypedEmitter<DeviceEvents> {
             options.keepSession === false
         ) {
             this.keepSession = false;
+            console.log('_runinner.release');
             await this.release();
         }
 
@@ -504,7 +559,11 @@ export class Device extends TypedEmitter<DeviceEvents> {
         }
 
         const expectedState = this.getExternalState();
-        const state = await this.getCommands().getDeviceState();
+        // const state = await this.getCommands().getDeviceState();
+        const state =
+            this.protocol.name === 'v2'
+                ? await getThpSession(this)
+                : await this.getCommands().getDeviceState();
         const uniqueState = `${state}@${this.features.device_id || 'device_id'}:${this.instance}`;
         if (this.features.session_id) {
             this.setInternalState(this.features.session_id);
@@ -517,7 +576,53 @@ export class Device extends TypedEmitter<DeviceEvents> {
         }
     }
 
+    // bridge older than 3.0.0 adds MESSAGE_MAGIC_HEADER_BYTE to each chunk
+    // therefore it's not possible to implement Trezor Host Protocol
+    useLegacyProtocol() {
+        return (
+            this.transport.name === 'BridgeTransport' &&
+            !versionUtils.isNewerOrEqual(this.transport.version, '3.0.0')
+        );
+    }
+
     async initialize(useCardanoDerivation: boolean) {
+        console.warn('.......Initialize()', useCardanoDerivation, this.protocol.name);
+        if (this.protocol.name === 'v2') {
+            await initThpChannel(this, DataManager.getSettings('thp')); // TODO settings
+
+            // const { message } = await this.getCommands().typedCall('Initialize', 'Features', payload);
+            const { message } = await this.getCommands().typedCall('GetFeatures', 'Features', {});
+            this._updateFeatures(message);
+
+            return;
+        }
+
+        let payload: PROTO.Initialize | undefined;
+        if (this.features) {
+            const internalState = this.getInternalState();
+            payload = {};
+            // If the user has BIP-39 seed, and Initialize(derive_cardano=True) is not sent,
+            // all Cardano calls will fail because the root secret will not be available.
+            payload.derive_cardano = useCardanoDerivation;
+            if (internalState) {
+                payload.session_id = internalState;
+            }
+        }
+
+        const { message } = await this.getCommands().typedCall('Initialize', 'Features', payload);
+        this._updateFeatures(message);
+    }
+
+    async initializeNw(useCardanoDerivation: boolean) {
+        console.warn('.......Initialize()', useCardanoDerivation);
+        await initThpChannel(this, DataManager.getSettings('thp')); // TODO settings
+
+        // const { message } = await this.getCommands().typedCall('Initialize', 'Features', payload);
+        const { message } = await this.getCommands().typedCall('GetFeatures', 'Features', {});
+        this._updateFeatures(message);
+    }
+
+    async initializeOld(useCardanoDerivation: boolean) {
         let payload: PROTO.Initialize | undefined;
         if (this.features) {
             const internalState = this.getInternalState();
@@ -535,6 +640,11 @@ export class Device extends TypedEmitter<DeviceEvents> {
     }
 
     async getFeatures() {
+        console.warn('.......getFeatures()');
+        if (this.protocol.name === 'v2') {
+            await initThpChannel(this, DataManager.getSettings('thp'));
+        }
+
         const { message } = await this.getCommands().typedCall('GetFeatures', 'Features', {});
         this._updateFeatures(message);
 
@@ -839,6 +949,8 @@ export class Device extends TypedEmitter<DeviceEvents> {
                     await this.commands.cancel();
                 }
 
+                console.log('Device.this.transport.release');
+
                 return this.transport.release({
                     session: this.activitySessionID,
                     path: this.originalDescriptor.path,
@@ -875,6 +987,11 @@ export class Device extends TypedEmitter<DeviceEvents> {
                 path: this.originalDescriptor.path,
                 label: 'Unacquired device',
                 name: this.name,
+                properties: this.properties,
+                protocolState: {
+                    channel: this.transportState.channel.toString('hex'),
+                    ...this.transportState.serialize(),
+                },
             };
         }
         const defaultLabel = 'My Trezor';
@@ -889,6 +1006,10 @@ export class Device extends TypedEmitter<DeviceEvents> {
             path: this.originalDescriptor.path,
             label,
             state: this.getExternalState(),
+            protocolState: {
+                channel: this.transportState.channel.toString('hex'),
+                ...this.transportState.serialize(),
+            },
             status,
             mode: this.getMode(),
             name: this.name,
@@ -897,6 +1018,7 @@ export class Device extends TypedEmitter<DeviceEvents> {
             firmwareRelease: this.firmwareRelease,
             firmwareType: this.firmwareType,
             features: this.features,
+            properties: this.properties,
             unavailableCapabilities: this.unavailableCapabilities,
             availableTranslations: this.availableTranslations,
             authenticityChecks: this.authenticityChecks,

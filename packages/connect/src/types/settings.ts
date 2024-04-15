@@ -1,4 +1,5 @@
 import type { BlockchainSettings } from '@trezor/blockchain-link';
+import type { ThpDeviceProperties, ThpMessageType } from '@trezor/protocol';
 import type { Transport } from '@trezor/transport';
 
 export type { SystemInfo } from '@trezor/connect-common';
@@ -8,6 +9,13 @@ export interface Manifest {
 }
 
 export type Proxy = BlockchainSettings['proxy'];
+
+export type ThpSettings = {
+    hostName?: string;
+    staticKeys: string;
+    knownCredentials?: ThpMessageType['ThpCredentialResponse'][]; // TODO type
+    pairingMethods: ThpDeviceProperties['pairing_methods'];
+};
 
 export interface ConnectSettingsPublic {
     manifest?: Manifest;
@@ -26,6 +34,7 @@ export interface ConnectSettingsPublic {
     coreMode?: 'auto' | 'popup' | 'iframe';
     /* _extendWebextensionLifetime features makes the service worker in @trezor/connect-webextension stay alive longer */
     _extendWebextensionLifetime?: boolean;
+    thp?: ThpSettings;
 }
 
 // internal part, not to be accepted from .init()

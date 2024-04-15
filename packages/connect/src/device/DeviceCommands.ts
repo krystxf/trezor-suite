@@ -98,7 +98,7 @@ export class DeviceCommands {
     callPromise?: ReturnType<Transport['call']>;
 
     // see DeviceCommands.cancel
-    _cancelableRequest?: (error?: any) => void;
+    _cancelableRequest?: (error?: any) => Promise<void>;
     _cancelableRequestBySend?: boolean;
 
     constructor(device: Device, transport: Transport, sessionId: Session) {
@@ -324,13 +324,14 @@ export class DeviceCommands {
             name: type,
             data: msg,
             protocol: this.device.protocol,
+            protocolState: this.device.transportState,
         });
 
         const res = await this.callPromise.promise;
 
         this.callPromise = undefined;
         if (!res.success) {
-            logger.warn('Received error', res.error);
+            console.warn('Received error', res);
             throw new Error(res.error);
         }
 
@@ -375,6 +376,7 @@ export class DeviceCommands {
             await this.transport.receive({
                 session: this.sessionId,
                 protocol: this.device.protocol,
+                protocolState: this.device.transportState,
             }).promise;
             // throw error anyway, next call should be resolved properly
             throw error;
@@ -433,7 +435,52 @@ export class DeviceCommands {
                 this.device.emit(DEVICE.BUTTON, this.device, res.message);
             }
 
+            console.warn('--->DebugLinkDecision before');
+
             return this._commonCall('ButtonAck', {});
+
+            // return this.transport
+            //     .send({
+            //         path: this.device.getDevicePath(),
+            //         session: this.device.activitySessionID!,
+            //         name: 'ButtonAck',
+            //         data: { button: 1 },
+            //         protocol: this.device.protocol,
+            //         protocolState: this.device.transportState,
+            //     })
+            //     .promise.then(() => {
+            //         console.warn('--->DebugLinkDecision sent');
+            //         this.device.transportState.updateSyncBit('recv');
+            //         this.device.transportState.updateNonce('send');
+            //         // this.device.transportState.updateNonce('recv');
+
+            //         return this._commonCall('DebugLinkDecision', { button: 1 }).then(res => {
+            //             console.warn('DebugLinkDecision', res);
+
+            //             return res;
+            //         });
+            //     });
+
+            // return new Promise(resolve => setTimeout(resolve, 100)).then(() => {
+            //     // this.device.transportState.updateSyncBit('send');
+
+            //     return this.transport
+            //         .send({
+            //             path: this.device.getDevicePath(),
+            //             session: this.device.activitySessionID!,
+            //             name: 'DebugLinkDecision',
+            //             data: { button: 1 },
+            //             protocol: this.device.protocol,
+            //             protocolState: this.device.transportState,
+            //         })
+            //         .promise.then(() => {
+            //             console.warn('--->DebugLinkDecision sent');
+
+            //             return promise;
+            //         });
+            // });
+
+            // return promise;
         }
 
         if (res.type === 'EntropyRequest') {
@@ -637,7 +684,7 @@ export class DeviceCommands {
     async cancel() {
         // _cancelableRequest is transport.call({ name: 'Cancel' }).
         if (this._cancelableRequest) {
-            this._cancelableRequest();
+            await this._cancelableRequest();
             this._cancelableRequest = undefined;
 
             return;
@@ -668,10 +715,11 @@ export class DeviceCommands {
             }
         } else {
             await this.transport.send({
-                protocol: this.device.protocol,
                 session: this.sessionId,
                 name: 'Cancel',
                 data: {},
+                protocol: this.device.protocol,
+                protocolState: this.device.transportState,
             }).promise;
 
             if (this.callPromise) {

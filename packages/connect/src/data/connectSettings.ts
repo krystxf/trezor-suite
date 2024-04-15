@@ -144,5 +144,10 @@ export const parseConnectSettings = (input: Partial<ConnectSettings> = {}) => {
         settings._extendWebextensionLifetime = input._extendWebextensionLifetime;
     }
 
+    if (input.thp) {
+        // TODO: validate
+        settings.thp = input.thp;
+    }
+
     return settings;
 };

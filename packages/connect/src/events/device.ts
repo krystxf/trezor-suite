@@ -9,6 +9,7 @@ export const DEVICE = {
     CONNECT_UNACQUIRED: 'device-connect_unacquired',
     DISCONNECT: 'device-disconnect',
     CHANGED: 'device-changed',
+    TRANSPORT_STATE_CHANGED: 'device-transport_state_changed',
     ACQUIRE: 'device-acquire',
     RELEASE: 'device-release',
     ACQUIRED: 'device-acquired',
@@ -24,6 +25,7 @@ export const DEVICE = {
     PASSPHRASE: 'passphrase',
     PASSPHRASE_ON_DEVICE: 'passphrase_on_device',
     WORD: 'word',
+    THP_PAIRING: 'thp_pairing',
 } as const;
 
 export interface DeviceButtonRequestPayload extends Omit<PROTO.ButtonRequest, 'code'> {
@@ -41,6 +43,7 @@ export type DeviceEvent =
               | typeof DEVICE.CONNECT
               | typeof DEVICE.CONNECT_UNACQUIRED
               | typeof DEVICE.CHANGED
+              | typeof DEVICE.TRANSPORT_STATE_CHANGED
               | typeof DEVICE.DISCONNECT;
           payload: Device;
       }
