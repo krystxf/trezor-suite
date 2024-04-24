@@ -9,19 +9,21 @@ import { selectDevices } from '@suite-common/wallet-core';
 import { selectFiatCurrencyCode, setFiatCurrency } from '@suite-native/module-settings';
 import { PROTO } from '@trezor/connect';
 import { mergeDeepObject } from '@trezor/utils';
-import { NativeUsbTransport } from '@trezor/transport-native';
+import { NativeTransportBLE } from '@trezor/transport-native-ble';
 
 const deviceType = Device.isDevice ? 'device' : 'emulator';
 
-const transportsPerDeviceType = {
-    device: Platform.select({
-        ios: ['BridgeTransport', 'UdpTransport'],
-        android: [new NativeUsbTransport()],
-    }),
-    emulator: ['BridgeTransport', 'UdpTransport'],
-} as const;
+// const transportsPerDeviceType = {
+//     device: Platform.select({
+//         ios: ['BridgeTransport', 'UdpTransport'],
+//         android: [new NativeUsbTransport()],
+//     }),
+//     emulator: ['BridgeTransport', 'UdpTransport'],
+// } as const;
 
-const transports = transportsPerDeviceType[deviceType];
+// const transports = transportsPerDeviceType[deviceType];
+
+const transports = [new NativeTransportBLE()];
 
 export const extraDependencies: ExtraDependencies = mergeDeepObject(extraDependenciesMock, {
     selectors: {

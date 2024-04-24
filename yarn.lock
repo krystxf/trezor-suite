@@ -3398,7 +3398,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@expo/config-plugins@npm:7.8.4, @expo/config-plugins@npm:~7.8.0, @expo/config-plugins@npm:~7.8.2":
+"@expo/config-plugins@npm:7.8.4, @expo/config-plugins@npm:^7.2.5, @expo/config-plugins@npm:~7.8.0, @expo/config-plugins@npm:~7.8.2":
   version: 7.8.4
   resolution: "@expo/config-plugins@npm:7.8.4"
   dependencies:
@@ -8775,10 +8775,12 @@ __metadata:
     react: "npm:18.2.0"
     react-intl: "npm:^6.6.2"
     react-native: "npm:0.73.6"
+    react-native-ble-plx: "npm:^3.1.2"
     react-native-flipper: "npm:^0.212.0"
     react-native-gesture-handler: "npm:2.15.0"
     react-native-keyboard-aware-scroll-view: "npm:0.9.5"
     react-native-mmkv: "npm:2.11.0"
+    react-native-permissions: "npm:^4.1.5"
     react-native-reanimated: "npm:3.8.1"
     react-native-restart: "npm:0.0.27"
     react-native-safe-area-context: "npm:4.9.0"
@@ -8878,6 +8880,22 @@ __metadata:
     "@suite-common/wallet-types": "workspace:*"
     "@suite-common/wallet-utils": "workspace:*"
     "@trezor/connect": "workspace:*"
+  languageName: unknown
+  linkType: soft
+
+"@suite-native/bluetooth@workspace:*, @suite-native/bluetooth@workspace:suite-native/bluetooth":
+  version: 0.0.0-use.local
+  resolution: "@suite-native/bluetooth@workspace:suite-native/bluetooth"
+  dependencies:
+    "@suite-native/atoms": "workspace:*"
+    "@suite-native/intl": "workspace:*"
+    "@trezor/styles": "workspace:*"
+    "@trezor/transport-native-ble": "workspace:*"
+    expo-constants: "npm:15.4.5"
+    react: "npm:18.2.0"
+    react-native: "npm:0.73.6"
+    react-native-ble-plx: "npm:^3.1.2"
+    react-native-permissions: "npm:^4.1.5"
   languageName: unknown
   linkType: soft
 
@@ -9288,6 +9306,7 @@ __metadata:
     "@suite-common/wallet-core": "workspace:*"
     "@suite-native/alerts": "workspace:*"
     "@suite-native/atoms": "workspace:*"
+    "@suite-native/bluetooth": "workspace:*"
     "@suite-native/device": "workspace:*"
     "@suite-native/device-mutex": "workspace:*"
     "@suite-native/forms": "workspace:*"
@@ -9682,6 +9701,7 @@ __metadata:
     "@suite-native/toasts": "workspace:*"
     "@trezor/connect": "workspace:*"
     "@trezor/transport-native": "workspace:*"
+    "@trezor/transport-native-ble": "workspace:*"
     "@trezor/utils": "workspace:*"
     "@types/redux-logger": "npm:^3.0.11"
     expo-device: "npm:5.9.3"
@@ -11213,6 +11233,15 @@ __metadata:
     styled-components: "npm:^6.1.8"
     usb: "npm:^2.11.0"
     webpack: "npm:^5.91.0"
+  languageName: unknown
+  linkType: soft
+
+"@trezor/transport-native-ble@workspace:*, @trezor/transport-native-ble@workspace:packages/transport-native-ble":
+  version: 0.0.0-use.local
+  resolution: "@trezor/transport-native-ble@workspace:packages/transport-native-ble"
+  dependencies:
+    "@trezor/transport": "workspace:*"
+    react-native-ble-plx: "npm:^3.1.2"
   languageName: unknown
   linkType: soft
 
@@ -33575,6 +33604,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"react-native-ble-plx@npm:^3.1.2":
+  version: 3.1.2
+  resolution: "react-native-ble-plx@npm:3.1.2"
+  dependencies:
+    "@expo/config-plugins": "npm:^7.2.5"
+  peerDependencies:
+    react: "*"
+    react-native: "*"
+  checksum: 10/75e3960fcc8c236d0e39fe07a5abd10f617ae8e1cd4114e2179d0e33876aad0932ce229a39e768914f859b5029445b4e44e21e03d5f031cb680f9eee060e9f43
+  languageName: node
+  linkType: hard
+
 "react-native-flipper@npm:^0.212.0":
   version: 0.212.0
   resolution: "react-native-flipper@npm:0.212.0"
@@ -33629,6 +33670,20 @@ __metadata:
     react: "*"
     react-native: ">=0.71.0"
   checksum: 10/bdf2622ae2b579b8dad7ecb5e43e9698db11a2a4248dd1f5ef696e9af1b753b83a23e1e4e0e0cdc04b052dbef53813046348eb2b74ae1aa032ae33122bf200f5
+  languageName: node
+  linkType: hard
+
+"react-native-permissions@npm:^4.1.5":
+  version: 4.1.5
+  resolution: "react-native-permissions@npm:4.1.5"
+  peerDependencies:
+    react: ">=18.1.0"
+    react-native: ">=0.70.0"
+    react-native-windows: ">=0.70.0"
+  peerDependenciesMeta:
+    react-native-windows:
+      optional: true
+  checksum: 10/2b1eaa879e4b0c3455488c3dfa1d8b203bdbf2cd550b8ee5691d26e03c086d33f9bc495a70f8e1e85d0c16131374e11d12f7927168179e339f158eea9fb04830
   languageName: node
   linkType: hard
 

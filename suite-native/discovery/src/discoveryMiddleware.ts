@@ -4,6 +4,7 @@ import {
     discoveryActions,
     selectDeviceModel,
     selectDeviceFirmwareVersion,
+    DISCOVERY_MODULE_PREFIX,
 } from '@suite-common/wallet-core';
 import { createMiddlewareWithExtraDeps } from '@suite-common/redux-utils';
 import { isFirmwareVersionSupported } from '@suite-native/device';
@@ -15,6 +16,10 @@ export const prepareDiscoveryMiddleware = createMiddlewareWithExtraDeps(
     (action, { dispatch, next, getState }) => {
         if (deviceActions.forgetDevice.match(action) && action.payload.state) {
             dispatch(discoveryActions.removeDiscovery(action.payload.state));
+        }
+
+        if (action.type.startsWith(DISCOVERY_MODULE_PREFIX)) {
+            console.log(action.name, JSON.stringify(action, null, 2));
         }
 
         const device = selectDevice(getState());

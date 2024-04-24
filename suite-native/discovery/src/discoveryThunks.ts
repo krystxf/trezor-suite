@@ -474,6 +474,8 @@ export const createDescriptorPreloadedDiscoveryThunk = createThunk(
             return;
         }
 
+        console.log('createDescriptorPreloadedDiscoveryThunk', deviceState, supportedNetworks);
+
         const supportedNetworksSymbols = supportedNetworks.map(network => network.symbol);
         const discoveryNetworksTotalCount = supportedNetworksSymbols.length;
 

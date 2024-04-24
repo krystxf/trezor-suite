@@ -31,6 +31,7 @@
         "@suite-native/toasts": "workspace:*",
         "@trezor/connect": "workspace:*",
         "@trezor/transport-native": "workspace:*",
+        "@trezor/transport-native-ble": "workspace:*",
         "@trezor/utils": "workspace:*",
         "expo-device": "5.9.3",
         "react": "18.2.0",
