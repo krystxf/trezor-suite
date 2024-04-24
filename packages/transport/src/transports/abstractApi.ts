@@ -54,7 +54,8 @@ export abstract class AbstractApiTransport extends AbstractTransport {
         this.api.on('transport-interface-change', descriptors => {
             // 2. we signal this to sessions background
             this.sessionsClient.enumerateDone({
-                descriptors,
+                // TODO: descriptors are somewhere mutated which causes problems on mobile BLE
+                descriptors: descriptors.map(d => ({ ...d })),
             });
         });
         // 3. based on 2.sessions background distributes information about descriptors change to all clients
@@ -63,7 +64,8 @@ export abstract class AbstractApiTransport extends AbstractTransport {
             if (this.acquirePromise?.promise) {
                 await this.acquirePromise.promise;
             }
-            this.handleDescriptorsChange(descriptors);
+            // TODO: descriptors are somewhere mutated which causes problems on mobile BLE
+            this.handleDescriptorsChange(descriptors.map(d => ({ ...d })));
         });
 
         return this.success(undefined);
