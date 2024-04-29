@@ -13,12 +13,14 @@ import {
 } from '@suite-native/navigation';
 import { clearStorage } from '@suite-native/storage';
 import { getCommitHash, getSuiteVersion } from '@trezor/env-utils';
+import { isBluetoothBuild } from '@suite-native/bluetooth';
 
 import { RenderingUtils } from '../components/RenderingUtils';
 import { FeatureFlags } from '../components/FeatureFlags';
 import { TestnetsToggle } from '../components/TestnetsToggle';
 import { DiscoveryCoinsFilter } from '../components/DiscoveryCoinsFilter';
 import { DevicePassphraseSwitch } from '../components/DevicePassphraseSwitch';
+import { BluetoothToggle } from '../components/BluetoothToggle';
 
 export const DevUtilsScreen = ({
     navigation,
@@ -44,6 +46,7 @@ export const DevUtilsScreen = ({
                             <RenderingUtils />
                             <DevicePassphraseSwitch />
                             <DiscoveryCoinsFilter />
+                            {isBluetoothBuild && <BluetoothToggle />}
                         </>
                     )}
                     <Button

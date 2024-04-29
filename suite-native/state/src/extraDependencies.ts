@@ -10,20 +10,24 @@ import { selectFiatCurrencyCode, setFiatCurrency } from '@suite-native/module-se
 import { PROTO } from '@trezor/connect';
 import { mergeDeepObject } from '@trezor/utils';
 import { NativeTransportBLE } from '@trezor/transport-native-ble';
+import { isBluetoothEnabled } from '@suite-native/bluetooth';
+import { NativeUsbTransport } from '@trezor/transport-native';
 
 const deviceType = Device.isDevice ? 'device' : 'emulator';
 
-// const transportsPerDeviceType = {
-//     device: Platform.select({
-//         ios: ['BridgeTransport', 'UdpTransport'],
-//         android: [new NativeUsbTransport()],
-//     }),
-//     emulator: ['BridgeTransport', 'UdpTransport'],
-// } as const;
+const transportsPerDeviceType = {
+    device: Platform.select({
+        ios: ['BridgeTransport', 'UdpTransport'],
+        android: [new NativeUsbTransport()],
+    }),
+    emulator: ['BridgeTransport', 'UdpTransport'],
+} as const;
 
-// const transports = transportsPerDeviceType[deviceType];
+let transports = transportsPerDeviceType[deviceType];
 
-const transports = [new NativeTransportBLE()];
+if (isBluetoothEnabled) {
+    transports = [new NativeTransportBLE()];
+}
 
 export const extraDependencies: ExtraDependencies = mergeDeepObject(extraDependenciesMock, {
     selectors: {

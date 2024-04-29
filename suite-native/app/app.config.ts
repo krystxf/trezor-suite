@@ -109,6 +109,10 @@ const getPlugins = (): ExpoPlugins => {
         ],
     ];
 
+    if (process.env.EXPO_PUBLIC_BLUETOOTH_ENABLED) {
+        plugins.push(['react-native-ble-plx', {}]);
+    }
+
     return [
         ...plugins,
         // EXPLAINER: plugins.push("@sentry...") does not work for some reason during `expo prebuild` and
@@ -126,8 +130,6 @@ const getPlugins = (): ExpoPlugins => {
                       },
                   ],
               ]),
-
-        ['react-native-ble-plx', {}],
         // These should come last
         './plugins/withRemoveXcodeLocalEnv.js',
         ['./plugins/withEnvFile.js', { buildType }],
