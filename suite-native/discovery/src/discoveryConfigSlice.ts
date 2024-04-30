@@ -76,11 +76,6 @@ export const selectDiscoverySupportedNetworks = memoizeWithArgs(
     (state: DeviceRootState, areTestnetsEnabled: boolean) =>
         pipe(
             selectDeviceSupportedNetworks(state),
-            symbols => {
-                console.log('selectDeviceSupportedNetworks', symbols);
-
-                return symbols;
-            },
             networkSymbols => filterTestnetNetworks(networkSymbols, areTestnetsEnabled),
             filterUnavailableNetworks,
             filterBlacklistedNetworks,

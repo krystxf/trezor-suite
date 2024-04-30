@@ -33,7 +33,7 @@ type DeviceModelLayoutProps = {
     pagerOffset: number;
 };
 
-const deviceToContentStyles: Record<DeviceModelInternal, DeviceModelLayoutProps> = {
+const deviceToContentStyles: Record<DeviceModelInternal | 'T3W1', DeviceModelLayoutProps> = {
     [DeviceModelInternal.T1B1]: {
         fontSource: require('../../../../packages/theme/fonts/PixelOperatorMono8-Regular.ttf'),
         fontSize: 14,
@@ -61,6 +61,14 @@ const deviceToContentStyles: Record<DeviceModelInternal, DeviceModelLayoutProps>
         lineWidth: 265,
         lineHeight: 25,
         pagerOffset: 40,
+    },
+    // T3W1 because it for development use only
+    T3W1: {
+        fontSource: require('../../../../packages/theme/fonts/RobotoMono-Regular.ttf'),
+        fontSize: 20,
+        lineWidth: 230,
+        lineHeight: 25,
+        pagerOffset: 60,
     },
 };
 
