@@ -14,6 +14,7 @@ const emptySync = () => error({ error: WRONG_ENVIRONMENT });
 
 export class UdpTransport extends AbstractTransport {
     public name = 'UdpTransport' as const;
+    public apiType = 'udp' as const;
 
     init = emptyAbortable;
     acquire = emptyAbortable;

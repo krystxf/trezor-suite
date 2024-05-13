@@ -71,6 +71,7 @@ export class BridgeTransport extends AbstractTransport {
     protected acquirePromise?: Deferred<void>;
 
     public name = 'BridgeTransport' as const;
+    public apiType = 'usb' as const;
 
     constructor(params?: BridgeConstructorParameters) {
         const { url = DEFAULT_URL, latestVersion, ...args } = params || {};
@@ -95,6 +96,7 @@ export class BridgeTransport extends AbstractTransport {
                 this.isOutdated = versionUtils.isNewer(this.latestVersion, this.version);
             }
 
+            this.stopped = false;
             return this.success(undefined);
         });
     }

@@ -12,6 +12,7 @@ import { initBackgroundInBrowser } from '../sessions/background-browser';
  */
 export class WebUsbTransport extends AbstractApiTransport {
     public name = 'WebUsbTransport' as const;
+    public apiType = 'usb' as const;
 
     constructor(params?: AbstractTransportParams) {
         const { messages, logger } = params || {};

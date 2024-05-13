@@ -8,6 +8,7 @@ import { SessionsBackground } from '../sessions/background';
 
 export class UdpTransport extends AbstractApiTransport {
     public name = 'UdpTransport' as const;
+    public apiType = 'udp' as const;
 
     constructor(params?: AbstractTransportParams) {
         const { messages, logger } = params || {};

@@ -82,6 +82,8 @@ export abstract class AbstractTransport extends TypedEmitter<{
         | 'NodeUsbTransport'
         | 'WebUsbTransport'
         | 'UdpTransport';
+
+    public abstract apiType: 'usb' | 'udp' | 'bluetooth';
     /**
      * transports with "external element" such as bridge can be outdated.
      */
@@ -93,7 +95,7 @@ export abstract class AbstractTransport extends TypedEmitter<{
     /**
      * once transport has been stopped, it does not emit any events
      */
-    protected stopped = false;
+    protected stopped = true;
     /**
      * once transport is listening, it will be emitting TRANSPORT.UPDATE events
      */
@@ -469,6 +471,10 @@ export abstract class AbstractTransport extends TypedEmitter<{
 
     public updateMessages(messages: Record<string, any>) {
         this.messages = protobuf.Root.fromJSON(messages);
+    }
+
+    public isActive() {
+        return !this.stopped;
     }
 
     protected success<T>(payload: T): Success<T> {
