@@ -8,14 +8,14 @@ const run = async () => {
         console.warn('TRANSPORT_EVENT', event);
     });
 
-    const a = await TrezorConnect.init({
+    const initResult = await TrezorConnect.init({
         manifest: { appUrl: 'a', email: 'b' },
         transports: ['UdpTransport', 'UdpTransport'],
         pendingTransportEvent: true,
-        debug: true,
+        // debug: true,
     });
 
-    console.warn('all inited!', a);
+    console.warn('all inited!', initResult);
 
     // TrezorConnect.getAddress({ path: "m/44'/0'/0'/0/0" }).then(console.warn);
 };

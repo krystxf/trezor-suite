@@ -1007,10 +1007,14 @@ const initDeviceList = async (transportReconnect?: boolean) => {
             postMessage(createTransportMessage(TRANSPORT.START, transportType)),
         );
 
-        _deviceList.init();
-        if (_deviceList) {
-            await _deviceList.waitForTransportFirstEvent();
-        }
+        _deviceList.on(TRANSPORT.START, console.warn);
+
+        await _deviceList.init();
+
+        console.warn('DEVICE_LIST INITED!', _deviceList.devices);
+        // if (_deviceList) {
+        //     await _deviceList.waitForTransportFirstEvent();
+        // }
     } catch (error) {
         _deviceList = undefined;
         postMessage(createTransportMessage(TRANSPORT.ERROR, { error }));

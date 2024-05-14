@@ -52,11 +52,8 @@ const dispose = () => {
 const handleMessage = (message: CoreEventMessage) => {
     const { event, type, payload } = message;
 
-    if (!_core) return;
-
-    if (type === UI.REQUEST_UI_WINDOW) {
+    if (_core && type === UI.REQUEST_UI_WINDOW) {
         _core.handleMessage({ type: POPUP.HANDSHAKE });
-
         return;
     }
 
@@ -120,7 +117,10 @@ const init = async (settings: Partial<ConnectSettings> = {}) => {
         return;
     }
 
+    console.warn('initializing Core!');
+
     _core = await initCore(_settings, handleMessage);
+    console.warn('Core initialized!');
 };
 
 const call: CallMethod = async params => {
