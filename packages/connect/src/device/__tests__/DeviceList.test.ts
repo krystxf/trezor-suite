@@ -264,7 +264,6 @@ describe('DeviceList', () => {
         list.init();
         await list.waitForTransportFirstEvent();
 
-        // NOTE: this behavior is wrong
         const events = eventsSpy.mock.calls.map(call => call[0]);
         expect(events).toEqual([
             ...DEVICE_CONNECTION_SEQUENCE, // path 1
