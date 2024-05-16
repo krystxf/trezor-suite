@@ -94,6 +94,14 @@ const createDeviceList = () => {
 };
 
 describe('DeviceList', () => {
+    const DEVICE_CONNECTION_SEQUENCE = [
+        'device-changed',
+        'device-acquired',
+        'device-changed',
+        'device-released',
+        'device-connect',
+    ];
+
     it('constructor throws error on unknown transport (string)', async () => {
         await loadDataManager({ transports: ['FooBarTransport'] });
 
@@ -259,13 +267,9 @@ describe('DeviceList', () => {
         // NOTE: this behavior is wrong
         const events = eventsSpy.mock.calls.map(call => call[0]);
         expect(events).toEqual([
-            'device-changed', // path 1
-            'device-acquired', // path 1
-            'device-connect_unacquired', // path 2
-            'device-connect_unacquired', // path 3
-            'device-changed', // path 2
-            'device-acquired', // path 2
-            'device-connect', // path 1
+            ...DEVICE_CONNECTION_SEQUENCE, // path 1
+            ...DEVICE_CONNECTION_SEQUENCE, // path 2
+            ...DEVICE_CONNECTION_SEQUENCE, // path 3
             'transport-start',
         ]);
 
@@ -330,27 +334,20 @@ describe('DeviceList', () => {
         await new Promise(resolve => list.on('device-connect', resolve));
 
         const events = eventsSpy.mock.calls.map(call => call[0]);
-        expect(events).toEqual([
-            'transport-start',
-            'device-changed',
-            'device-acquired',
-            'device-changed',
-            'device-released',
-            'device-connect',
-        ]);
+        expect(events).toEqual(['transport-start', ...DEVICE_CONNECTION_SEQUENCE]);
 
         list.dispose();
     });
 
     it('multiple device connected after .init()', async () => {
-        let inChangeCallback = (..._args: any[]) => {};
+        let onChangeCallback = (..._args: any[]) => {};
         const transport = createTestTransport({
             enumerate: () => {
                 return { success: true, payload: [] };
             },
-            on: (eventName: string, callback: typeof inChangeCallback) => {
+            on: (eventName: string, callback: typeof onChangeCallback) => {
                 if (eventName === 'transport-interface-change') {
-                    inChangeCallback = callback;
+                    onChangeCallback = callback;
                 }
             },
         });
@@ -362,22 +359,25 @@ describe('DeviceList', () => {
         list.init();
         await list.waitForTransportFirstEvent();
 
-        inChangeCallback([{ path: '1' }, { path: '2' }, { path: '3' }]);
+        // emit TRANSPORT.CHANGE 3 times
+        onChangeCallback([{ path: '1' }, { path: '11' }]);
+        onChangeCallback([{ path: '1' }, { path: '2' }]); // path 11 disconnected, path 2 connected
+        onChangeCallback([{ path: '1' }, { path: '2' }, { path: '3' }]); // path 3 connected
 
-        // wait for device-connect
-        await new Promise(resolve => {
-            list.on('device-connect', resolve);
+        // wait for 3rd device-connect
+        await new Promise<void>(resolve => {
+            let i = 0;
+            list.on('device-connect', () => {
+                if (++i === 3) resolve();
+            });
         });
 
-        // NOTE: this behavior is wrong
         const events = eventsSpy.mock.calls.map(call => call[0]);
         expect(events).toEqual([
             'transport-start',
-            'device-changed', // path 1
-            'device-acquired', // path 1
-            'device-connect_unacquired', // path 2
-            'device-connect_unacquired', // path 3
-            'device-connect', // path 1
+            ...DEVICE_CONNECTION_SEQUENCE, // path 1
+            ...DEVICE_CONNECTION_SEQUENCE, // path 2
+            ...DEVICE_CONNECTION_SEQUENCE, // path 3
         ]);
 
         list.dispose();
