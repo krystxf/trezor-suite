@@ -1,4 +1,4 @@
-import { WelcomeLayout } from 'src/components/suite';
+import { WelcomeLayout } from '../layouts/WelcomeLayout/WelcomeLayout';
 import { SecurityCheckFail } from '../SecurityCheck/SecurityCheckFail';
 import { Card } from '@trezor/components';
 import { useEffect } from 'react';
