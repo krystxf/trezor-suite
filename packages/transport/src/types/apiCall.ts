@@ -36,4 +36,5 @@ export type AbortableCall<T, E> = {
 export type BridgeProtocolMessage = {
     data: string;
     protocol?: TransportProtocol['name'];
+    state?: { sendBit: 0; recvBit: 0; sendNonce: 0; recvNonce: 1 };
 };

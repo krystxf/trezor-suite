@@ -1,5 +1,5 @@
 import { createDeferred } from '@trezor/utils';
-import { v1 as v1Protocol } from '@trezor/protocol';
+import { v1 as v1Protocol, thp as thpProtocol } from '@trezor/protocol';
 
 import {
     AbstractTransport,
@@ -8,6 +8,7 @@ import {
 } from './abstract';
 import { AbstractApi } from '../api/abstract';
 import { buildMessage, createChunks, sendChunks } from '../utils/send';
+import { sendThpMessage, receiveThpMessage, parseThpMessage } from '../thp';
 import { receiveAndParse } from '../utils/receive';
 import { SessionsClient } from '../sessions/client';
 import * as ERRORS from '../errors';
@@ -174,6 +175,7 @@ export abstract class AbstractApiTransport extends AbstractTransport {
         name,
         data,
         protocol: customProtocol,
+        protocolState,
     }: AbstractTransportMethodParams<'call'>) {
         return this.scheduleAction(
             async signal => {
@@ -196,14 +198,47 @@ export abstract class AbstractApiTransport extends AbstractTransport {
                         messages: this.messages,
                         name,
                         data,
-                        encode: protocol.encode,
+                        protocol,
+                        protocolState,
                     });
                     const chunks = createChunks(
                         bytes,
                         protocol.getChunkHeader(bytes),
                         this.api.chunkSize,
                     );
-                    const apiWrite = (chunk: Buffer) => this.api.write(path, chunk, signal);
+
+                    const apiWrite = (chunk: Buffer, attemptSignal?: AbortSignal) =>
+                        this.api.write(path, chunk, attemptSignal || signal);
+                    const apiRead = (attemptSignal?: AbortSignal) =>
+                        this.api.read(path, attemptSignal || signal);
+
+                    console.warn('Bytes to send', bytes.toString('hex'));
+
+                    if (protocol.name === 'v2') {
+                        await sendThpMessage({
+                            protocolState,
+                            chunks,
+                            apiWrite,
+                            apiRead,
+                            signal,
+                        });
+
+                        const decoded = await receiveThpMessage({
+                            protocolState,
+                            apiWrite,
+                            apiRead,
+                            signal,
+                        });
+
+                        const message = parseThpMessage({
+                            messages: this.messages,
+                            decoded,
+                            protocolState,
+                        });
+
+                        return this.success(message);
+                    }
+
                     const sendResult = await sendChunks(chunks, apiWrite);
                     if (!sendResult.success) {
                         throw new Error(sendResult.error);
@@ -240,7 +275,13 @@ export abstract class AbstractApiTransport extends AbstractTransport {
         );
     }
 
-    public send({ data, session, name, protocol }: AbstractTransportMethodParams<'send'>) {
+    public send({
+        data,
+        session,
+        name,
+        protocol: customProtocol,
+        protocolState,
+    }: AbstractTransportMethodParams<'send'>) {
         return this.scheduleAction(
             async signal => {
                 const getPathBySessionResponse = await this.sessionsClient.getPathBySession({
@@ -252,22 +293,58 @@ export abstract class AbstractApiTransport extends AbstractTransport {
                 const { path } = getPathBySessionResponse.payload;
 
                 try {
-                    const { encode, getChunkHeader } = protocol || v1Protocol;
+                    const protocol = customProtocol || v1Protocol;
+                    const { getChunkHeader } = protocol;
+                    console.warn('just pure sending', name, protocol.name, protocolState);
                     const bytes = buildMessage({
                         messages: this.messages,
                         name,
                         data,
-                        encode,
+                        protocol,
+                        protocolState,
                     });
                     const chunks = createChunks(bytes, getChunkHeader(bytes), this.api.chunkSize);
-                    const apiWrite = (chunk: Buffer) => this.api.write(path, chunk, signal);
-                    const sendResult = await sendChunks(chunks, apiWrite);
-                    if (!sendResult.success) {
-                        throw new Error(sendResult.error);
+                    const apiWrite = (chunk: Buffer, attemptSignal?: AbortSignal) =>
+                        this.api.write(path, chunk, attemptSignal || signal);
+                    const apiRead = (attemptSignal?: AbortSignal) =>
+                        this.api.read(path, attemptSignal || signal);
+                    // const sendResult = await sendChunks(chunks, apiWrite);
+                    // if (!sendResult.success) {
+                    //     throw new Error(sendResult.error);
+                    // }
+
+                    if (protocol.name === 'v2') {
+                        await sendThpMessage({
+                            protocolState,
+                            chunks,
+                            apiWrite,
+                            apiRead,
+                            signal,
+                        });
+
+                        // console.warn('EXPECTING THP ACK!');
+                        // const message = await receiveAndParse(
+                        //     this.messages,
+                        //     () =>
+                        //         this.api.read(path).then(result => {
+                        //             if (result.success) {
+                        //                 return result.payload;
+                        //             }
+                        //             throw new Error(result.error);
+                        //         }),
+                        //     protocol,
+                        // );
+                        // console.warn('RECEIVED THP ACK!', message);
+                    } else {
+                        const sendResult = await sendChunks(chunks, apiWrite);
+                        if (!sendResult.success) {
+                            throw new Error(sendResult.error);
+                        }
                     }
 
                     return this.success(undefined);
                 } catch (err) {
+                    console.warn('====================> is it here?', err);
                     if (err.message === ERRORS.DEVICE_DISCONNECTED_DURING_ACTION) {
                         this.enumerate();
                     }
@@ -285,6 +362,7 @@ export abstract class AbstractApiTransport extends AbstractTransport {
     public receive({
         session,
         protocol: customProtocol,
+        protocolState,
     }: AbstractTransportMethodParams<'receive'>) {
         return this.scheduleAction(
             async signal => {
@@ -296,8 +374,31 @@ export abstract class AbstractApiTransport extends AbstractTransport {
                 }
                 const { path } = getPathBySessionResponse.payload;
 
+                const apiWrite = (chunk: Buffer, attemptSignal?: AbortSignal) =>
+                    this.api.write(path, chunk, attemptSignal || signal);
+                const apiRead = (attemptSignal?: AbortSignal) =>
+                    this.api.read(path, attemptSignal || signal);
+
                 try {
                     const protocol = customProtocol || v1Protocol;
+
+                    if (protocol.name === 'v2') {
+                        const decoded = await receiveThpMessage({
+                            protocolState,
+                            apiWrite,
+                            apiRead,
+                            signal,
+                        });
+
+                        const message = parseThpMessage({
+                            messages: this.messages,
+                            decoded,
+                            protocolState,
+                        });
+
+                        return this.success(message);
+                    }
+
                     const message = await receiveAndParse(
                         this.messages,
                         () =>
@@ -305,11 +406,26 @@ export abstract class AbstractApiTransport extends AbstractTransport {
                                 if (!result.success) {
                                     throw new Error(result.error);
                                 }
+                                console.warn(
+                                    'API READ',
+                                    Buffer.from(result.payload).toString('hex'),
+                                );
 
                                 return result.payload;
                             }),
                         protocol,
                     );
+
+                    // Host: read ack
+                    const chunk = thpProtocol.encodeAck(protocolState!);
+                    const readAck = await this.api.write(path, chunk).then(result => {
+                        if (!result.success) {
+                            throw new Error(result.error);
+                        }
+                    });
+                    protocolState?.updateSyncBit('recv');
+
+                    console.warn('ReadAck sent', readAck);
 
                     return this.success(message);
                 } catch (err) {

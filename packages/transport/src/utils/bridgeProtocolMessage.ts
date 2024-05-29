@@ -28,7 +28,7 @@ export function validateProtocolMessage(body: unknown, withMessage = true) {
     }
 
     // validate TransportProtocol['name']
-    if (typeof json.protocol !== 'string' || !/^bridge$|^v1$/.test(json.protocol)) {
+    if (typeof json.protocol !== 'string' || !/^bridge$|^v1$|^v2$/.test(json.protocol)) {
         throw new Error('Invalid protocol name');
     }
     if (withMessage && (typeof json.data !== 'string' || !isHex(json.data))) {
@@ -38,12 +38,14 @@ export function validateProtocolMessage(body: unknown, withMessage = true) {
     return {
         protocol: json.protocol,
         data: json.data,
+        state: json.state,
     } as BridgeProtocolMessage;
 }
 
 export function createProtocolMessage(
     body: unknown,
     protocol?: TransportProtocol | TransportProtocol['name'],
+    protocolState?: any,
 ) {
     let data;
     if (Buffer.isBuffer(body)) {
@@ -65,5 +67,6 @@ export function createProtocolMessage(
     return JSON.stringify({
         protocol: typeof protocol === 'string' ? protocol : protocol.name,
         data,
+        state: protocolState,
     });
 }

@@ -1,8 +1,13 @@
 import * as protobuf from 'protobufjs/light';
 import { scheduleAction, ScheduleActionParams, ScheduledAction, Deferred } from '@trezor/utils';
 import { TypedEmitter } from '@trezor/utils';
-import { PROTOCOL_MALFORMED, TransportProtocol } from '@trezor/protocol';
-import { MessageFromTrezor } from '@trezor/protobuf';
+import {
+    PROTOCOL_MALFORMED,
+    TransportProtocol,
+    TransportProtocolState,
+    thp as protocolThp,
+} from '@trezor/protocol';
+import type { MessageFromTrezor as ProtobufMessageType } from '@trezor/protobuf';
 
 import {
     Session,
@@ -42,6 +47,11 @@ export type DeviceDescriptorDiff = {
     released: Descriptor[];
     releasedByMyself: Descriptor[];
     releasedElsewhere: Descriptor[];
+};
+
+type ExtendedMessageFromTrezor = {
+    type: ProtobufMessageType['type'] | keyof protocolThp.ThpMessageType;
+    message: ProtobufMessageType['message'];
 };
 
 export interface AbstractTransportParams {
@@ -263,6 +273,7 @@ export abstract class AbstractTransport extends TypedEmitter<{
         name: string;
         data: Record<string, unknown>;
         protocol?: TransportProtocol;
+        protocolState?: TransportProtocolState;
     }): AbortableCall<
         undefined,
         | typeof ERRORS.DEVICE_DISCONNECTED_DURING_ACTION
@@ -286,8 +297,9 @@ export abstract class AbstractTransport extends TypedEmitter<{
         path?: string;
         session: Session;
         protocol?: TransportProtocol;
+        protocolState?: TransportProtocolState;
     }): AbortableCall<
-        MessageFromTrezor,
+        ExtendedMessageFromTrezor,
         // bridge
         | typeof ERRORS.HTTP_ERROR
         | typeof ERRORS.WRONG_RESULT_TYPE
@@ -310,8 +322,9 @@ export abstract class AbstractTransport extends TypedEmitter<{
         name: string;
         data: Record<string, unknown>;
         protocol?: TransportProtocol;
+        protocolState?: TransportProtocolState;
     }): AbortableCall<
-        MessageFromTrezor,
+        ExtendedMessageFromTrezor,
         // bridge
         | typeof ERRORS.HTTP_ERROR
         | typeof ERRORS.WRONG_RESULT_TYPE
