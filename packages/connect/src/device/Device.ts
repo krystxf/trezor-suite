@@ -19,6 +19,7 @@ import {
     Device as DeviceTyped,
     DeviceFirmwareStatus,
     DeviceStatus,
+    DeviceState,
     Features,
     ReleaseInfo,
     UnavailableCapabilities,
@@ -127,9 +128,8 @@ export class Device extends TypedEmitter<DeviceEvents> {
 
     instance = 0;
 
-    internalState: string[] = [];
-
-    externalState: string[] = [];
+    // DeviceState list [this.instance]: DeviceState | undefined
+    private state: DeviceState[] = [];
 
     unavailableCapabilities: UnavailableCapabilities = {};
 
@@ -330,7 +330,7 @@ export class Device extends TypedEmitter<DeviceEvents> {
             await this.releasePromise.promise;
         }
 
-        if (!this.isUsedHere() || this.commands?.disposed || !this.getExternalState()) {
+        if (!this.isUsedHere() || this.commands?.disposed || !this.getState()?.external) {
             // acquire session
             await this.acquire();
 
@@ -445,9 +445,9 @@ export class Device extends TypedEmitter<DeviceEvents> {
                 this.keepSession = false;
             }
 
-            // T1B1: forget passphrase cached in internal state
+            // T1B1: forget passphrase cached in sessionId
             if (this.isT1() && this.useLegacyPassphrase()) {
-                this.setInternalState(undefined);
+                this.setState({ sessionId: undefined });
             }
         }
         this.instance = instance;
@@ -457,30 +457,25 @@ export class Device extends TypedEmitter<DeviceEvents> {
         return this.instance;
     }
 
-    setInternalState(state?: string) {
-        if (typeof state !== 'string') {
-            delete this.internalState[this.instance];
-        } else if (state !== this.internalState[this.instance]) {
-            this.internalState[this.instance] = state;
-            this.emit(DEVICE.SAVE_STATE, state);
-        }
+    getState(): DeviceState | undefined {
+        return this.state[this.instance];
     }
 
-    getInternalState() {
-        return this.internalState[this.instance];
-    }
-
-    setExternalState(state?: string) {
-        if (typeof state !== 'string') {
-            delete this.internalState[this.instance];
-            delete this.externalState[this.instance];
+    setState(state?: Partial<DeviceState>) {
+        if (!state) {
+            delete this.state[this.instance];
         } else {
-            this.externalState[this.instance] = state;
-        }
-    }
+            const prevState = this.state[this.instance];
+            const newState = {
+                ...prevState,
+                ...state,
+            };
 
-    getExternalState() {
-        return this.externalState[this.instance];
+            this.state[this.instance] = newState;
+            if (newState.sessionId && newState.sessionId !== prevState?.sessionId) {
+                this.emit(DEVICE.SAVE_STATE, newState.sessionId);
+            }
+        }
     }
 
     async validateState(preauthorized = false) {
@@ -495,17 +490,17 @@ export class Device extends TypedEmitter<DeviceEvents> {
             // ...and if it's not then unlock device and proceed to regular GetAddress flow
         }
 
-        const expectedState = this.getExternalState();
+        const expectedState = this.getState()?.external;
         const state = await this.getCommands().getDeviceState();
         const uniqueState = `${state}@${this.features.device_id || 'device_id'}:${this.instance}`;
         if (!this.useLegacyPassphrase() && this.features.session_id) {
-            this.setInternalState(this.features.session_id);
+            this.setState({ sessionId: this.features.session_id });
         }
         if (expectedState && expectedState !== uniqueState) {
             return uniqueState;
         }
         if (!expectedState) {
-            this.setExternalState(uniqueState);
+            this.setState({ external: uniqueState });
         }
     }
 
@@ -517,16 +512,16 @@ export class Device extends TypedEmitter<DeviceEvents> {
         let payload: PROTO.Initialize | undefined;
         if (this.features) {
             const legacy = this.useLegacyPassphrase();
-            const internalState = this.getInternalState();
+            const sessionId = this.getState()?.sessionId;
             payload = {};
             // If the user has BIP-39 seed, and Initialize(derive_cardano=True) is not sent,
             // all Cardano calls will fail because the root secret will not be available.
             payload.derive_cardano = useCardanoDerivation;
-            if (!legacy && internalState) {
-                payload.session_id = internalState;
+            if (!legacy && sessionId) {
+                payload.session_id = sessionId;
             }
             if (legacy && !this.isT1()) {
-                payload.session_id = internalState;
+                payload.session_id = sessionId;
                 if (useEmptyPassphrase) {
                     payload._skip_passphrase = useEmptyPassphrase;
                     payload.session_id = undefined;
@@ -849,7 +844,7 @@ export class Device extends TypedEmitter<DeviceEvents> {
             id: this.features.device_id || null,
             path: this.originalDescriptor.path,
             label,
-            state: this.getExternalState(),
+            state: this.getState()?.external,
             status,
             mode: this.getMode(),
             name: this.name,

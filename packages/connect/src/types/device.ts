@@ -29,6 +29,15 @@ export enum FirmwareType {
     Regular = 'regular',
 }
 
+export type DeviceState = {
+    // sessionId:
+    // - T1B1 < 1.9.0 passphrase string received from UI
+    // - T2T1 < 2.3.0 result of Deprecated_PassphraseStateRequest message
+    // - otherwise Features.session_id
+    sessionId?: string;
+    external?: string; // 1st address TODO: rename to fingerprint?
+};
+
 // NOTE: unavailableCapabilities is an object with information what is NOT supported by this device.
 // in ideal/expected setup this object should be empty but given setup might have exceptions.
 // key = coin shortcut lowercase (ex: btc, eth, xrp) OR field declared in coins.json "supportedFirmware.capability"
@@ -47,6 +56,7 @@ export type KnownDevice = {
     color?: string;
     status: DeviceStatus;
     mode: DeviceMode;
+    // state?: DeviceState; // TODO: breaking change, sessionId could be sensitive (legacy T1 passphrase)
     state?: string;
     features: PROTO.Features;
     unavailableCapabilities: UnavailableCapabilities;

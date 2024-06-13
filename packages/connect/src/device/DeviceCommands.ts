@@ -464,11 +464,11 @@ export class DeviceCommands {
         }
 
         if (res.type === 'PassphraseRequest') {
-            const state = this.device.getInternalState();
+            const state = this.device.getState()?.sessionId;
             const legacy = this.device.useLegacyPassphrase();
             const legacyT1 = legacy && this.device.isT1();
 
-            // T1B1 fw lower than 1.9.0, passphrase is cached in internal state
+            // T1B1 fw lower than 1.9.0, passphrase is cached in sessionId
             if (legacyT1 && typeof state === 'string') {
                 return this._commonCall('PassphraseAck', { passphrase: state });
             }
@@ -484,7 +484,7 @@ export class DeviceCommands {
                 response => {
                     const { passphrase, passphraseOnDevice, cache } = response;
                     if (legacyT1) {
-                        this.device.setInternalState(cache ? passphrase : undefined);
+                        this.device.setState({ sessionId: cache ? passphrase : undefined });
 
                         return this._commonCall('PassphraseAck', { passphrase });
                     }
@@ -509,7 +509,7 @@ export class DeviceCommands {
         // new passphrase design set this value from `features.session_id`
         if (res.type === 'Deprecated_PassphraseStateRequest') {
             const { state } = res.message;
-            this.device.setInternalState(state);
+            this.device.setState({ sessionId: state });
 
             return this._commonCall('Deprecated_PassphraseStateAck', {});
         }

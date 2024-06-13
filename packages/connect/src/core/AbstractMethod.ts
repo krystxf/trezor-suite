@@ -15,7 +15,7 @@ import {
 } from '../events';
 import { getHost } from '../utils/urlUtils';
 import type { Device } from '../device/Device';
-import type { FirmwareRange } from '../types';
+import type { FirmwareRange, DeviceState } from '../types';
 
 export type Payload<M> = Extract<CallMethodPayload, { method: M }> & { override?: boolean };
 export type MethodReturnType<M extends CallMethodPayload['method']> = CallMethodResponse<M>;
@@ -37,7 +37,7 @@ export abstract class AbstractMethod<Name extends CallMethodPayload['method'], P
 
     devicePath?: string;
 
-    deviceState?: string;
+    deviceState?: DeviceState;
 
     hasExpectedDeviceState: boolean;
 
@@ -107,7 +107,10 @@ export abstract class AbstractMethod<Name extends CallMethodPayload['method'], P
         this.devicePath = payload.device?.path;
         // expected state from method parameter.
         // it could be null
-        this.deviceState = payload.device?.state;
+        this.deviceState =
+            typeof payload.device?.state === 'string'
+                ? { external: payload.device.state }
+                : payload.device?.state;
         this.hasExpectedDeviceState = payload.device
             ? Object.prototype.hasOwnProperty.call(payload.device, 'state')
             : false;
