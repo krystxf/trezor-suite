@@ -275,7 +275,7 @@ const inner = async (method: AbstractMethod<any>, device: Device) => {
         method.requireDeviceMode,
     );
     if (unexpectedMode) {
-        device.keepSession = false;
+        device.keepTransportSession = false;
         if (isUsingPopup) {
             // wait for popup handshake
             await waitForPopup();
@@ -880,7 +880,7 @@ const onPopupClosed = (customErrorMessage?: string) => {
     // Device was already acquired. Try to interrupt running action which will throw error from onCall try/catch block
     if (_deviceList && _deviceList.asArray().length > 0) {
         _deviceList.allDevices().forEach(d => {
-            d.keepSession = false; // clear session on release
+            d.keepTransportSession = false; // clear transportSession on release
             if (d.isUsedHere()) {
                 _overridePromise = d.interruptionFromUser(error);
             } else {

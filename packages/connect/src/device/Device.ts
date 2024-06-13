@@ -109,23 +109,19 @@ export class Device extends TypedEmitter<DeviceEvents> {
 
     featuresNeedsReload = false;
 
-    acquirePromise?: ReturnType<Transport['acquire']> = undefined;
-    releasePromise?: ReturnType<Transport['release']> = undefined;
-
-    runPromise?: Deferred<void>;
+    // variables used in one workflow: acquire -> transportSession -> commands -> run -> keepTransportSession -> release
+    private acquirePromise?: ReturnType<Transport['acquire']>;
+    private releasePromise?: ReturnType<Transport['release']>;
+    private runPromise?: Deferred<void>;
+    private transportSession?: Session | null;
+    keepTransportSession = false;
+    private commands?: DeviceCommands;
 
     loaded = false;
 
     inconsistent = false;
 
     firstRunPromise: Deferred<boolean>;
-
-    activitySessionID?: Session | null;
-
-    commands?: DeviceCommands;
-
-    keepSession = false;
-
     instance = 0;
 
     // DeviceState list [this.instance]: DeviceState | undefined
@@ -200,26 +196,26 @@ export class Device extends TypedEmitter<DeviceEvents> {
             throw acquireResult.error;
         }
 
-        const sessionID = acquireResult.payload;
+        const transportSession = acquireResult.payload;
 
-        _log.debug('Expected session id:', sessionID);
-        this.activitySessionID = sessionID;
+        _log.debug('Expected workflow id:', transportSession);
+        this.transportSession = transportSession;
         // note: this.originalDescriptor is updated here and also in TRANSPORT.UPDATE listener.
         // I would like to update it only in one place (listener) but it some cases (unchained test),
         // listen response is not triggered by device acquire. not sure why.
-        this.originalDescriptor.session = sessionID;
+        this.originalDescriptor.session = transportSession;
 
         if (this.commands) {
             this.commands.dispose();
         }
-        this.commands = new DeviceCommands(this, this.transport, sessionID);
+        this.commands = new DeviceCommands(this, this.transport, transportSession);
     }
 
     async release() {
         if (
             this.isUsedHere() &&
-            !this.keepSession &&
-            this.activitySessionID &&
+            this.transportSession &&
+            !this.keepTransportSession &&
             !this.releasePromise
         ) {
             if (this.commands) {
@@ -230,14 +226,14 @@ export class Device extends TypedEmitter<DeviceEvents> {
             }
 
             this.releasePromise = this.transport.release({
-                session: this.activitySessionID,
+                session: this.transportSession,
                 path: this.originalDescriptor.path,
             });
 
             const releaseResponse = await this.releasePromise.promise;
             this.releasePromise = undefined;
             if (releaseResponse.success) {
-                this.activitySessionID = null;
+                this.transportSession = null;
                 this.originalDescriptor.session = null;
             }
         }
@@ -388,7 +384,7 @@ export class Device extends TypedEmitter<DeviceEvents> {
         // if keepSession is set do not release device
         // until method with keepSession: false will be called
         if (options.keepSession) {
-            this.keepSession = true;
+            this.keepTransportSession = true;
         }
 
         // if we were waiting for device to be acquired, it should be guaranteed here that it had already happened
@@ -408,10 +404,10 @@ export class Device extends TypedEmitter<DeviceEvents> {
         }
 
         if (
-            (!this.keepSession && typeof options.keepSession !== 'boolean') ||
+            (!this.keepTransportSession && typeof options.keepSession !== 'boolean') ||
             options.keepSession === false
         ) {
-            this.keepSession = false;
+            this.keepTransportSession = false;
             await this.release();
         }
 
@@ -439,10 +435,10 @@ export class Device extends TypedEmitter<DeviceEvents> {
         if (this.instance !== instance) {
             // if requested instance is different than current
             // and device wasn't released in previous call (example: interrupted discovery which set "keepSession" to true but never released)
-            // clear "keepSession" and reset "activitySessionID" to ensure that "initialize" will be called
-            if (this.keepSession) {
-                this.activitySessionID = null;
-                this.keepSession = false;
+            // clear "keepTransportSession" and reset "transportSession" to ensure that "initialize" will be called
+            if (this.keepTransportSession) {
+                this.transportSession = null;
+                this.keepTransportSession = false;
             }
 
             // T1B1: forget passphrase cached in sessionId
@@ -693,7 +689,7 @@ export class Device extends TypedEmitter<DeviceEvents> {
         // TODO: cleanup everything
         _log.debug('Disconnect cleanup');
 
-        this.activitySessionID = null; // set to null to prevent transport.release
+        this.transportSession = null; // set to null to prevent transport.release
         this.interruptionFromUser(ERRORS.TypedError('Device_Disconnected'));
         delete this.runPromise;
     }
@@ -737,7 +733,7 @@ export class Device extends TypedEmitter<DeviceEvents> {
     }
 
     isUsedHere() {
-        return this.isUsed() && this.originalDescriptor.session === this.activitySessionID;
+        return this.isUsed() && this.originalDescriptor.session === this.transportSession;
     }
 
     isUsedElsewhere() {
@@ -789,14 +785,14 @@ export class Device extends TypedEmitter<DeviceEvents> {
 
     async dispose() {
         this.removeAllListeners();
-        if (this.isUsedHere() && this.activitySessionID) {
+        if (this.isUsedHere() && this.transportSession) {
             try {
                 if (this.commands) {
                     await this.commands.cancel();
                 }
 
                 return this.transport.release({
-                    session: this.activitySessionID,
+                    session: this.transportSession,
                     path: this.originalDescriptor.path,
                     onClose: true,
                 });
