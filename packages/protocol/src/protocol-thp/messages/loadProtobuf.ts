@@ -1,7 +1,7 @@
 import { getThpProtobufMessages } from './protobufDefinitions';
 
 // partial { Root } from 'protobufjs/light';
-export type ProtobufRoot = {
+type ProtobufRoot = {
     lookupType: (path: string | string[]) => any;
     lookupEnum: (path: string | string[]) => any;
     define: (path: string | string[], json?: any) => any;
