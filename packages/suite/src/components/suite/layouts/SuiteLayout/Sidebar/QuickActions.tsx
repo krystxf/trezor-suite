@@ -13,6 +13,7 @@ import { ActionButton } from './ActionButton';
 import { NavBackends } from './NavBackends';
 import { HelperIcons } from './HelperIcons';
 import { useEnabledBackends } from '../utils';
+import { ExpandedSidebarOnly } from './ExpandedSidebarOnly';
 
 const Container = styled.div`
     display: flex;
@@ -91,7 +92,9 @@ export const QuickActions = () => {
                         data-test="@quickActions/hideBalances"
                     >
                         <Icon size={16} icon={isDiscreetModeActive ? 'HIDE' : 'SHOW'} />
-                        <Label>{translationString(translationLabel)} </Label>
+                        <ExpandedSidebarOnly>
+                            <Label>{translationString(translationLabel)} </Label>
+                        </ExpandedSidebarOnly>
                     </DescreetContainer>
                 ) : (
                     <>

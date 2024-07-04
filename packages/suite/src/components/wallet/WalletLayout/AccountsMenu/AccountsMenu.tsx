@@ -14,6 +14,7 @@ import { AccountsMenuNotice } from './AccountsMenuNotice';
 import { getFailedAccounts, sortByCoin } from '@suite-common/wallet-utils';
 import { RefreshAfterDiscoveryNeeded } from './RefreshAfterDiscoveryNeeded';
 import { useScrollShadow } from '@trezor/components';
+import { ExpandedSidebarOnly } from '../../../suite/layouts/SuiteLayout/Sidebar/ExpandedSidebarOnly';
 
 const Wrapper = styled.div`
     display: flex;
@@ -69,7 +70,7 @@ export const AccountsMenu = () => {
         <Wrapper>
             <MenuHeader>
                 <Row>
-                    {!isEmpty && <AccountSearchBox />}
+                    <ExpandedSidebarOnly>{!isEmpty && <AccountSearchBox />}</ExpandedSidebarOnly>
                     <AddAccountButton
                         isFullWidth={isEmpty}
                         data-test="@account-menu/add-account"

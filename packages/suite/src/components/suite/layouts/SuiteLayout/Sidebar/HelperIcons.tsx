@@ -4,6 +4,7 @@ import { borders, spacingsPx } from '@trezor/theme';
 import { useDispatch, useSelector, useTranslation } from 'src/hooks/suite';
 import { goto } from 'src/actions/suite/routerActions';
 import { SettingsAnchor } from 'src/constants/suite/anchors';
+import { ExpandedSidebarOnly } from './ExpandedSidebarOnly';
 
 const Container = styled.div`
     display: flex;
@@ -68,24 +69,26 @@ export const HelperIcons = () => {
 
     return (
         <Container>
-            {showExperimental && (
-                <ExperimentalIcon
-                    onClick={handleEapClick}
-                    $isEapEnabled={isEapEnabled}
-                    $isExperimental={isExperimental}
-                >
-                    <Tooltip cursor="pointer" content={experimentalTooltip}>
-                        <Icon icon="EXPERIMENTAL" size={16} color={theme.iconOnSecondary} />
-                    </Tooltip>
-                </ExperimentalIcon>
-            )}
-            {showDebugMode && (
-                <DebugModeIcon>
-                    <Tooltip content="Debug mode active">
-                        <Icon icon="FLAG" size={16} color={theme.iconOnSecondary} />
-                    </Tooltip>
-                </DebugModeIcon>
-            )}
+            <ExpandedSidebarOnly>
+                {showExperimental && (
+                    <ExperimentalIcon
+                        onClick={handleEapClick}
+                        $isEapEnabled={isEapEnabled}
+                        $isExperimental={isExperimental}
+                    >
+                        <Tooltip cursor="pointer" content={experimentalTooltip}>
+                            <Icon icon="EXPERIMENTAL" size={16} color={theme.iconOnSecondary} />
+                        </Tooltip>
+                    </ExperimentalIcon>
+                )}
+                {showDebugMode && (
+                    <DebugModeIcon>
+                        <Tooltip content="Debug mode active">
+                            <Icon icon="FLAG" size={16} color={theme.iconOnSecondary} />
+                        </Tooltip>
+                    </DebugModeIcon>
+                )}
+            </ExpandedSidebarOnly>
         </Container>
     );
 };

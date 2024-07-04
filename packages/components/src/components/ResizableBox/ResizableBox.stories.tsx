@@ -38,6 +38,8 @@ export const ResizableBox: StoryObj<ResizableBoxProps> = {
         height: 100,
         minHeight: 50,
         maxHeight: 300,
+        disabledWidthIntervals: [[51, 100]],
+        disabledHeightIntervals: undefined,
         updateWidthOnWindowResize: false,
         updateHeightOnWindowResize: false,
     },

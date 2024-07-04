@@ -7,6 +7,7 @@ import { TrezorDevice } from 'src/types/suite';
 import { spacingsPx } from '@trezor/theme';
 import { RotateDeviceImage } from '@trezor/components';
 import { DeviceStatusText } from 'src/views/suite/SwitchDevice/DeviceItem/DeviceStatusText';
+import { ExpandedSidebarOnly } from '../Sidebar/ExpandedSidebarOnly';
 
 type DeviceStatusProps = {
     deviceModel: DeviceModelInternal;
@@ -53,15 +54,17 @@ export const DeviceStatus = ({
                 />
             </DeviceWrapper>
 
-            {device && (
-                <DeviceDetail label={device.label}>
-                    <DeviceStatusText
-                        onRefreshClick={handleRefreshClick}
-                        device={device}
-                        forceConnectionInfo={forceConnectionInfo}
-                    />
-                </DeviceDetail>
-            )}
+            <ExpandedSidebarOnly>
+                {device && (
+                    <DeviceDetail label={device.label}>
+                        <DeviceStatusText
+                            onRefreshClick={handleRefreshClick}
+                            device={device}
+                            forceConnectionInfo={forceConnectionInfo}
+                        />
+                    </DeviceDetail>
+                )}
+            </ExpandedSidebarOnly>
         </Container>
     );
 };

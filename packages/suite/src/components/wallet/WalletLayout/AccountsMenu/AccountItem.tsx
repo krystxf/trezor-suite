@@ -8,6 +8,7 @@ import {
     Icon,
     SkeletonRectangle,
     SkeletonStack,
+    Tooltip,
     TOOLTIP_DELAY_LONG,
     TruncateWithTooltip,
 } from '@trezor/components';
@@ -25,6 +26,8 @@ import { goto } from 'src/actions/suite/routerActions';
 import { NavigationItemBase } from 'src/components/suite/layouts/SuiteLayout/Sidebar/NavigationItem';
 import { useFormatters } from '@suite-common/formatters';
 import { selectLocalCurrency } from 'src/reducers/wallet/settingsReducer';
+import { ExpandedSidebarOnly } from '../../../suite/layouts/SuiteLayout/Sidebar/ExpandedSidebarOnly';
+import { CollapsedSidebarOnly } from '../../../suite/layouts/SuiteLayout/Sidebar/CollapsedSidebarOnly';
 
 const Wrapper = styled(NavigationItemBase)<{
     $isSelected: boolean;
@@ -219,7 +222,22 @@ export const AccountItem = forwardRef(
         // Show skeleton instead of zero balance during coinjoin initial discovery
         const isBalanceShown = account.backendType !== 'coinjoin' || account.status !== 'initial';
 
-        return (
+        const Name = () => (
+            <AccountLabelContainer>
+                {type === 'coin' && (
+                    <AccountLabel
+                        accountLabel={accountLabel}
+                        accountType={accountType}
+                        symbol={symbol}
+                        index={index}
+                    />
+                )}
+                {type === 'staking' && <Translation id="TR_NAV_STAKING" />}
+                {type === 'tokens' && <Translation id="TR_NAV_TOKENS" />}
+            </AccountLabelContainer>
+        );
+
+        const AccountRow = () => (
             <Wrapper
                 $isSelected={isSelected}
                 $isGroup={isGroup}
@@ -231,87 +249,94 @@ export const AccountItem = forwardRef(
             >
                 <Left>{getLeftComponent()}</Left>
                 <Right>
-                    <Row>
-                        <AccountName $isSelected={isSelected} data-test={`${dataTestKey}/label`}>
-                            <AccountLabelContainer>
-                                {type === 'coin' && (
-                                    <AccountLabel
-                                        accountLabel={accountLabel}
-                                        accountType={accountType}
-                                        symbol={symbol}
-                                        index={index}
-                                    />
-                                )}
-                                {type === 'staking' && <Translation id="TR_NAV_STAKING" />}
-                                {type === 'tokens' && <Translation id="TR_NAV_TOKENS" />}
-                            </AccountLabelContainer>
-                            <FiatAmount>
-                                {customFiatValue && !isTestnet(symbol) ? (
-                                    <HiddenPlaceholder>
-                                        <FiatAmountFormatter
-                                            value={customFiatValue}
-                                            currency={localCurrency}
-                                            minimumFractionDigits={0}
-                                            maximumFractionDigits={0}
-                                        />
-                                    </HiddenPlaceholder>
-                                ) : (
-                                    <FiatValue
-                                        amount={formattedBalance}
-                                        symbol={symbol}
-                                        fiatAmountFormatterOptions={{
-                                            minimumFractionDigits: 0,
-                                            maximumFractionDigits: 0,
-                                        }}
-                                    >
-                                        {({ value }) =>
-                                            value ? (
-                                                <FiatValueWrapper>
-                                                    <TruncateWithTooltip
-                                                        delayShow={TOOLTIP_DELAY_LONG}
-                                                    >
-                                                        {value}
-                                                    </TruncateWithTooltip>
-                                                </FiatValueWrapper>
-                                            ) : null
-                                        }
-                                    </FiatValue>
-                                )}
-                            </FiatAmount>
-                        </AccountName>
-                    </Row>
-                    {isBalanceShown && type !== 'tokens' && (
-                        <>
-                            <Row>
-                                <Balance>
-                                    <CoinBalance value={formattedBalance} symbol={symbol} />
-                                </Balance>
-                            </Row>
-                        </>
-                    )}
-                    {!isBalanceShown && (
-                        <SkeletonStack
-                            $col
-                            $margin="6px 0px 0px 0px"
-                            $childMargin="0px 0px 8px 0px"
-                        >
-                            <SkeletonRectangle
-                                width="100px"
-                                height="16px"
-                                animate={shouldAnimate}
-                            />
-
-                            {!isTestnet(account.symbol) && (
+                    <ExpandedSidebarOnly>
+                        <Row>
+                            <AccountName
+                                $isSelected={isSelected}
+                                data-test={`${dataTestKey}/label`}
+                            >
+                                <Name />
+                                <FiatAmount>
+                                    {customFiatValue && !isTestnet(symbol) ? (
+                                        <HiddenPlaceholder>
+                                            <FiatAmountFormatter
+                                                value={customFiatValue}
+                                                currency={localCurrency}
+                                                minimumFractionDigits={0}
+                                                maximumFractionDigits={0}
+                                            />
+                                        </HiddenPlaceholder>
+                                    ) : (
+                                        <FiatValue
+                                            amount={formattedBalance}
+                                            symbol={symbol}
+                                            fiatAmountFormatterOptions={{
+                                                minimumFractionDigits: 0,
+                                                maximumFractionDigits: 0,
+                                            }}
+                                        >
+                                            {({ value }) =>
+                                                value ? (
+                                                    <FiatValueWrapper>
+                                                        <TruncateWithTooltip
+                                                            delayShow={TOOLTIP_DELAY_LONG}
+                                                        >
+                                                            {value}
+                                                        </TruncateWithTooltip>
+                                                    </FiatValueWrapper>
+                                                ) : null
+                                            }
+                                        </FiatValue>
+                                    )}
+                                </FiatAmount>
+                            </AccountName>
+                        </Row>
+                        {isBalanceShown && type !== 'tokens' && (
+                            <>
+                                <Row>
+                                    <Balance>
+                                        <CoinBalance value={formattedBalance} symbol={symbol} />
+                                    </Balance>
+                                </Row>
+                            </>
+                        )}
+                        {!isBalanceShown && (
+                            <SkeletonStack
+                                $col
+                                $margin="6px 0px 0px 0px"
+                                $childMargin="0px 0px 8px 0px"
+                            >
                                 <SkeletonRectangle
                                     width="100px"
                                     height="16px"
                                     animate={shouldAnimate}
                                 />
-                            )}
-                        </SkeletonStack>
-                    )}
+
+                                {!isTestnet(account.symbol) && (
+                                    <SkeletonRectangle
+                                        width="100px"
+                                        height="16px"
+                                        animate={shouldAnimate}
+                                    />
+                                )}
+                            </SkeletonStack>
+                        )}
+                    </ExpandedSidebarOnly>
                 </Right>
             </Wrapper>
+        );
+
+        return (
+            <>
+                <ExpandedSidebarOnly>
+                    <AccountRow />
+                </ExpandedSidebarOnly>
+                <CollapsedSidebarOnly>
+                    <Tooltip content={<Name />} placement="right" hasArrow>
+                        <AccountRow />
+                    </Tooltip>
+                </CollapsedSidebarOnly>
+            </>
         );
     },
 );
