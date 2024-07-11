@@ -12,6 +12,7 @@ import prod from './prod.webpack.config';
 const dev = {
     mode: 'development',
     watch: true,
+    watchOptions: { ignored: /node_modules/ },
     devtool: 'eval-source-map',
     entry: {
         'trezor-connect': path.resolve(__dirname, '../src/index.ts'),

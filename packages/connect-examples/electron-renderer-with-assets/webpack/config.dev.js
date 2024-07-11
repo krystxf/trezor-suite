@@ -5,6 +5,7 @@ const CopyPlugin = require('copy-webpack-plugin');
 
 module.exports = {
     watch: true,
+    watchOptions: { ignored: /node_modules/ },
     mode: 'development',
     devtool: 'inline-source-map',
     entry: path.resolve(__dirname, '../src/renderer.js'),

@@ -6,6 +6,7 @@ import prod from './prod.webpack.config';
 const dev = {
     mode: 'development',
     watch: true,
+    watchOptions: { ignored: /node_modules/ },
     devtool: 'eval-source-map',
     output: {
         filename: '[name].js',

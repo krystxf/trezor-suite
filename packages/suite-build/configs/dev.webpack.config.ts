@@ -15,6 +15,7 @@ const config: webpack.Configuration = {
     },
     mode: 'development',
     watch: true,
+    watchOptions: { ignored: /node_modules/ },
     devtool: 'eval-source-map',
     entry: ['webpack-plugin-serve/client'],
     output: {
