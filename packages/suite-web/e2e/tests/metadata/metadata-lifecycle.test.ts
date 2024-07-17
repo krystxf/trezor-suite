@@ -1,5 +1,5 @@
 // @group_metadata
-// @retry=2
+// @retry=0
 
 const mnemonic = 'all all all all all all all all all all all all';
 
