@@ -31,7 +31,7 @@ export const AutomaticUpdate = () => {
     };
 
     return (
-        <SettingsSectionItem anchorId={SettingsAnchor.Analytics}>
+        <SettingsSectionItem anchorId={SettingsAnchor.AutomaticUpdate}>
             <TextColumn
                 title={<Translation id="TR_ALLOW_AUTOMATIC_SUITE_UPDATES" />}
                 description={<Translation id="TR_ALLOW_AUTOMATIC_SUITE_UPDATES_DESCRIPTION" />}
