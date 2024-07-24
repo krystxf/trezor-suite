@@ -1,4 +1,4 @@
-import desktopUpdateReducer, { State, UpdateState } from '../desktopUpdateReducer';
+import desktopUpdateReducer, { DesktopUpdateState, UpdateState } from '../desktopUpdateReducer';
 import { DESKTOP_UPDATE, SUITE } from 'src/actions/suite/constants';
 import type { Action } from 'src/types/suite';
 
@@ -7,7 +7,7 @@ const createUpdateInfo = (salt: string) => ({
     version: `version-${salt}`,
 });
 
-const fixtures: [Action, Partial<State>][] = [
+const fixtures: [Action, Partial<DesktopUpdateState>][] = [
     [
         {
             type: SUITE.DESKTOP_HANDSHAKE,
@@ -15,6 +15,7 @@ const fixtures: [Action, Partial<State>][] = [
             payload: {
                 desktopUpdate: {
                     allowPrerelease: true,
+                    isAutomaticUpdateEnabled: false,
                 },
             },
         },
@@ -38,19 +39,22 @@ const fixtures: [Action, Partial<State>][] = [
     ],
     [
         { type: DESKTOP_UPDATE.OPEN_EARLY_ACCESS_ENABLE },
-        { state: UpdateState.EarlyAccessEnable, window: 'maximized' },
+        { state: UpdateState.EarlyAccessEnable, modalVisibility: 'maximized' },
     ],
-    [{ type: DESKTOP_UPDATE.WINDOW, payload: 'minimized' }, { window: 'minimized' }],
+    [
+        { type: DESKTOP_UPDATE.MODAL_VISIBILITY, payload: 'minimized' },
+        { modalVisibility: 'minimized' },
+    ],
 
     [
         { type: DESKTOP_UPDATE.OPEN_EARLY_ACCESS_DISABLE },
-        { state: UpdateState.EarlyAccessDisable, window: 'maximized' },
+        { state: UpdateState.EarlyAccessDisable, modalVisibility: 'maximized' },
     ],
 ];
 
 describe('desktopUpdateReducer', () => {
     it('DESKTOP_UPDATE actions', () => {
-        let lastState: State | undefined;
+        let lastState: DesktopUpdateState | undefined;
         fixtures.forEach(([action, state]) => {
             lastState = desktopUpdateReducer(lastState, action);
             expect(lastState).toMatchObject(state);
