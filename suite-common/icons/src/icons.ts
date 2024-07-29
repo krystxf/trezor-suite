@@ -107,7 +107,7 @@ export const icons = {
     trezorConnectedDark: require('../assets/icons/trezorConnectedDark.svg'),
     trezorConnectedLight: require('../assets/icons/trezorConnectedLight.svg'),
     trezorT1B1: require('../assets/icons/trezorT1B1.svg'),
-    trezorT2B1: require('../assets/icons/trezorT2B1.svg'),
+    trezorT3B1: require('../assets/icons/trezorT3B1.svg'),
     trezorT2T1: require('../assets/icons/trezorT2T1.svg'),
     trezorT3T1: require('../assets/icons/trezorT3T1.svg'),
     twitter: require('../assets/icons/twitter.svg'),
