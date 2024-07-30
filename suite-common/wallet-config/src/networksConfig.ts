@@ -291,6 +291,7 @@ export const networks = {
         support: {
             [DeviceModelInternal.T2T1]: '2.4.3',
             [DeviceModelInternal.T2B1]: '2.6.1',
+            [DeviceModelInternal.T3B1]: '2.8.1',
             [DeviceModelInternal.T3T1]: '2.7.1',
         },
         customBackends: ['blockfrost'],
@@ -322,6 +323,7 @@ export const networks = {
         support: {
             [DeviceModelInternal.T2T1]: '2.6.4',
             [DeviceModelInternal.T2B1]: '2.6.4',
+            [DeviceModelInternal.T3B1]: '2.8.1',
             [DeviceModelInternal.T3T1]: '2.7.1',
         },
         customBackends: ['solana'],
@@ -512,6 +514,7 @@ export const networks = {
         support: {
             [DeviceModelInternal.T2T1]: '2.4.3',
             [DeviceModelInternal.T2B1]: '2.6.1',
+            [DeviceModelInternal.T3B1]: '2.8.1',
             [DeviceModelInternal.T3T1]: '2.7.1',
         },
         customBackends: ['blockfrost'],
@@ -543,6 +546,7 @@ export const networks = {
         support: {
             [DeviceModelInternal.T2T1]: '2.6.4',
             [DeviceModelInternal.T2B1]: '2.6.4',
+            [DeviceModelInternal.T3B1]: '2.8.1',
             [DeviceModelInternal.T3T1]: '2.7.1',
         },
         customBackends: ['solana'],
