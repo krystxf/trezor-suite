@@ -452,18 +452,13 @@ const onCall = async (context: CoreContext, message: IFrameCallMessage) => {
 
     const {
         uiPromises,
-        deviceList,
         callMethods,
         methodSynchronize,
         resolveWaitForFirstMethod,
-        getOverridePromise,
-        setOverridePromise,
         sendCoreMessage,
     } = context;
     const responseID = message.id;
     const origin = DataManager.getSettings('origin')!;
-    const env = DataManager.getSettings('env')!;
-    const useCoreInPopup = DataManager.getSettings('useCoreInPopup');
 
     const { preferredDevice } = storage.loadForOrigin(origin) || {};
     if (preferredDevice && !message.payload.device) {
@@ -516,15 +511,6 @@ const onCall = async (context: CoreContext, message: IFrameCallMessage) => {
         return Promise.resolve();
     }
 
-    if (!deviceList.isConnected() && !deviceList.pendingConnection()) {
-        const { transports, pendingTransportEvent } = DataManager.getSettings();
-        // transport is missing try to initialize it once again
-        // TODO bridge transport is probably not reusable, so I can't remove this setTransports yet.
-        deviceList.setTransports(transports);
-        // TODO is pendingTransportEvent needed here?
-        await deviceList.init({ pendingTransportEvent });
-    }
-
     if (method.isManagementRestricted()) {
         sendCoreMessage(createPopupMessage(POPUP.CANCEL_POPUP_REQUEST));
         sendCoreMessage(
@@ -536,6 +522,32 @@ const onCall = async (context: CoreContext, message: IFrameCallMessage) => {
         return Promise.resolve();
     }
 
+    return await onCallDevice(context, message, method);
+};
+
+const onCallDevice = async (
+    context: CoreContext,
+    message: IFrameCallMessage,
+    method: AbstractMethod<any>,
+): Promise<void> => {
+    const { deviceList, callMethods, getOverridePromise, setOverridePromise, sendCoreMessage } =
+        context;
+    const responseID = message.id;
+    const { origin, env, useCoreInPopup, transportReconnect } = DataManager.getSettings();
+
+    let messageResponse: CoreEventMessage;
+
+    if (!deviceList.isConnected() && !deviceList.pendingConnection()) {
+        const { transports, pendingTransportEvent } = DataManager.getSettings();
+        // transport is missing try to initialize it once again
+        // TODO bridge transport is probably not reusable, so I can't remove this setTransports yet.
+        deviceList.setTransports(transports);
+        // TODO is pendingTransportEvent needed here?
+        await deviceList.init({ pendingTransportEvent });
+    }
+
+    // track start time
+    const initDeviceTime = Date.now();
     // find device
     let device: Device;
     try {
@@ -546,6 +558,17 @@ const onCall = async (context: CoreContext, message: IFrameCallMessage) => {
             await waitForPopup(context);
             // show message about transport
             sendCoreMessage(createUiMessage(UI.TRANSPORT));
+
+            // Retry onCallDevice again
+            // NOTE: this should change after multi-transports refactor, where transport will be always alive
+            if (transportReconnect && (env === 'web' || env === 'webextension')) {
+                // wait 10s between reconnects
+                const reconnectTime = 10000 - (Date.now() - initDeviceTime);
+                await resolveAfter(reconnectTime).promise;
+
+                // call onCallDevice again recursively
+                return await onCallDevice(context, message, method);
+            }
         } else {
             // cancel popup request
             sendCoreMessage(createPopupMessage(POPUP.CANCEL_POPUP_REQUEST));
@@ -621,7 +644,7 @@ const onCall = async (context: CoreContext, message: IFrameCallMessage) => {
     device.on(DEVICE.SAVE_STATE, (state: string) => {
         // Persist internal state only in case of core in popup
         // Currently also only for webextension until we asses security implications
-        if (useCoreInPopup && env === 'webextension') {
+        if (useCoreInPopup && env === 'webextension' && origin) {
             storage.saveForOrigin(store => {
                 return {
                     ...store,
@@ -637,7 +660,7 @@ const onCall = async (context: CoreContext, message: IFrameCallMessage) => {
         }
     });
 
-    if (!device.getInternalState() && useCoreInPopup && env === 'webextension') {
+    if (!device.getInternalState() && useCoreInPopup && env === 'webextension' && origin) {
         // Restore internal state if available
         const { preferredDevice } = storage.loadForOrigin(origin) || {};
         if (
