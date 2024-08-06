@@ -101,7 +101,16 @@ const load = async ({ store }: Dependencies) => {
     const { logger } = global;
     const bridge = getBridgeInstance(store);
 
+    const currentStatus = await handleBridgeStatus(bridge);
+    if (currentStatus.service) {
+        logger.info(SERVICE_NAME, 'Bridge already running');
+
+        return;
+    }
+
     app.on('before-quit', () => {
+        if (store.getBridgeSettings().daemon) return;
+
         logger.info(SERVICE_NAME, 'Stopping (app quit)');
         bridge.stop();
     });

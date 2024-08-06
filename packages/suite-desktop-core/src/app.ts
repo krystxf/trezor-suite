@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-use-before-define */
 import path from 'path';
 import { app, BrowserWindow } from 'electron';
 
@@ -127,18 +128,29 @@ const init = async () => {
 
     // No UI mode with bridge only
     const { wasOpenedAtLogin } = app.getLoginItemSettings();
-    if (app.commandLine.hasSwitch('bridge-daemon') || wasOpenedAtLogin) {
+    const daemon = app.commandLine.hasSwitch('bridge-daemon') || wasOpenedAtLogin;
+    store.setBridgeSettings({ ...store.getBridgeSettings(), daemon });
+    if (daemon) {
         logger.info('main', 'App is hidden, starting bridge only');
         app.dock?.hide(); // hide dock icon on macOS
-        app.releaseSingleInstanceLock(); // allow user to open new instance with UI
         const loadBridgeModule = initBridgeModule({ store } as Dependencies); // bridge module only needs store
         if (loadBridgeModule) {
             loadBridgeModule(null);
         }
+        app.once('second-instance', () => {
+            // Initialize the UI when the second instance is opened
+            logger.warn('main', 'Second instance detected, initializing UI');
+            app.dock?.show();
+            initUi(store, daemon);
+        });
 
         return;
     }
 
+    await initUi(store, daemon);
+};
+
+const initUi = async (store: Store, daemon: boolean) => {
     await app.whenReady();
 
     const buildInfo = getBuildInfo();
@@ -158,7 +170,14 @@ const init = async () => {
         mainWindow.focus();
     });
 
-    app.on('before-quit', () => {
+    app.on('before-quit', event => {
+        if (daemon) {
+            // Prevent quitting app when in daemon mode
+            logger.info('main', 'Preventing app quit in daemon mode');
+            event.preventDefault();
+            app.dock?.hide();
+            mainWindow.close();
+        }
         mainWindow.removeAllListeners();
         logger.exit();
     });

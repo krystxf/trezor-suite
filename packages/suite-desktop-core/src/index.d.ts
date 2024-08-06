@@ -116,4 +116,8 @@ declare type BridgeSettings = {
      * Should run the new bridge?
      */
     newBridgeRollout?: number;
+    /**
+     * Daemon mode
+     */
+    daemon?: boolean;
 };
