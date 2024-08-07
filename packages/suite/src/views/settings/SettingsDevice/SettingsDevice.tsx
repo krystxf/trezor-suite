@@ -1,5 +1,5 @@
 import { isDeviceRemembered, isDeviceWithButtons } from '@suite-common/suite-utils';
-import { DeviceModelInternal, type TransportInfo } from '@trezor/connect';
+import type { TransportInfo } from '@trezor/connect';
 import { isBitcoinOnlyDevice } from '@trezor/device-utils';
 
 import { DeviceBanner, SettingsLayout, SettingsSection } from 'src/components/settings';
