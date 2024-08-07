@@ -25,7 +25,7 @@ type PaginationModelMetrics = {
     paginationSvgHeight: number;
 };
 
-const safe3 = {
+const safe3Svg = {
     paginationPrefixSvg: require('../../assets/addressPaginationPrefixT3B1.svg'),
     paginationSuffixSvg: require('../../assets/addressPaginationSuffixT3B1.svg'),
     paginatorPrefixX: 40,
@@ -71,8 +71,8 @@ const deviceModelToSvg: Record<PaginationCompatibleDeviceModel, PaginationModelM
         paginationSvgWidth: 40,
         paginationSvgHeight: 17.5,
     },
-    [DeviceModelInternal.T2B1]: safe3,
-    [DeviceModelInternal.T3B1]: safe3,
+    [DeviceModelInternal.T2B1]: safe3Svg,
+    [DeviceModelInternal.T3B1]: safe3Svg,
 };
 
 export const DeviceScreenPagination = ({
