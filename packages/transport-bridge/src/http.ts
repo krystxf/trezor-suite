@@ -13,6 +13,7 @@ import {
     Response,
 } from '@trezor/node-utils';
 import { Descriptor, Session } from '@trezor/transport/src/types';
+import { validateProtocolMessage } from '@trezor/transport/src/utils/bridgeProtocolMessage';
 import { Log, arrayPartition, Throttler } from '@trezor/utils';
 import { AbstractApi } from '@trezor/transport/src/api/abstract';
 
@@ -22,14 +23,15 @@ const defaults = {
     port: 21325,
 };
 
-const str = (value: Record<string, any> | string) => JSON.stringify(value);
+const str = (value: Record<string, any> | string) =>
+    typeof value === 'string' ? value : JSON.stringify(value);
 
 const validateDescriptorsJSON: RequestHandler<JSON, Descriptor[]> = (request, response, next) => {
     if (Array.isArray(request.body)) {
         next({ ...request, body: request.body }, response);
     } else {
         response.statusCode = 400;
-        response.end(JSON.stringify({ error: 'Invalid body' }));
+        response.end(str({ error: 'Invalid body' }));
     }
 };
 
@@ -45,7 +47,7 @@ const validateAcquireParams: ParamsValidatorHandler<{
         next(request as Parameters<typeof next>[0], response);
     } else {
         response.statusCode = 400;
-        response.end(JSON.stringify({ error: 'Invalid params' }));
+        response.end(str({ error: 'Invalid params' }));
     }
 };
 
@@ -56,9 +58,22 @@ const validateSessionParams: ParamsValidatorHandler<{
         next(request as Parameters<typeof next>[0], response);
     } else {
         response.statusCode = 400;
-        response.end(JSON.stringify({ error: 'Invalid params' }));
+        response.end(str({ error: 'Invalid params' }));
     }
 };
+
+const validateProtocolMessageBody =
+    (withMessage: boolean): RequestHandler<string, ReturnType<typeof validateProtocolMessage>> =>
+    (request, response, next) => {
+        try {
+            const body = validateProtocolMessage(request.body, withMessage);
+
+            return next({ ...request, body }, response);
+        } catch (error) {
+            response.statusCode = 400;
+            response.end(str({ error: error.message }));
+        }
+    };
 
 export class TrezordNode {
     /** versioning, baked in by webpack */
@@ -148,6 +163,7 @@ export class TrezordNode {
         res.end(
             str({
                 version: this.version,
+                protocolMessage: true, // TODO: some flag? constructor param?
             }),
         );
     }
@@ -274,12 +290,13 @@ export class TrezordNode {
             app.post('/call/:session', [
                 validateSessionParams,
                 parseBodyText,
+                validateProtocolMessageBody(true),
                 (req, res) => {
                     const signal = this.createAbortSignal(res);
                     this.core
                         .call({
+                            ...req.body,
                             session: req.params.session,
-                            data: req.body,
                             signal,
                         })
                         .then(result => {
@@ -288,36 +305,21 @@ export class TrezordNode {
 
                                 return res.end(str({ error: result.error }));
                             }
-                            res.end(result.payload);
+                            res.end(str(result.payload));
                         });
                 },
             ]);
 
             app.post('/read/:session', [
                 validateSessionParams,
-                (req, res) => {
-                    const signal = this.createAbortSignal(res);
-                    this.core.receive({ session: req.params.session, signal }).then(result => {
-                        if (!result.success) {
-                            res.statusCode = 400;
-
-                            return res.end(str({ error: result.error }));
-                        }
-
-                        res.end(result.payload);
-                    });
-                },
-            ]);
-
-            app.post('/post/:session', [
-                validateSessionParams,
                 parseBodyText,
+                validateProtocolMessageBody(false),
                 (req, res) => {
                     const signal = this.createAbortSignal(res);
                     this.core
-                        .send({
+                        .receive({
+                            ...req.body,
                             session: req.params.session,
-                            data: req.body,
                             signal,
                         })
                         .then(result => {
@@ -326,7 +328,30 @@ export class TrezordNode {
 
                                 return res.end(str({ error: result.error }));
                             }
-                            res.end();
+                            res.end(str(result.payload));
+                        });
+                },
+            ]);
+
+            app.post('/post/:session', [
+                validateSessionParams,
+                parseBodyText,
+                validateProtocolMessageBody(true),
+                (req, res) => {
+                    const signal = this.createAbortSignal(res);
+                    this.core
+                        .send({
+                            ...req.body,
+                            session: req.params.session,
+                            signal,
+                        })
+                        .then(result => {
+                            if (!result.success) {
+                                res.statusCode = 400;
+
+                                return res.end(str({ error: result.error }));
+                            }
+                            res.end(str(result.payload));
                         });
                 },
             ]);
