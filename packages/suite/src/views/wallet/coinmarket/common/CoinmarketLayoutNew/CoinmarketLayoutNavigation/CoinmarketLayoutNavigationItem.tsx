@@ -46,10 +46,6 @@ const NavListItemWrapper = styled(NavigationItem)`
 
 const ButtonWrapper = styled(Button)`
     margin-left: auto;
-
-    ${SCREEN_QUERY.BELOW_DESKTOP} {
-        margin-left: 0;
-    }
 `;
 
 interface CoinmarketLayoutNavigationItemProps {

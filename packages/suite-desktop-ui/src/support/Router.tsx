@@ -24,6 +24,7 @@ import { CoinmarketSellOffers } from 'src/views/wallet/coinmarket/sell_new/Coinm
 import WalletCoinmarketExchange from 'src/views/wallet/coinmarket/exchange';
 import WalletCoinmarketExchangeDetail from 'src/views/wallet/coinmarket/exchange/detail';
 import WalletCoinmarketExchangeOffers from 'src/views/wallet/coinmarket/exchange/offers';
+import WalletCoinmarketDCA from 'src/views/wallet/coinmarket/DCA';
 import WalletCoinmarketRedirect from 'src/views/wallet/coinmarket/redirect';
 import WalletCoinmarketTransactions from 'src/views/wallet/coinmarket/transactions';
 import { SettingsGeneral } from 'src/views/settings/SettingsGeneral/SettingsGeneral';
@@ -55,6 +56,7 @@ const components: { [key: string]: ComponentType<any> } = {
     'wallet-coinmarket-exchange': WalletCoinmarketExchange,
     'wallet-coinmarket-exchange-detail': WalletCoinmarketExchangeDetail,
     'wallet-coinmarket-exchange-offers': WalletCoinmarketExchangeOffers,
+    'wallet-coinmarket-dca': WalletCoinmarketDCA,
     'wallet-coinmarket-redirect': WalletCoinmarketRedirect,
     'wallet-coinmarket-transactions': WalletCoinmarketTransactions,
 

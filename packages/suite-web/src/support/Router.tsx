@@ -89,6 +89,9 @@ const components: Record<PageName, LazyExoticComponent<ComponentType<any>>> = {
                 /* webpackChunkName: "coinmarket" */ 'src/views/wallet/coinmarket/exchange/offers'
             ),
     ),
+    'wallet-coinmarket-dca': lazy(
+        () => import(/* webpackChunkName: "coinmarket" */ 'src/views/wallet/coinmarket/DCA'),
+    ),
     'wallet-coinmarket-redirect': lazy(
         () => import(/* webpackChunkName: "coinmarket" */ 'src/views/wallet/coinmarket/redirect'),
     ),

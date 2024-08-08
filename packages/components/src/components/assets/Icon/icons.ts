@@ -58,6 +58,7 @@ export const ICONS = {
     EJECT: require('../../../images/icons/eject.svg'),
     EXPERIMENTAL: require('../../../images/icons/experimental.svg'),
     EXTERNAL_LINK: require('../../../images/icons/external_link.svg'),
+    EYE: require('../../../images/icons/eye.svg'),
     EYE_SLASH: require('../../../images/icons/eye_slash.svg'),
     EYE_CLOSED: require('../../../images/icons/eye_closed.svg'),
     FEEDBACK: require('../../../images/icons/feedback.svg'),

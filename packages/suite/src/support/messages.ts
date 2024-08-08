@@ -1755,6 +1755,46 @@ export default defineMessages({
         defaultMessage: 'Sell',
         id: 'TR_COINMARKET_FEATURED_OFFER_SELL',
     },
+    TR_COINMARKET_DCA_HEADING: {
+        defaultMessage: 'Save in Bitcoin with Invity app',
+        id: 'TR_COINMARKET_DCA_HEADING',
+    },
+    TR_COINMARKET_DCA_FEATURE_1_SUBHEADING: {
+        defaultMessage: 'Developed by SatoshiLabs',
+        id: 'TR_COINMARKET_DCA_FEATURE_1_SUBHEADING',
+    },
+    TR_COINMARKET_DCA_FEATURE_1_DESCRIPTION: {
+        defaultMessage: 'Safe & simple custodial DCA savings plan.',
+        id: 'TR_COINMARKET_DCA_FEATURE_1_DESCRIPTION',
+    },
+    TR_COINMARKET_DCA_FEATURE_2_SUBHEADING: {
+        defaultMessage: 'Free withdrawals',
+        id: 'TR_COINMARKET_DCA_FEATURE_2_SUBHEADING',
+    },
+    TR_COINMARKET_DCA_FEATURE_2_DESCRIPTION: {
+        defaultMessage: 'Withdraw to self-custody with no extra charge.',
+        id: 'TR_COINMARKET_DCA_FEATURE_2_DESCRIPTION',
+    },
+    TR_COINMARKET_DCA_FEATURE_3_SUBHEADING: {
+        defaultMessage: 'Easy to use',
+        id: 'TR_COINMARKET_DCA_FEATURE_3_SUBHEADING',
+    },
+    TR_COINMARKET_DCA_FEATURE_3_DESCRIPTION: {
+        defaultMessage: 'Quick, streamlined, user-friendly interface.',
+        id: 'TR_COINMARKET_DCA_FEATURE_3_DESCRIPTION',
+    },
+    TR_COINMARKET_DCA_FEATURE_4_SUBHEADING: {
+        defaultMessage: 'DCA Overview',
+        id: 'TR_COINMARKET_DCA_FEATURE_4_SUBHEADING',
+    },
+    TR_COINMARKET_DCA_FEATURE_4_DESCRIPTION: {
+        defaultMessage: 'Monitor your investment history, amount, and frequency.',
+        id: 'TR_COINMARKET_DCA_FEATURE_4_DESCRIPTION',
+    },
+    TR_COINMARKET_DCA_DOWNLOAD: {
+        defaultMessage: 'Download Invity mobile app to start saving in Bitcoin',
+        id: 'TR_COINMARKET_DCA_DOWNLOAD',
+    },
     TR_ADDRESS_MODAL_CLIPBOARD: {
         defaultMessage: 'Copy address',
         id: 'TR_ADDRESS_MODAL_CLIPBOARD',
@@ -5616,6 +5656,10 @@ export default defineMessages({
     TR_NAV_EXCHANGE: {
         id: 'TR_NAV_EXCHANGE',
         defaultMessage: 'Exchange',
+    },
+    TR_NAV_DCA: {
+        id: 'TR_NAV_DCA',
+        defaultMessage: 'DCA',
     },
     TR_NAV_SELL: {
         id: 'TR_NAV_SELL',

@@ -50,16 +50,18 @@ const Layout = styled.div`
 
 interface CoinmarketLayoutProps {
     children: ReactNode;
+    className?: string;
     selectedAccount: SelectedAccountLoaded;
     onClearFormButtonClick?: () => void;
 }
 
 export const CoinmarketLayout = ({
     children,
+    className,
     selectedAccount,
     onClearFormButtonClick,
 }: CoinmarketLayoutProps) => (
-    <WalletLayout title="TR_NAV_TRADE" isSubpage account={selectedAccount}>
+    <WalletLayout className={className} title="TR_NAV_TRADE" isSubpage account={selectedAccount}>
         <CoinmarketWrapper>
             <WalletSubpageHeading title="TR_NAV_TRADE">
                 {onClearFormButtonClick && (
