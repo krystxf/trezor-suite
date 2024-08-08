@@ -95,9 +95,11 @@ export const Homescreen = ({ isDeviceLocked }: HomescreenProps) => {
     return (
         <>
             <SettingsSectionItem anchorId={SettingsAnchor.Homescreen}>
-                {[DeviceModelInternal.T1B1, DeviceModelInternal.T2B1].includes(
-                    deviceModelInternal,
-                ) && (
+                {[
+                    DeviceModelInternal.T1B1,
+                    DeviceModelInternal.T2B1,
+                    DeviceModelInternal.T3B1,
+                ].includes(deviceModelInternal) && (
                     <TextColumn
                         title={<Translation id="TR_DEVICE_SETTINGS_HOMESCREEN_TITLE" />}
                         description={

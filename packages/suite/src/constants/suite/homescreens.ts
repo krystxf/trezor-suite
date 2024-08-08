@@ -1,6 +1,6 @@
 import { DeviceModelInternal } from '@trezor/connect';
 
-const t2b1 = [
+const safe3 = [
     'original_t2b1', // note - has to be first
     'blank',
     'circleweb',
@@ -53,8 +53,8 @@ export const getHomescreens = (isBitcoinOnlyFirmware: boolean) => ({
         'polis',
         'carlos',
     ],
-    [DeviceModelInternal.T2B1]: t2b1,
-    [DeviceModelInternal.T3B1]: t2b1,
+    [DeviceModelInternal.T2B1]: safe3,
+    [DeviceModelInternal.T3B1]: safe3,
     [DeviceModelInternal.T2T1]: [
         'original_t2t1', // note - has to be first
         'trezor-3d',
