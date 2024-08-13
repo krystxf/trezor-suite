@@ -87,6 +87,33 @@ describe('bridge', () => {
         });
     });
 
+    test.only(`receive - send, using locks`, async () => {
+        const messagePromise1 = bridge.receive({ session }).promise;
+        const messagePromise2 = bridge.receive({ session }).promise;
+        const sendResponse1 = await bridge.send({ session, name: 'GetFeatures', data: {} }).promise;
+        const sendResponse2 = await bridge.send({ session, name: 'GetFeatures', data: {} }).promise;
+        const r = await Promise.all([
+            messagePromise1,
+            messagePromise2,
+            sendResponse1,
+            sendResponse2,
+        ]);
+        console.warn('all', r);
+        console.warn('messagePromise2', messagePromise1, messagePromise2);
+        console.warn('messagePromise2', sendResponse1, sendResponse2);
+        // expect(sendResponse).toEqual({ success: true, payload: undefined });
+        // expect(message).toMatchObject({
+        //     success: true,
+        //     payload: {
+        //         type: 'Features',
+        //         message: {
+        //             vendor: 'trezor.io',
+        //             label: 'TrezorT',
+        //         },
+        //     },
+        // });
+    });
+
     test(`call(RebootToBootloader) - send(Cancel) - receive`, async () => {
         // initiate RebootToBootloader procedure on device (it works regardless device is wiped or not)
         const callResponse = await bridge.call({ session, name: 'RebootToBootloader', data: {} })
