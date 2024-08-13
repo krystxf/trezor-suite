@@ -5,7 +5,7 @@ import CoinmarketLayoutNavigationItem from './CoinmarketLayoutNavigationItem';
 import { Divider } from '@trezor/components';
 import { spacings } from '@trezor/theme';
 import { useMemo } from 'react';
-import { EEACountryCodes } from 'src/constants/wallet/coinmarket/EEA';
+import regional from 'src/constants/wallet/coinmarket/regional';
 
 const List = styled.div`
     display: flex;
@@ -25,7 +25,7 @@ const CoinmarketLayoutNavigation = () => {
             state.wallet.coinmarket.buy.buyInfo?.buyInfo?.country ??
             state.wallet.coinmarket.sell.sellInfo?.sellList?.country,
     );
-    const isInEEA = useMemo(() => Boolean(country && EEACountryCodes.includes(country)), [country]);
+    const isInEEA = useMemo(() => Boolean(country && regional.isInEEA(country)), [country]);
 
     return (
         <List>
