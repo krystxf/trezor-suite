@@ -6,6 +6,7 @@ import { Divider } from '@trezor/components';
 import { spacings } from '@trezor/theme';
 import { useMemo } from 'react';
 import regional from 'src/constants/wallet/coinmarket/regional';
+import { getIsTorEnabled } from 'src/utils/suite/tor';
 
 const List = styled.div`
     display: flex;
@@ -20,12 +21,18 @@ const SeparatorWrapper = styled.div`
 const CoinmarketLayoutNavigation = () => {
     const { device } = useDevice();
     const isBitcoinOnly = device?.firmwareType === FirmwareType.BitcoinOnly;
+
+    const torStatus = useSelector(state => state.suite.torStatus);
+    const isTorEnabled = getIsTorEnabled(torStatus);
     const country = useSelector(
         state =>
             state.wallet.coinmarket.buy.buyInfo?.buyInfo?.country ??
             state.wallet.coinmarket.sell.sellInfo?.sellList?.country,
     );
-    const isInEEA = useMemo(() => Boolean(country && regional.isInEEA(country)), [country]);
+    const isInEEA = useMemo(
+        () => Boolean(!isTorEnabled && country && regional.isInEEA(country)),
+        [country, isTorEnabled],
+    );
 
     return (
         <List>
