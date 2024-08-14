@@ -37,11 +37,16 @@ import { SET_MODAL_CRYPTO_CURRENCY } from 'src/actions/wallet/constants/coinmark
 import useCoinmarketPaymentMethod from 'src/hooks/wallet/coinmarket/form/useCoinmarketPaymentMethod';
 import { useBitcoinAmountUnit } from 'src/hooks/wallet/useBitcoinAmountUnit';
 import { useCoinmarketNavigation } from 'src/hooks/wallet/useCoinmarketNavigation';
-import { FORM_PAYMENT_METHOD_SELECT } from 'src/constants/wallet/coinmarket/form';
-import { useCoinmarketSatsSwitcher } from 'src/hooks/wallet/coinmarket/form/useCoinmarketSatsSwitcher';
+import {
+    FORM_CRYPTO_INPUT,
+    FORM_DEFAULT_PAYMENT_METHOD,
+    FORM_FIAT_INPUT,
+    FORM_PAYMENT_METHOD_SELECT,
+} from 'src/constants/wallet/coinmarket/form';
 import { Network } from '@suite-common/wallet-config';
 import { cryptoToNetworkSymbol } from 'src/utils/wallet/coinmarket/cryptoSymbolUtils';
 import { useCoinmarketLoadData } from 'src/hooks/wallet/coinmarket/useCoinmarketLoadData';
+import { useCoinmarketCurrencySwitcher } from 'src/hooks/wallet/coinmarket/form/common/useCoinmarketCurrencySwitcher';
 
 const useCoinmarketBuyForm = ({
     selectedAccount,
@@ -85,7 +90,7 @@ const useCoinmarketBuyForm = ({
         saveQuoteRequest: coinmarketBuyActions.saveQuoteRequest,
         saveCachedAccountInfo: coinmarketBuyActions.saveCachedAccountInfo,
     });
-    const { navigateToBuyForm, navigateToBuyOffers, navigateToBuyOffer } =
+    const { navigateToBuyForm, navigateToBuyOffers, navigateToBuyConfirm } =
         useCoinmarketNavigation(account);
 
     // states
@@ -150,12 +155,16 @@ const useCoinmarketBuyForm = ({
     const network = getNetwork(
         cryptoToNetworkSymbol(values.cryptoSelect?.value ?? 'BTC') ?? 'btc',
     ) as Network;
-    const { toggleAmountInCrypto } = useCoinmarketSatsSwitcher({
+    const { toggleAmountInCrypto } = useCoinmarketCurrencySwitcher({
         account,
         methods,
         quoteCryptoAmount: quotesByPaymentMethod?.[0]?.receiveStringAmount,
         quoteFiatAmount: quotesByPaymentMethod?.[0]?.fiatStringAmount,
         network,
+        inputNames: {
+            cryptoInput: FORM_CRYPTO_INPUT,
+            fiatInput: FORM_FIAT_INPUT,
+        },
     });
 
     const getQuotesRequest = useCallback(
@@ -246,7 +255,8 @@ const useCoinmarketBuyForm = ({
                 const bestQuotePaymentMethod = bestQuote?.paymentMethod;
                 const bestQuotePaymentMethodName =
                     bestQuote?.paymentMethodName ?? bestQuotePaymentMethod;
-                const paymentMethodSelected = values.paymentMethod?.value;
+                const paymentMethodSelected =
+                    values.paymentMethod?.value ?? FORM_DEFAULT_PAYMENT_METHOD;
                 const paymentMethodsFromQuotes = getPaymentMethods(quotesSuccess);
                 const isSelectedPaymentMethodAvailable =
                     paymentMethodsFromQuotes.find(item => item.value === paymentMethodSelected) !==
@@ -328,13 +338,13 @@ const useCoinmarketBuyForm = ({
                     });
                     timer.stop();
 
-                    navigateToBuyOffer();
+                    navigateToBuyConfirm();
                 }
             }
         }
     };
 
-    const goToPayment = async (address: string) => {
+    const confirmTrade = async (address: string) => {
         setCallInProgress(true);
         if (!selectedQuote) return;
 
@@ -502,7 +512,7 @@ const useCoinmarketBuyForm = ({
         quotesRequest,
         selectedQuote,
         selectQuote,
-        goToPayment,
+        confirmTrade,
         goToOffers,
         verifyAddress,
         removeDraft,

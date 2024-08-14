@@ -1,6 +1,7 @@
 import { ExchangeInfo } from 'src/actions/wallet/coinmarketExchangeActions';
 import { CryptoAmountLimits } from 'src/types/wallet/coinmarketCommonTypes';
 import { ExchangeTrade, ExchangeTradeStatus } from 'invity-api';
+import { RateType } from 'src/types/coinmarket/coinmarketForm';
 
 // loop through quotes and if all quotes are either with error below minimum or over maximum, return error message
 export const getAmountLimits = (quotes: ExchangeTrade[]): CryptoAmountLimits | undefined => {
@@ -52,25 +53,43 @@ export const isQuoteError = (quote: ExchangeTrade): boolean => {
     return false;
 };
 
+export const fixedRateQuotes = (quotes: ExchangeTrade[], exchangeInfo: ExchangeInfo | undefined) =>
+    quotes.filter(
+        q => exchangeInfo?.providerInfos[q.exchange || '']?.isFixedRate && !isQuoteError(q),
+    );
+
+export const floatRateQuotes = (quotes: ExchangeTrade[], exchangeInfo: ExchangeInfo | undefined) =>
+    quotes.filter(
+        q => !exchangeInfo?.providerInfos[q.exchange || '']?.isFixedRate && !isQuoteError(q),
+    );
+
+export const getQuotesByRateType = (
+    rateType: RateType,
+    quotes: ExchangeTrade[] | undefined,
+    exchangeInfo: ExchangeInfo | undefined,
+) => {
+    if (!quotes) return undefined;
+    if (rateType === 'fixed') return fixedRateQuotes(quotes, exchangeInfo);
+    if (rateType === 'floating') return floatRateQuotes(quotes, exchangeInfo);
+    else return quotes;
+};
+
 export const getSuccessQuotesOrdered = (
     quotes: ExchangeTrade[],
     exchangeInfo: ExchangeInfo | undefined,
 ): ExchangeTrade[] => {
-    const fixed =
-        quotes.filter(
-            q =>
-                exchangeInfo?.providerInfos[q.exchange || '']?.isFixedRate &&
-                !q.isDex &&
-                !isQuoteError(q),
-        ) || [];
-    const float =
-        quotes.filter(
-            q =>
-                !exchangeInfo?.providerInfos[q.exchange || '']?.isFixedRate &&
-                !q.isDex &&
-                !isQuoteError(q),
-        ) || [];
-    const dex = quotes.filter(q => q.isDex && !isQuoteError(q)) || [];
+    const { dex, cex } = quotes.reduce<Record<'cex' | 'dex', ExchangeTrade[]>>(
+        (acc, q) => {
+            if (isQuoteError(q)) return acc;
+            if (q.isDex) acc.dex.push(q);
+            else acc.cex.push(q);
+
+            return acc;
+        },
+        { cex: [], dex: [] },
+    );
+    const fixed = fixedRateQuotes(cex, exchangeInfo);
+    const float = floatRateQuotes(cex, exchangeInfo);
 
     return [...dex, ...fixed, ...float];
 };

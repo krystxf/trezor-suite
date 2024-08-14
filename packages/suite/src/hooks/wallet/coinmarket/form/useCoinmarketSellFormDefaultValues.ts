@@ -20,6 +20,7 @@ import { useSelector } from 'src/hooks/suite';
 import { selectAccounts, selectDevice } from '@suite-common/wallet-core';
 import { useAccountLabel } from 'src/components/suite/AccountLabel';
 import { cryptoToNetworkSymbol } from 'src/utils/wallet/coinmarket/cryptoSymbolUtils';
+import { FORM_DEFAULT_PAYMENT_METHOD } from 'src/constants/wallet/coinmarket/form';
 
 export const useCoinmarketBuildAccountGroups = (
     type: CoinmarketTradeSellExchangeType,
@@ -65,7 +66,6 @@ export const useCoinmarketSellFormDefaultValues = (
     account: Account,
     sellInfo: SellInfo | undefined,
     paymentMethods: CoinmarketPaymentMethodListProps[],
-    defaultAddress?: string,
 ): CoinmarketSellFormDefaultValuesProps => {
     const country = sellInfo?.sellList?.country;
     const cryptoGroups = useCoinmarketBuildAccountGroups('sell');
@@ -82,7 +82,9 @@ export const useCoinmarketSellFormDefaultValues = (
     const defaultCountry = useMemo(() => getDefaultCountry(country), [country]);
     const defaultPaymentMethod: CoinmarketPaymentMethodListProps = useMemo(
         () =>
-            paymentMethods.find(paymentMethod => paymentMethod.value === 'creditCard') ?? {
+            paymentMethods.find(
+                paymentMethod => paymentMethod.value === FORM_DEFAULT_PAYMENT_METHOD,
+            ) ?? {
                 value: '',
                 label: '',
             },
@@ -92,10 +94,9 @@ export const useCoinmarketSellFormDefaultValues = (
     const defaultPayment: Output = useMemo(
         () => ({
             ...DEFAULT_PAYMENT,
-            address: defaultAddress ?? defaultCrypto?.descriptor ?? '',
             token: defaultCrypto?.contractAddress ?? '',
         }),
-        [defaultCrypto?.contractAddress, defaultCrypto?.descriptor, defaultAddress],
+        [defaultCrypto?.contractAddress],
     );
     const defaultFormState: FormState = useMemo(
         () => ({

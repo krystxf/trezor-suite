@@ -1,45 +1,70 @@
 import styled, { useTheme } from 'styled-components';
 import { CoinmarketFiatAmount } from '../CoinmarketFiatAmount';
-import { isBuyTrade } from 'src/utils/wallet/coinmarket/coinmarketTypingUtils';
+import {
+    isBuyTrade,
+    isExchangeTrade,
+    isSellTrade,
+} from 'src/utils/wallet/coinmarket/coinmarketTypingUtils';
 import { FormattedCryptoAmount } from 'src/components/suite';
 import { cryptoToCoinSymbol } from 'src/utils/wallet/coinmarket/cryptoSymbolUtils';
 import { Icon } from '@trezor/components';
-import { BuySellQuote } from './CoinmarketFeaturedOffersItem';
+import { CoinmarketTradeDetailType } from 'src/types/coinmarket/coinmarket';
+import { spacingsPx } from '@trezor/theme';
 
 const Arrow = styled.div`
     display: flex;
     align-items: center;
-    padding: 0 11px;
 `;
 
 const AmountsWrapper = styled.div`
     font-size: 22px;
     display: flex;
+    flex-wrap: wrap;
+    gap: ${spacingsPx.sm};
 `;
 
-const CoinmarketFeaturedOffersAmounts = ({ quote }: { quote: BuySellQuote }) => {
+const CoinmarketFeaturedOffersAmounts = ({ quote }: { quote: CoinmarketTradeDetailType }) => {
     const theme = useTheme();
-    const fiatAmount = (
-        <CoinmarketFiatAmount amount={quote.fiatStringAmount} currency={quote.fiatCurrency} />
-    );
-    const fromAmount = isBuyTrade(quote) ? (
-        fiatAmount
-    ) : (
-        <FormattedCryptoAmount
-            disableHiddenPlaceholder
-            value={quote.cryptoStringAmount}
-            symbol={cryptoToCoinSymbol(quote.cryptoCurrency!)}
-        />
-    );
-    const toAmount = isBuyTrade(quote) ? (
-        <FormattedCryptoAmount
-            disableHiddenPlaceholder
-            value={quote.receiveStringAmount}
-            symbol={cryptoToCoinSymbol(quote.receiveCurrency!)}
-        />
-    ) : (
-        fiatAmount
-    );
+    let toAmount = null;
+    let fromAmount = null;
+    if (isBuyTrade(quote)) {
+        fromAmount = (
+            <CoinmarketFiatAmount amount={quote.fiatStringAmount} currency={quote.fiatCurrency} />
+        );
+        toAmount = (
+            <FormattedCryptoAmount
+                disableHiddenPlaceholder
+                value={quote.receiveStringAmount}
+                symbol={cryptoToCoinSymbol(quote.receiveCurrency!)}
+            />
+        );
+    } else if (isSellTrade(quote)) {
+        fromAmount = (
+            <FormattedCryptoAmount
+                disableHiddenPlaceholder
+                value={quote.cryptoStringAmount}
+                symbol={cryptoToCoinSymbol(quote.cryptoCurrency!)}
+            />
+        );
+        toAmount = (
+            <CoinmarketFiatAmount amount={quote.fiatStringAmount} currency={quote.fiatCurrency} />
+        );
+    } else if (isExchangeTrade(quote)) {
+        fromAmount = (
+            <FormattedCryptoAmount
+                disableHiddenPlaceholder
+                value={quote.sendStringAmount}
+                symbol={cryptoToCoinSymbol(quote.send!)}
+            />
+        );
+        toAmount = (
+            <FormattedCryptoAmount
+                disableHiddenPlaceholder
+                value={quote.receiveStringAmount}
+                symbol={cryptoToCoinSymbol(quote.receive!)}
+            />
+        );
+    }
 
     return (
         <AmountsWrapper>

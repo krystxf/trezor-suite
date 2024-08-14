@@ -1,5 +1,5 @@
 import styled from 'styled-components';
-import { Icon, variables, SelectBar, Paragraph, TextButton, H2 } from '@trezor/components';
+import { Icon, variables, SelectBar, Paragraph, TextButton, H2, Card } from '@trezor/components';
 import {
     Elevation,
     mapElevationToBackground,
@@ -13,6 +13,48 @@ import { SCREEN_QUERY } from '@trezor/components/src/config/variables';
 interface ResponsiveSize {
     $responsiveSize: keyof typeof variables.SCREEN_SIZE;
 }
+
+export const CoinmarketWrapper = `
+    display: flex;
+    justify-content: space-between;
+    padding-bottom: ${spacingsPx.xxxl};
+
+    ${SCREEN_QUERY.BELOW_LAPTOP} {
+        flex-wrap: wrap;
+    }
+`;
+
+// eslint-disable-next-line local-rules/no-override-ds-component
+export const CoinmarketLeftWrapper = styled(Card)`
+    padding: ${spacingsPx.xl} ${spacingsPx.xl} ${spacingsPx.lg};
+    width: 60%;
+
+    ${SCREEN_QUERY.BELOW_DESKTOP} {
+        padding: ${spacingsPx.md};
+        width: 49%;
+    }
+
+    ${SCREEN_QUERY.BELOW_LAPTOP} {
+        width: 100%;
+        padding-bottom: ${spacingsPx.zero};
+    }
+`;
+
+// eslint-disable-next-line local-rules/no-override-ds-component
+export const CoinmarketRightWrapper = styled(Card)`
+    padding: ${spacingsPx.xl} ${spacingsPx.xl} ${spacingsPx.xxxl};
+    width: 37%;
+
+    ${SCREEN_QUERY.BELOW_DESKTOP} {
+        padding: ${spacingsPx.md} ${spacingsPx.md} ${spacingsPx.xxl};
+        width: 49%;
+    }
+
+    ${SCREEN_QUERY.BELOW_LAPTOP} {
+        width: 100%;
+        margin-top: ${spacingsPx.sm};
+    }
+`;
 
 export const Wrapper = styled.div<ResponsiveSize>`
     display: flex;
@@ -185,4 +227,31 @@ export const CoinmarketAmountWrapperText = styled.div`
     font-variant-numeric: tabular-nums;
     overflow: hidden;
     text-overflow: ellipsis;
+`;
+
+export const CoinmarketInfoLeftColumn = styled.div`
+    display: flex;
+    flex: 1;
+    ${typography.hint}
+    color: ${({ theme }) => theme.textSubdued};
+`;
+
+export const CoinmarketInfoRightColumn = styled.div`
+    display: flex;
+    align-items: flex-end;
+    justify-content: center;
+    flex-direction: column;
+    flex: 1;
+    ${typography.body}
+    color: ${({ theme }) => theme.textDefault};
+`;
+
+export const CoinmarketInfoAmount = styled.div`
+    padding-left: ${spacingsPx.xs};
+`;
+
+export const CoinmarketInfoBorder = styled.div`
+    width: 100%;
+    height: 1px;
+    background: ${({ theme }) => theme.borderElevation1};
 `;

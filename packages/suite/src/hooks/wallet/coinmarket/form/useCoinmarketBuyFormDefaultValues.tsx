@@ -12,6 +12,7 @@ import { FiatCurrencyCode } from 'invity-api';
 import { formDefaultCurrency } from 'src/constants/wallet/coinmarket/formDefaults';
 import { networkToCryptoSymbol } from 'src/utils/wallet/coinmarket/cryptoSymbolUtils';
 import { defaultCryptoCurrency } from 'src/constants/wallet/coinmarket/cryptoCurrencies';
+import { FORM_DEFAULT_PAYMENT_METHOD } from 'src/constants/wallet/coinmarket/form';
 
 export const useCoinmarketBuyFormDefaultValues = (
     accountSymbol: Account['symbol'],
@@ -27,7 +28,9 @@ export const useCoinmarketBuyFormDefaultValues = (
     );
     const defaultPaymentMethod: CoinmarketPaymentMethodListProps = useMemo(
         () =>
-            paymentMethods.find(paymentMethod => paymentMethod.value === 'creditCard') ?? {
+            paymentMethods.find(
+                paymentMethod => paymentMethod.value === FORM_DEFAULT_PAYMENT_METHOD,
+            ) ?? {
                 value: '',
                 label: '',
             },

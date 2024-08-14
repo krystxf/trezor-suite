@@ -1,9 +1,9 @@
 import CoinmarketFeaturedOffersItem from './CoinmarketFeaturedOffersItem';
-import { isCoinmarketExchangeOffers } from 'src/hooks/wallet/coinmarket/offers/useCoinmarketCommonOffers';
 import { getBestRatedQuote } from 'src/utils/wallet/coinmarket/coinmarketUtils';
 import { WalletSubpageHeading } from 'src/components/wallet';
 import { ExchangeTrade } from 'invity-api';
 import { useCoinmarketFormContext } from 'src/hooks/wallet/coinmarket/form/useCoinmarketCommonForm';
+import { useFilteredQuotesByRateType } from 'src/hooks/wallet/coinmarket/offers/useCoinmarketCommonOffers';
 
 const CoinmarketFeaturedOffers = () => {
     const context = useCoinmarketFormContext();
@@ -11,15 +11,12 @@ const CoinmarketFeaturedOffers = () => {
         type,
         form: { state },
     } = context;
-    const quotes = context?.quotes ?? [];
-    const featuredQuotes = quotes.filter(quote => quote.infoNote);
-    const noFeaturedOffers = featuredQuotes.length === 0;
-    const bestRatedQuote = getBestRatedQuote(quotes, type);
-
-    // for now do not show featured offers on exchange
-    if (isCoinmarketExchangeOffers(context)) return null;
-
+    const quotes = useFilteredQuotesByRateType(context);
+    const featuredQuotes = quotes?.filter(quote => quote.infoNote);
+    const noFeaturedOffers = !featuredQuotes || featuredQuotes.length === 0;
     if (state.isFormLoading || state.isFormInvalid || noFeaturedOffers) return null;
+
+    const bestRatedQuote = getBestRatedQuote(quotes, type);
 
     return (
         <>

@@ -6,6 +6,8 @@ import {
     FORM_FIAT_INPUT,
     FORM_OUTPUT_AMOUNT,
     FORM_OUTPUT_FIAT,
+    FORM_RECEIVE_CRYPTO_CURRENCY_SELECT,
+    FORM_SEND_CRYPTO_CURRENCY_SELECT,
 } from 'src/constants/wallet/coinmarket/form';
 import { useCoinmarketFormContext } from 'src/hooks/wallet/coinmarket/form/useCoinmarketCommonForm';
 import {
@@ -19,13 +21,13 @@ import {
 } from 'src/types/coinmarket/coinmarketForm';
 import { CoinmarketFormInput } from 'src/views/wallet/coinmarket';
 import { CoinmarketFractionButtons } from 'src/views/wallet/coinmarket/common';
+import { CoinmarketFormInputCryptoSelect } from 'src/views/wallet/coinmarket/common/CoinmarketForm/CoinmarketFormInput/CoinmarketFormInputCryptoSelect';
 import CoinmarketFormInputAccount from 'src/views/wallet/coinmarket/common/CoinmarketForm/CoinmarketFormInput/CoinmarketFormInputAccount';
-import CoinmarketFormInputAccountActive from 'src/views/wallet/coinmarket/common/CoinmarketForm/CoinmarketFormInput/CoinmarketFormInputAccountActive';
 import CoinmarketFormInputCountry from 'src/views/wallet/coinmarket/common/CoinmarketForm/CoinmarketFormInput/CoinmarketFormInputCountry';
-import CoinmarketFormInputFiatCrypto from 'src/views/wallet/coinmarket/common/CoinmarketForm/CoinmarketFormInput/CoinmarketFormInputFiatCrypto/CoinmarketFormInputFiatCrypto';
 import CoinmarketFormInputPaymentMethod from 'src/views/wallet/coinmarket/common/CoinmarketForm/CoinmarketFormInput/CoinmarketFormInputPaymentMethod';
 import styled from 'styled-components';
-// import CoinmarketFormExchangeRates from 'src/views/wallet/coinmarket/common/CoinmarketForm/CoinmarketFormInput/CoinmarketFormExchangeRates';
+import CoinmarketFormSwitcherExchangeRates from 'src/views/wallet/coinmarket/common/CoinmarketForm/CoinmarketFormInput/CoinmarketFormSwitcherExchangeRates';
+import { CoinmarketFormInputFiatCrypto } from 'src/views/wallet/coinmarket/common/CoinmarketForm/CoinmarketFormInput/CoinmarketFormInputFiatCrypto/CoinmarketFormInputFiatCrypto';
 
 const CoinmarketFeesWrapper = styled.div`
     margin-bottom: ${spacingsPx.md};
@@ -35,7 +37,7 @@ const CoinmarketFractionButtonsWrapper = styled(CoinmarketFractionButtons)`
     margin-bottom: ${spacingsPx.xl};
 `;
 
-const CoinmarketFormInputs = () => {
+export const CoinmarketFormInputs = () => {
     const context = useCoinmarketFormContext();
 
     if (isCoinmarketSellOffers(context)) {
@@ -51,18 +53,23 @@ const CoinmarketFormInputs = () => {
             getValues,
             changeFeeLevel,
         } = context;
-        const { amountInCrypto, currencySelect } = getValues();
+        const { amountInCrypto, currencySelect, cryptoSelect } = getValues();
 
         return (
             <>
                 <CoinmarketFormInput>
-                    <CoinmarketFormInputAccountActive label="TR_COINMARKET_YOU_SELL" />
+                    <CoinmarketFormInputAccount<CoinmarketSellFormProps>
+                        accountSelectName={FORM_CRYPTO_CURRENCY_SELECT}
+                        label="TR_COINMARKET_YOU_SELL"
+                    />
                 </CoinmarketFormInput>
                 <CoinmarketFormInput>
                     <CoinmarketFormInputFiatCrypto<CoinmarketSellFormProps>
                         cryptoInputName={FORM_CRYPTO_INPUT}
                         fiatInputName={FORM_FIAT_INPUT}
                         currencySelectLabel={currencySelect.label}
+                        cryptoCurrencyLabel={cryptoSelect?.value}
+                        cryptoSelectName={FORM_CRYPTO_CURRENCY_SELECT}
                         methods={{ ...context }}
                     />
                 </CoinmarketFormInput>
@@ -104,24 +111,31 @@ const CoinmarketFormInputs = () => {
             composedLevels,
             formState: { errors },
             form: { helpers },
+            exchangeInfo,
             register,
             setValue,
             getValues,
             changeFeeLevel,
         } = context;
-        const { amountInCrypto } = getValues();
+        const { amountInCrypto, rateType, sendCryptoSelect } = getValues();
         const currencySelect = getValues().outputs[0].currency;
+        const supportedCryptoCurrencies = exchangeInfo?.buySymbols;
 
         return (
             <div>
                 <CoinmarketFormInput>
-                    <CoinmarketFormInputAccountActive label="TR_FROM" />
+                    <CoinmarketFormInputAccount<CoinmarketExchangeFormProps>
+                        accountSelectName={FORM_SEND_CRYPTO_CURRENCY_SELECT}
+                        label="TR_FROM"
+                    />
                 </CoinmarketFormInput>
                 <CoinmarketFormInput>
                     <CoinmarketFormInputFiatCrypto<CoinmarketExchangeFormProps>
                         cryptoInputName={FORM_OUTPUT_AMOUNT}
                         fiatInputName={FORM_OUTPUT_FIAT}
+                        cryptoSelectName={FORM_SEND_CRYPTO_CURRENCY_SELECT}
                         currencySelectLabel={currencySelect.label}
+                        cryptoCurrencyLabel={sendCryptoSelect?.value}
                         methods={{ ...context }}
                     />
                 </CoinmarketFormInput>
@@ -132,6 +146,14 @@ const CoinmarketFormInputs = () => {
                         onAllClick={helpers.setAllAmount}
                     />
                 )}
+                <CoinmarketFormInput>
+                    <CoinmarketFormInputCryptoSelect<CoinmarketExchangeFormProps>
+                        label="TR_TO"
+                        cryptoSelectName={FORM_RECEIVE_CRYPTO_CURRENCY_SELECT}
+                        supportedCryptoCurrencies={supportedCryptoCurrencies}
+                        methods={{ ...context }}
+                    />
+                </CoinmarketFormInput>
                 <CoinmarketFeesWrapper>
                     <Fees
                         control={control}
@@ -145,19 +167,19 @@ const CoinmarketFormInputs = () => {
                         changeFeeLevel={changeFeeLevel}
                     />
                 </CoinmarketFeesWrapper>
-                {/* <CoinmarketFormExchangeRates /> */}
+                <CoinmarketFormSwitcherExchangeRates rateType={rateType} setValue={setValue} />
             </div>
         );
     }
 
     const { buyInfo } = context;
-    const { currencySelect } = context.getValues();
+    const { currencySelect, cryptoSelect } = context.getValues();
     const supportedCryptoCurrencies = buyInfo?.supportedCryptoCurrencies;
 
     return (
         <>
             <CoinmarketFormInput>
-                <CoinmarketFormInputAccount<CoinmarketBuyFormProps>
+                <CoinmarketFormInputCryptoSelect<CoinmarketBuyFormProps>
                     label="TR_COINMARKET_YOU_BUY"
                     cryptoSelectName={FORM_CRYPTO_CURRENCY_SELECT}
                     supportedCryptoCurrencies={supportedCryptoCurrencies}
@@ -168,7 +190,9 @@ const CoinmarketFormInputs = () => {
                 <CoinmarketFormInputFiatCrypto<CoinmarketBuyFormProps>
                     cryptoInputName={FORM_CRYPTO_INPUT}
                     fiatInputName={FORM_FIAT_INPUT}
+                    cryptoSelectName={FORM_CRYPTO_CURRENCY_SELECT}
                     currencySelectLabel={currencySelect.label}
+                    cryptoCurrencyLabel={cryptoSelect.value}
                     methods={{ ...context }}
                 />
             </CoinmarketFormInput>
@@ -181,5 +205,3 @@ const CoinmarketFormInputs = () => {
         </>
     );
 };
-
-export default CoinmarketFormInputs;
