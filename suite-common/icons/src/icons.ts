@@ -54,6 +54,7 @@ export const icons = {
     ghost: require('../assets/icons/ghost.svg'),
     github: require('../assets/icons/github.svg'),
     hiddenWallet: require('../assets/icons/hiddenWallet.svg'),
+    hide: require('../assets/icons/hide.svg'),
     home: require('../assets/icons/home.svg'),
     info: require('../assets/icons/info.svg'),
     infoLight: require('../assets/icons/infoLight.svg'),
@@ -124,6 +125,7 @@ export type IconName = keyof typeof icons;
 export const cryptoIcons = {
     ada: require('../assets/cryptoIcons/ada.svg'),
     bch: require('../assets/cryptoIcons/bch.svg'),
+    bnb: require('../assets/cryptoIcons/bnb.svg'),
     btc: require('../assets/cryptoIcons/btc.svg'),
     btg: require('../assets/cryptoIcons/btg.svg'),
     dash: require('../assets/cryptoIcons/dash.svg'),
@@ -132,7 +134,6 @@ export const cryptoIcons = {
     dsol: require('../assets/cryptoIcons/dsol.svg'),
     etc: require('../assets/cryptoIcons/etc.svg'),
     eth: require('../assets/cryptoIcons/eth.svg'),
-    bnb: require('../assets/cryptoIcons/bnb.svg'),
     gnt: require('../assets/cryptoIcons/gnt.svg'),
     ltc: require('../assets/cryptoIcons/ltc.svg'),
     matic: require('../assets/cryptoIcons/matic.svg'),

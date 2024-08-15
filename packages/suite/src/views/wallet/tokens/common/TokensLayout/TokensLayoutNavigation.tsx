@@ -144,7 +144,7 @@ export const TokensLayoutNavigation = ({
                 <Item
                     route="wallet-tokens-hidden"
                     title="TR_HIDDEN"
-                    icon="eyeClosed"
+                    icon="hide"
                     count={tokens.unverifiedWithBalance.length + tokens.hiddenWithBalance.length}
                 />
             </List>
