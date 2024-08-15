@@ -1,5 +1,6 @@
 import { CoinLogo, Column, Icon, Row, variables } from '@trezor/components';
 import { spacingsPx, typography } from '@trezor/theme';
+import { CryptoId } from 'invity-api';
 import {
     AccountLabeling,
     FiatValue,
@@ -8,6 +9,7 @@ import {
 } from 'src/components/suite';
 import { CoinmarketSelectedOfferVerifyOptionsItemProps } from 'src/types/coinmarket/coinmarketVerify';
 import styled, { useTheme } from 'styled-components';
+import { useCoinmarketInfo } from '../../../../../hooks/wallet/coinmarket/useCoinmarketInfo';
 
 const LogoWrapper = styled.div`
     padding: 0 0 0 ${spacingsPx.xxs};
@@ -46,6 +48,8 @@ const CoinmarketSelectedOfferVerifyOptionsItem = ({
     receiveNetwork,
 }: CoinmarketSelectedOfferVerifyOptionsItemProps) => {
     const theme = useTheme();
+    const { getNetworkSymbol } = useCoinmarketInfo();
+
     const iconSize = 24;
 
     if (option.type === 'SUITE') {
@@ -97,7 +101,8 @@ const CoinmarketSelectedOfferVerifyOptionsItem = ({
                         <Translation
                             id="TR_EXCHANGE_CREATE_SUITE_ACCOUNT"
                             values={{
-                                symbol: receiveNetwork?.toUpperCase(),
+                                // TODO: Why is it optional???
+                                symbol: getNetworkSymbol(receiveNetwork as CryptoId),
                             }}
                         />
                     </Column>
@@ -118,7 +123,8 @@ const CoinmarketSelectedOfferVerifyOptionsItem = ({
                     <Translation
                         id="TR_EXCHANGE_USE_NON_SUITE_ACCOUNT"
                         values={{
-                            symbol: receiveNetwork?.toUpperCase(),
+                            // TODO: Why is it optional???
+                            symbol: getNetworkSymbol(receiveNetwork as CryptoId),
                         }}
                     />
                 </Column>

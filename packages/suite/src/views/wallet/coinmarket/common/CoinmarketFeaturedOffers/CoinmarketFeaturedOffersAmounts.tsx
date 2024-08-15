@@ -1,8 +1,8 @@
 import styled, { useTheme } from 'styled-components';
+import { useCoinmarketInfo } from '../../../../../hooks/wallet/coinmarket/useCoinmarketInfo';
 import { CoinmarketFiatAmount } from '../CoinmarketFiatAmount';
 import { isBuyTrade } from 'src/utils/wallet/coinmarket/coinmarketTypingUtils';
 import { FormattedCryptoAmount } from 'src/components/suite';
-import { cryptoToCoinSymbol } from 'src/utils/wallet/coinmarket/cryptoSymbolUtils';
 import { Icon } from '@trezor/components';
 import { BuySellQuote } from './CoinmarketFeaturedOffersItem';
 
@@ -18,7 +18,9 @@ const AmountsWrapper = styled.div`
 `;
 
 const CoinmarketFeaturedOffersAmounts = ({ quote }: { quote: BuySellQuote }) => {
+    const { getNetworkSymbol } = useCoinmarketInfo();
     const theme = useTheme();
+
     const fiatAmount = (
         <CoinmarketFiatAmount amount={quote.fiatStringAmount} currency={quote.fiatCurrency} />
     );
@@ -28,14 +30,14 @@ const CoinmarketFeaturedOffersAmounts = ({ quote }: { quote: BuySellQuote }) => 
         <FormattedCryptoAmount
             disableHiddenPlaceholder
             value={quote.cryptoStringAmount}
-            symbol={cryptoToCoinSymbol(quote.cryptoCurrency!)}
+            symbol={getNetworkSymbol(quote.cryptoCurrency!)}
         />
     );
     const toAmount = isBuyTrade(quote) ? (
         <FormattedCryptoAmount
             disableHiddenPlaceholder
             value={quote.receiveStringAmount}
-            symbol={cryptoToCoinSymbol(quote.receiveCurrency!)}
+            symbol={getNetworkSymbol(quote.receiveCurrency!)}
         />
     ) : (
         fiatAmount

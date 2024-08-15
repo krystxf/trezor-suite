@@ -1,9 +1,9 @@
+import { spacingsPx } from '@trezor/theme';
 import { ImgHTMLAttributes, useEffect, useState } from 'react';
 import { ReactSVG } from 'react-svg';
 import styled from 'styled-components';
+import { DefaultCoinLogo } from '../assets/DefaultCoinLogo/DefaultCoinLogo';
 import { COINS } from './coins';
-import { DefaultCoinLogo } from '../DefaultCoinLogo/DefaultCoinLogo';
-import { spacingsPx } from '@trezor/theme';
 
 export type CoinType = keyof typeof COINS;
 
@@ -12,9 +12,10 @@ const UPDATED_ICONS_LIST_URL_BASE = 'https://data.trezor.io/suite/icons/coins/';
 export const QUALITY_SIZE = {
     small: 16,
     medium: 24,
+    large: 32,
 };
 
-type Quality = keyof typeof QUALITY_SIZE;
+export type Quality = keyof typeof QUALITY_SIZE;
 
 const useCheckUrlAccessibility = (url: string) => {
     const [isAccessible, setIsAccessible] = useState(false);
@@ -39,7 +40,7 @@ const useCheckUrlAccessibility = (url: string) => {
 };
 
 export const useAssetUrl = (coingeckoId: string, contractAddress?: string) => {
-    const fileName = contractAddress ? `${coingeckoId}_${contractAddress}` : coingeckoId;
+    const fileName = contractAddress ? `${coingeckoId}--${contractAddress}` : coingeckoId;
     const assetUrl = fileName ? `${UPDATED_ICONS_LIST_URL_BASE}${fileName}@2x.webp` : '';
     const isAssetUrlAccessible = useCheckUrlAccessibility(assetUrl);
     const iconUrl = fileName && isAssetUrlAccessible ? assetUrl : undefined;
@@ -105,26 +106,24 @@ export const CoinLogo = ({
 
     const iconUrl = useAssetUrl(coingeckoId, contractAddress);
     const firstCharacter = coingeckoId && coingeckoId[0].toUpperCase();
-    const coinLogoSize = !symbol ? QUALITY_SIZE[quality] : size;
-
     const logo = iconUrl ? (
         <>
             {isLoading && <span className="loading">Loading...</span>}
             <StyledIconImage
                 src={iconUrl}
-                $size={coinLogoSize}
+                $size={size}
                 onLoad={() => setIsLoading(false)}
                 onError={() => setIsLoading(false)}
                 {...rest}
             />
         </>
     ) : (
-        <DefaultCoinLogo size={coinLogoSize} coinFirstCharacter={firstCharacter} />
+        <DefaultCoinLogo size={size} coinFirstCharacter={firstCharacter} />
     );
 
     return (
-        <Wrapper className={className} $size={coinLogoSize} {...rest}>
-            {symbol ? <SVGCoinLogo $symbol={COINS[symbol]} $size={coinLogoSize} /> : logo}
+        <Wrapper className={className} $size={size} {...rest}>
+            {symbol ? <SVGCoinLogo $symbol={COINS[symbol]} $size={size} /> : logo}
         </Wrapper>
     );
 };
