@@ -81,6 +81,12 @@ export const en = {
                 enable: 'Enable',
             },
         },
+        coinEnabling: {
+            title: 'Choose coins you want to use with your Trezor.',
+            subtitle:
+                'The more coins are enabled, the more it takes to load the app. You can always add more later.',
+            button: 'Confirm selection',
+        },
     },
     assets: {
         dashboard: {

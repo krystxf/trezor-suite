@@ -1,4 +1,4 @@
-import { memoizeWithArgs } from 'proxy-memoize';
+import { memoize, memoizeWithArgs } from 'proxy-memoize';
 
 import {
     AccountsRootState,
@@ -14,6 +14,8 @@ import {
     selectIsDeviceConnectedAndAuthorized,
     selectIsEmptyDevice,
     selectIsUnacquiredDevice,
+    PORTFOLIO_TRACKER_DEVICE_ID,
+    selectDevices,
 } from '@suite-common/wallet-core';
 import { SettingsSliceRootState, selectFiatCurrencyCode } from '@suite-native/settings';
 
@@ -70,5 +72,26 @@ export const selectDeviceTotalFiatBalanceNative = memoizeWithArgs(
     {
         // reasonably high cache size for a lot of devices and passphrases
         size: 20,
+    },
+);
+
+// Unique symbols for all accounts that are on view only devices (excluding portfolio tracker)
+export const selectViewOnlyDevicesAccountsNetworkSymbols = memoize(
+    (state: DeviceRootState & AccountsRootState) => {
+        const rememberedDevices = selectDevices(state).filter(
+            d => d.remember && d.id !== PORTFOLIO_TRACKER_DEVICE_ID && d.state,
+        );
+
+        return Array.from(
+            new Set(
+                rememberedDevices
+                    .map(d =>
+                        selectAccountsByDeviceState(state, d.state!)
+                            .filter(a => a.visible)
+                            .map(a => a.symbol),
+                    )
+                    .flat(),
+            ),
+        );
     },
 );

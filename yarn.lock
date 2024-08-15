@@ -9342,6 +9342,8 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@suite-native/coin-enabling@workspace:suite-native/coin-enabling"
   dependencies:
+    "@mobily/ts-belt": "npm:^3.13.1"
+    "@react-navigation/native": "npm:6.1.17"
     "@reduxjs/toolkit": "npm:1.9.5"
     "@suite-common/icons": "workspace:*"
     "@suite-common/wallet-config": "workspace:*"
@@ -9351,11 +9353,13 @@ __metadata:
     "@suite-native/discovery": "workspace:*"
     "@suite-native/feature-flags": "workspace:*"
     "@suite-native/intl": "workspace:*"
+    "@suite-native/navigation": "workspace:*"
     "@suite-native/theme": "workspace:*"
     "@suite-native/toasts": "workspace:*"
     "@trezor/styles": "workspace:*"
     react: "npm:18.2.0"
     react-native: "npm:0.74.1"
+    react-native-safe-area-context: "npm:4.10.3"
     react-native-svg: "npm:15.3.0"
     react-redux: "npm:8.0.7"
   languageName: unknown
@@ -9843,6 +9847,7 @@ __metadata:
   version: 0.0.0-use.local
   resolution: "@suite-native/module-home@workspace:suite-native/module-home"
   dependencies:
+    "@mobily/ts-belt": "npm:^3.13.1"
     "@react-navigation/native": "npm:6.1.17"
     "@react-navigation/native-stack": "npm:6.9.26"
     "@reduxjs/toolkit": "npm:1.9.5"
@@ -9853,6 +9858,7 @@ __metadata:
     "@suite-native/atoms": "workspace:*"
     "@suite-native/biometrics": "workspace:*"
     "@suite-native/blockchain": "workspace:*"
+    "@suite-native/coin-enabling": "workspace:*"
     "@suite-native/device": "workspace:*"
     "@suite-native/device-manager": "workspace:*"
     "@suite-native/discovery": "workspace:*"
@@ -9972,6 +9978,7 @@ __metadata:
     "@suite-native/coin-enabling": "workspace:*"
     "@suite-native/config": "workspace:*"
     "@suite-native/device-manager": "workspace:*"
+    "@suite-native/discovery": "workspace:*"
     "@suite-native/feature-flags": "workspace:*"
     "@suite-native/intl": "workspace:*"
     "@suite-native/link": "workspace:*"

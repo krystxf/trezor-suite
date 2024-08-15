@@ -1,4 +1,5 @@
 import { useEffect } from 'react';
+import { useDispatch } from 'react-redux';
 
 import { VStack, Text } from '@suite-native/atoms';
 import { NetworkSymbol } from '@suite-common/wallet-config';
@@ -9,16 +10,19 @@ import { useCoinEnabling } from '../hooks/useCoinEnabling';
 import { NetworkSymbolSwitchItem } from './NetworkSymbolSwitchItem';
 
 type DiscoveryCoinsFilterProps = {
-    isToastEnabled?: boolean;
+    isValidationAndFeedbackEnabled?: boolean;
 };
 
-export const DiscoveryCoinsFilter = ({ isToastEnabled = true }: DiscoveryCoinsFilterProps) => {
+export const DiscoveryCoinsFilter = ({
+    isValidationAndFeedbackEnabled = true,
+}: DiscoveryCoinsFilterProps) => {
+    const dispatch = useDispatch();
     const { enabledNetworkSymbols, availableNetworks, applyDiscoveryChanges } = useCoinEnabling();
 
     useEffect(() => {
         // This will run when the component is unmounted (leaving the screen) and trigger the applyDiscoveryChanges function
         return () => applyDiscoveryChanges();
-    }, [applyDiscoveryChanges]);
+    }, [applyDiscoveryChanges, dispatch, enabledNetworkSymbols]);
 
     const uniqueNetworkSymbols = [...new Set(availableNetworks.map(n => n.symbol))];
 
@@ -29,7 +33,7 @@ export const DiscoveryCoinsFilter = ({ isToastEnabled = true }: DiscoveryCoinsFi
                     key={networkSymbol}
                     networkSymbol={networkSymbol}
                     isEnabled={enabledNetworkSymbols.includes(networkSymbol)}
-                    isToastEnabled={isToastEnabled}
+                    isValidationAndFeedbackEnabled={isValidationAndFeedbackEnabled}
                 />
             ))}
             <VStack paddingTop="small" paddingBottom="extraLarge" alignItems="center">

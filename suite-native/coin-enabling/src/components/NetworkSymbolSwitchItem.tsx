@@ -15,7 +15,7 @@ import { useCoinEnabling } from '../hooks/useCoinEnabling';
 type NetworkSymbolProps = {
     networkSymbol: NetworkSymbol;
     isEnabled: boolean;
-    isToastEnabled: boolean;
+    isValidationAndFeedbackEnabled: boolean;
 };
 
 const wrapperStyle = prepareNativeStyle<{ isEnabled: boolean }>((utils, { isEnabled }) => ({
@@ -43,7 +43,7 @@ const iconWrapperStyle = prepareNativeStyle(utils => ({
 export const NetworkSymbolSwitchItem = ({
     networkSymbol,
     isEnabled,
-    isToastEnabled,
+    isValidationAndFeedbackEnabled,
 }: NetworkSymbolProps) => {
     const dispatch = useDispatch();
     const { applyStyle } = useNativeStyles();
@@ -67,6 +67,7 @@ export const NetworkSymbolSwitchItem = ({
     const handleEnabledChange = (isChecked: boolean) => {
         if (
             !isChecked &&
+            isValidationAndFeedbackEnabled &&
             enabledNetworkSymbols.length === 1 &&
             enabledNetworkSymbols.includes(networkSymbol)
         ) {
@@ -75,7 +76,7 @@ export const NetworkSymbolSwitchItem = ({
             return;
         }
 
-        if (isToastEnabled) {
+        if (isValidationAndFeedbackEnabled) {
             showToast({
                 variant: 'default',
                 message: isChecked ? (
