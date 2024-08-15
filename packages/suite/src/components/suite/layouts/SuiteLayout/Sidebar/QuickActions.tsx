@@ -80,6 +80,7 @@ export const QuickActions = () => {
     const CheckIcon = () => (
         <StyledCheckIcon icon="CHECK_ACTIVE" size={12} color={theme.iconPrimaryDefault} />
     );
+    const icon = isDiscreetModeActive ? 'SHOW' : 'HIDE';
 
     return (
         <Container>
@@ -90,7 +91,7 @@ export const QuickActions = () => {
                         onClick={handleDiscreetModeClick}
                         data-testid="@quickActions/hideBalances"
                     >
-                        <Icon size={16} icon={isDiscreetModeActive ? 'HIDE' : 'SHOW'} />
+                        <Icon size={16} icon={icon} />
                         <Label>{translationString(translationLabel)} </Label>
                     </DescreetContainer>
                 ) : (
@@ -127,7 +128,7 @@ export const QuickActions = () => {
 
                         <ActionButton
                             title={translationString(translationLabel)}
-                            icon={isDiscreetModeActive ? 'HIDE' : 'SHOW'}
+                            icon={icon}
                             onClick={handleDiscreetModeClick}
                             variant="tertiary"
                             size="small"
