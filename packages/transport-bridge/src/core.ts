@@ -190,15 +190,6 @@ export const createCore = (apiArg: 'usb' | 'udp' | AbstractApi, logger?: Log) =>
         const { path } = sessionsResult.payload;
         logger?.debug(`core: call: retrieved path ${path} for session ${session}`);
 
-        const openResult = await api.openDevice(path, false, signal);
-
-        if (!openResult.success) {
-            logger?.error(`core: call: api.openDevice error: ${openResult.error}`);
-
-            return openResult;
-        }
-        logger?.debug(`core: call: api.openDevice done`);
-
         logger?.debug('core: call: writeUtil');
         const writeResult = await writeUtil({ path, data, signal });
         if (!writeResult.success) {
@@ -229,11 +220,6 @@ export const createCore = (apiArg: 'usb' | 'udp' | AbstractApi, logger?: Log) =>
         }
         const { path } = sessionsResult.payload;
 
-        const openResult = await api.openDevice(path, false, signal);
-        if (!openResult.success) {
-            return openResult;
-        }
-
         return writeUtil({ path, data, signal });
     };
 
@@ -247,9 +233,6 @@ export const createCore = (apiArg: 'usb' | 'udp' | AbstractApi, logger?: Log) =>
         }
         const { path } = sessionsResult.payload;
 
-        const openResult = await api.openDevice(path, false, signal);
-        if (!openResult.success) {
-            return openResult;
         }
 
         return readUtil({ path, signal });
