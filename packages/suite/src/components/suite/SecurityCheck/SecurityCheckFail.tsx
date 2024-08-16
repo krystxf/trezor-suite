@@ -1,7 +1,7 @@
 import styled from 'styled-components';
 
 import { H2, variables } from '@trezor/components';
-import { TREZOR_SUPPORT_URL } from '@trezor/urls';
+import { TREZOR_SUPPORT_FW_REVISION_FAIL } from '@trezor/urls';
 
 import { Translation, TrezorLink } from 'src/components/suite';
 import { SecurityChecklist } from '../../../views/onboarding/steps/SecurityCheck/SecurityChecklist';
@@ -73,7 +73,7 @@ const softChecklistItems = [
     },
 ] as const;
 
-const supportChatUrl = `${TREZOR_SUPPORT_URL}#open-chat`;
+const supportChatUrl = `${TREZOR_SUPPORT_FW_REVISION_FAIL}#open-chat`;
 
 interface SecurityCheckFailProps {
     goBack?: () => void;
