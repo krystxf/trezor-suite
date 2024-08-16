@@ -1,7 +1,7 @@
 import * as messages from '@trezor/protobuf/messages.json';
 import { BridgeTransport } from '@trezor/transport';
 
-import { controller as TrezorUserEnvLink } from './controller';
+import { controller as TrezorUserEnvLink, env } from './controller';
 import { pathLength, descriptor as expectedDescriptor } from './expect';
 
 // todo: introduce global jest config for e2e
@@ -128,5 +128,34 @@ describe('bridge', () => {
                 },
             },
         });
+    });
+    test(`concurrent receive - not allowed`, async () => {
+        await bridge.send({ session, name: 'GetFeatures', data: {} }).promise;
+
+        const messagePromise1 = bridge.receive({ session }).promise;
+        const messagePromise2 = bridge.receive({ session }).promise;
+        const results = await Promise.all([messagePromise1, messagePromise2]);
+
+        // TODO: FIX
+        if (env.USE_NODE_BRIDGE) {
+            expect(results).toMatchObject([
+                { success: false, error: 'Aborted by timeout', message: undefined },
+                {
+                    success: false,
+                    error: 'unexpected error',
+                    message: 'Malformed protocol format',
+                },
+            ]);
+        } else {
+            // CORRECT
+            expect(results).toMatchObject([
+                { success: true, payload: { type: 'Features' } },
+                {
+                    success: false,
+                    error: 'other call in progress',
+                    message: undefined,
+                },
+            ]);
+        }
     });
 });
