@@ -24,6 +24,10 @@ export enum DEVICE_TYPE {
     TypeEmulator = 5,
 }
 
+type AccessLock = {
+    read: boolean;
+    write: boolean;
+};
 /**
  * This class defines unifying shape for native communication interfaces such as
  * - navigator.bluetooth
@@ -36,7 +40,10 @@ export abstract class AbstractApi extends TypedEmitter<{
 }> {
     protected logger?: Logger;
     protected listening: boolean = false;
-
+    protected lock: AccessLock = {
+        read: false,
+        write: false,
+    };
     constructor({ logger }: AbstractApiConstructorParams) {
         super();
 
@@ -141,6 +148,25 @@ export abstract class AbstractApi extends TypedEmitter<{
 
         return unknownError(err, expectedErrors);
     }
+
+    /**
+     * call this to ensure single access to transport api.
+     */
+    public requestAccess(lock: AccessLock) {
+        if (this.lock.read || this.lock.write) {
+            return { success: false, error: 'other call in progress' };
+        }
+        this.lock = lock;
+
+        return { success: true, payload: undefined };
+    }
+
+    public releaseAccessLock = () => {
+        this.lock = {
+            read: false,
+            write: false,
+        };
+    };
 }
 
 export type AbstractApiAwaitedResult<K extends keyof AbstractApi> = AbstractApi[K] extends (

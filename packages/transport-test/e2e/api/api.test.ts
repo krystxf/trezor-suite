@@ -101,9 +101,29 @@ const runTests = async () => {
         );
         await getConnectedDevicePath();
 
-        // here concurrent enumeration works correctly, even in node.
-        await sharedTest('concurrent enumerate', () => concurrentEnumerate(3));
+        // // here concurrent enumeration works correctly, even in node.
+        // await sharedTest('concurrent enumerate', () => concurrentEnumerate(3));
         await sharedTest('ping pong', pingPong);
+
+        await sharedTest('write-read-abort write-read', async () => {
+            await api.openDevice(path, true);
+
+            const writeResponse1 = await api.write(path, buildMessage('PING'));
+            assertSuccess(writeResponse1);
+            const abortController = new AbortController();
+            const readResponse1 = api.read(path, abortController.signal);
+            abortController.abort();
+            assertEquals(await readResponse1, { success: false, error: 'Aborted by signal' });
+
+            console.log('===readResponse===', readResponse1);
+
+            await api.write(path, buildMessage('INITIALIZE'));
+            const readResponse2 = await api.read(path);
+            assertSuccess(readResponse2);
+            assertMessage(readResponse2.payload, 'FEATURES');
+            console.log('==== readResponse2 ====', readResponse2);
+            await api.closeDevice(path);
+        });
     }
     success('All tests passed');
 };

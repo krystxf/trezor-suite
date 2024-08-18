@@ -326,8 +326,13 @@ export class UsbApi extends AbstractApi {
         }
 
         this.logger?.debug(`usb: closeDevice. device.opened: ${device.opened}`);
-
         if (device.opened) {
+            // const b = await device.clearHalt('out', ENDPOINT_ID);
+            // console.log('clearHalt', b);
+
+            // const a = await device.clearHalt('in', ENDPOINT_ID);
+            // console.log('clearHalt', a);
+
             try {
                 const interfaceId = INTERFACE_ID;
                 this.logger?.debug(`usb: device.releaseInterface: ${interfaceId}`);
@@ -342,6 +347,7 @@ export class UsbApi extends AbstractApi {
                 // ignore
             }
         }
+
         if (device.opened) {
             try {
                 this.logger?.debug(`usb: device.close`);
@@ -386,6 +392,10 @@ export class UsbApi extends AbstractApi {
                 bootloaderId++;
                 path += bootloaderId;
             }
+            // @ts-expect-error
+            console.log('======= device.timeout', device.timeout);
+            // @ts-expect-error
+            device.timeout = 1000;
 
             return path;
         };
@@ -473,5 +483,9 @@ export class UsbApi extends AbstractApi {
             this.usbInterface.ondisconnect = null;
         }
         this.abortController.abort();
+
+        return this.devices.map(d => {
+            return d.device.close();
+        });
     }
 }

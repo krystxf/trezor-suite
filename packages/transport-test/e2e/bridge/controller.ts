@@ -61,7 +61,7 @@ class Controller extends TrezorUserEnvLinkClass {
                         this.nodeBridge = new TrezordNode({
                             port: 21325,
                             api: !env.USE_HW ? 'udp' : 'usb',
-                            logger: new Log('test-bridge', false),
+                            logger: new Log('test-bridge', true),
                         });
 
                         await this.nodeBridge.start();
@@ -119,6 +119,7 @@ class Controller extends TrezorUserEnvLinkClass {
                 if (devices.filter(d => d.productName === 'TREZOR').length === expected) {
                     return null;
                 }
+
                 throw new Error('Condition not met');
             },
             {

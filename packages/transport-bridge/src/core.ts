@@ -13,6 +13,8 @@ import { Log } from '@trezor/utils';
 import { AbstractApi } from '@trezor/transport/src/api/abstract';
 
 export const createCore = (apiArg: 'usb' | 'udp' | AbstractApi, logger?: Log) => {
+    // usb.setDebugLevel(4);
+
     let api: AbstractApi;
 
     const abortController = new AbortController();
@@ -137,13 +139,20 @@ export const createCore = (apiArg: 'usb' | 'udp' | AbstractApi, logger?: Log) =>
             return acquireIntentResult;
         }
 
-        const openDeviceResult = await api.openDevice(acquireInput.path, true, acquireInput.signal);
+        const openDeviceResult = await api.openDevice(
+            acquireInput.path,
+            // acquireInput.previous === 'null',
+            false,
+            acquireInput.signal,
+        );
         logger?.debug(`core: openDevice: result: ${JSON.stringify(openDeviceResult)}`);
 
         if (!openDeviceResult.success) {
             return openDeviceResult;
         }
+
         await sessionsClient.acquireDone({ path: acquireInput.path });
+        await api.closeDevice(acquireInput.path);
 
         return acquireIntentResult;
     };
@@ -190,6 +199,18 @@ export const createCore = (apiArg: 'usb' | 'udp' | AbstractApi, logger?: Log) =>
         const { path } = sessionsResult.payload;
         logger?.debug(`core: call: retrieved path ${path} for session ${session}`);
 
+        const accessRes = api.requestAccess({ read: true, write: true });
+        if (!accessRes.success) {
+            return accessRes;
+        }
+
+        const openDeviceResult = await api.openDevice(path, false, signal);
+        logger?.debug(`core: openDevice: result: ${JSON.stringify(openDeviceResult)}`);
+
+        if (!openDeviceResult.success) {
+            return openDeviceResult;
+        }
+
         logger?.debug('core: call: writeUtil');
         const writeResult = await writeUtil({ path, data, signal });
         if (!writeResult.success) {
@@ -199,7 +220,11 @@ export const createCore = (apiArg: 'usb' | 'udp' | AbstractApi, logger?: Log) =>
         }
         logger?.debug('core: call: readUtil');
 
-        return readUtil({ path, signal });
+        const res = await readUtil({ path, signal });
+        api.releaseAccessLock();
+        await api.closeDevice(path);
+
+        return res;
     };
 
     const send = async ({
@@ -220,7 +245,24 @@ export const createCore = (apiArg: 'usb' | 'udp' | AbstractApi, logger?: Log) =>
         }
         const { path } = sessionsResult.payload;
 
-        return writeUtil({ path, data, signal });
+        // this is a special case. we must not write when there is another write in progress
+        const accessRes = api.requestAccess({ read: false, write: true });
+        if (!accessRes.success) {
+            return accessRes;
+        }
+        const openDeviceResult = await api.openDevice(path, false, signal);
+        logger?.debug(`core: openDevice: result: ${JSON.stringify(openDeviceResult)}`);
+
+        if (!openDeviceResult.success) {
+            return openDeviceResult;
+        }
+
+        const res = await writeUtil({ path, data, signal });
+
+        await api.closeDevice(path);
+        api.releaseAccessLock();
+
+        return res;
     };
 
     const receive = async ({ session, signal }: { session: Session; signal: AbortSignal }) => {
@@ -233,15 +275,32 @@ export const createCore = (apiArg: 'usb' | 'udp' | AbstractApi, logger?: Log) =>
         }
         const { path } = sessionsResult.payload;
 
+        const accessRes = api.requestAccess({ read: true, write: false });
+        if (!accessRes.success) {
+            return accessRes;
         }
 
-        return readUtil({ path, signal });
+        const openDeviceResult = await api.openDevice(path, false, signal);
+
+        logger?.debug(`core: openDevice: result: ${JSON.stringify(openDeviceResult)}`);
+        if (!openDeviceResult.success) {
+            return openDeviceResult;
+        }
+
+        const res = await readUtil({ path, signal });
+
+        await api.closeDevice(path);
+
+        api.releaseAccessLock();
+
+        return res;
     };
 
     const dispose = () => {
         abortController.abort();
-        api.dispose();
         sessionsClient.dispose();
+
+        return api.dispose();
     };
 
     return {
