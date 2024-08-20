@@ -63,10 +63,16 @@ const validateSessionParams: ParamsValidatorHandler<{
 };
 
 const validateProtocolMessageBody =
-    (withData: boolean): RequestHandler<string, ReturnType<typeof validateProtocolMessage>> =>
+    (
+        withData: boolean,
+        protocolMessages?: boolean,
+    ): RequestHandler<string, ReturnType<typeof validateProtocolMessage>> =>
     (request, response, next) => {
         try {
             const body = validateProtocolMessage(request.body, withData);
+            if (!protocolMessages && body.protocol) {
+                throw new Error('BridgeProtocolMessage');
+            }
 
             return next({ ...request, body }, response);
         } catch (error) {
@@ -294,7 +300,7 @@ export class TrezordNode {
             app.post('/call/:session', [
                 validateSessionParams,
                 parseBodyText,
-                validateProtocolMessageBody(true),
+                validateProtocolMessageBody(true, this.protocolMessages),
                 (req, res) => {
                     const signal = this.createAbortSignal(res);
                     this.core
@@ -317,7 +323,7 @@ export class TrezordNode {
             app.post('/read/:session', [
                 validateSessionParams,
                 parseBodyText,
-                validateProtocolMessageBody(false),
+                validateProtocolMessageBody(false, this.protocolMessages),
                 (req, res) => {
                     const signal = this.createAbortSignal(res);
                     this.core
@@ -340,7 +346,7 @@ export class TrezordNode {
             app.post('/post/:session', [
                 validateSessionParams,
                 parseBodyText,
-                validateProtocolMessageBody(true),
+                validateProtocolMessageBody(true, this.protocolMessages),
                 (req, res) => {
                     const signal = this.createAbortSignal(res);
                     this.core
