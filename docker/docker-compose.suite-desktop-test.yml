@@ -1,7 +1,7 @@
 version: "3.9"
 services:
   trezor-user-env-unix:
-    image: ghcr.io/trezor/trezor-user-env
+    image: ghcr.io/trezor/trezor-user-env:4b77015dcdd304711f3eece4ec97bba555c362ba
     environment:
       - DISPLAY=$DISPLAY
     volumes:

@@ -106,7 +106,7 @@ jobs:
 
   connect-randomized-order:
     needs: [build, set-matrix]
-    if: github.event_name == 'schedule' &&  github.repository == 'trezor/trezor-suite'
+    #if: github.event_name == 'schedule' &&  github.repository == 'trezor/trezor-suite'
     name: randomized-${{ matrix.name }}
     uses: ./.github/workflows/template-connect-test-params.yml
     with:
@@ -123,7 +123,7 @@ jobs:
 
   connect-legacy-firmware:
     needs: [build, set-matrix]
-    if: github.event_name == 'schedule' &&  github.repository == 'trezor/trezor-suite'
+    #if: github.event_name == 'schedule' &&  github.repository == 'trezor/trezor-suite'
     name: legacy-${{ matrix.name }}
     uses: ./.github/workflows/template-connect-test-params.yml
     with:
@@ -137,7 +137,7 @@ jobs:
 
   connect-canary-firmware:
     needs: [build, set-matrix]
-    if: github.event_name == 'schedule' &&  github.repository == 'trezor/trezor-suite'
+    #if: github.event_name == 'schedule' &&  github.repository == 'trezor/trezor-suite'
     name: canary-${{ matrix.name }}
     uses: ./.github/workflows/template-connect-test-params.yml
     with:
@@ -151,7 +151,7 @@ jobs:
 
   connect-other-devices:
     needs: [build, set-matrix]
-    if: github.event_name == 'schedule' &&  github.repository == 'trezor/trezor-suite'
+    #if: github.event_name == 'schedule' &&  github.repository == 'trezor/trezor-suite'
     name: other-devices-${{ matrix.name }}-${{ matrix.model }}
     uses: ./.github/workflows/template-connect-test-params.yml
     with:
