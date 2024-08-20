@@ -34,7 +34,7 @@ export function validateProtocolMessage(body: unknown, withData = true) {
     }
 
     // validate BridgeProtocolMessage['protocol']
-    if (typeof json.protocol !== 'string' || !/^bridge$|^v1$/.test(json.protocol)) {
+    if (typeof json.protocol !== 'string' || !/^(bridge|v1)$/.test(json.protocol)) {
         throw new Error('Invalid BridgeProtocolMessage protocol');
     }
     // optionally validate BridgeProtocolMessage['data]
