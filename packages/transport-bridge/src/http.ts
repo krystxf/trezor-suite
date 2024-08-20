@@ -71,7 +71,7 @@ const validateProtocolMessageBody =
         try {
             const body = validateProtocolMessage(request.body, withData);
             if (!protocolMessages && body.protocol) {
-                throw new Error('BridgeProtocolMessage');
+                throw new Error('BridgeProtocolMessage support is disabled');
             }
 
             return next({ ...request, body }, response);
