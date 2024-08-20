@@ -32,7 +32,10 @@ import { HapticFeedback } from './HapticFeedback';
 import { Brightness } from './Brightness';
 import { DefaultWalletLoading } from './DefaultWalletLoading';
 import { FirmwareRevisionCheck } from './FirmwareRevisionCheck';
-import { SUPPORTS_DEVICE_AUTHENTICITY_CHECK } from '../../../constants/suite/device';
+import {
+    SUPPORTS_DEVICE_AUTHENTICITY_CHECK,
+    SUPPORTS_FIRMWARE_REVISION_CHECK,
+} from '../../../constants/suite/device';
 
 const deviceSettingsUnavailable = (device?: TrezorDevice, transport?: Partial<TransportInfo>) => {
     const noTransportAvailable = transport && !transport.type;
@@ -89,7 +92,7 @@ export const SettingsDevice = () => {
     const deviceModelInternal = device.features.internal_model;
 
     const supportsDeviceAuthentication = SUPPORTS_DEVICE_AUTHENTICITY_CHECK[deviceModelInternal];
-    const supportsFirmwareRevisionCheck = !supportsDeviceAuthentication; // Older devices with no secure element
+    const supportsFirmwareRevisionCheck = SUPPORTS_FIRMWARE_REVISION_CHECK[deviceModelInternal];
 
     return (
         <SettingsLayout>

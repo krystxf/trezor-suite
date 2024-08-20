@@ -52,3 +52,11 @@ export const SUPPORTS_DEVICE_AUTHENTICITY_CHECK: Record<DeviceModelInternal, boo
     [DeviceModelInternal.T3B1]: true,
     [DeviceModelInternal.T3T1]: true,
 };
+
+export const SUPPORTS_FIRMWARE_REVISION_CHECK: Record<DeviceModelInternal, boolean> = {
+    [DeviceModelInternal.T1B1]: true,
+    [DeviceModelInternal.T2T1]: true,
+    [DeviceModelInternal.T2B1]: true,
+    [DeviceModelInternal.T3B1]: true,
+    [DeviceModelInternal.T3T1]: true,
+};

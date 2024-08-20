@@ -10,6 +10,8 @@
 describe('T2B1 - Device settings', () => {
     const startEmuOpts = {
         version: '2-main',
+        // TODO use the offical release version when it is merged in trezor-user-env, without it this test WILL fail
+        // version: '2.8.0',
         model: 'R', // TODO: T2B1 DeviceModelInternal
         wipe: true,
     };
