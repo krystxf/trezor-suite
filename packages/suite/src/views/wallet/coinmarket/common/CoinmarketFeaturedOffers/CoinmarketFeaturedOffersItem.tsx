@@ -17,8 +17,8 @@ import {
 import { getTagAndInfoNote } from 'src/utils/wallet/coinmarket/coinmarketUtils';
 import { SellFiatTrade } from 'invity-api';
 import { CoinmarketFormContextValues } from 'src/types/coinmarket/coinmarketForm';
-import CoinmarketFeaturedOffersAmounts from './CoinmarketFeaturedOffersAmounts';
-import CoinmarketFeaturedOffersPaymentInfo from './CoinmarketFeaturedOffersPaymentInfo';
+import { CoinmarketFeaturedOffersAmounts } from './CoinmarketFeaturedOffersAmounts';
+import { CoinmarketFeaturedOffersPaymentInfo } from './CoinmarketFeaturedOffersPaymentInfo';
 import { CoinmarketTradeDetailType, CoinmarketTradeType } from 'src/types/coinmarket/coinmarket';
 
 const OfferWrap = styled.div`
@@ -107,7 +107,7 @@ const actionButtonText = (
     }
 };
 
-const CoinmarketFeaturedOffersItem = ({
+export const CoinmarketFeaturedOffersItem = ({
     context,
     quote,
     isBestRate,
@@ -174,5 +174,3 @@ const CoinmarketFeaturedOffersItem = ({
         </OfferWrap>
     );
 };
-
-export default CoinmarketFeaturedOffersItem;

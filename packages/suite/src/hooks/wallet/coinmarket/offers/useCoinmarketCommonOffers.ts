@@ -1,7 +1,7 @@
 import { useTimer } from '@trezor/react-utils';
 import { useDevice } from 'src/hooks/suite';
 import { InvityAPIReloadQuotesAfterSeconds } from 'src/constants/wallet/coinmarket/metadata';
-import { createContext, useContext, useEffect, useMemo, useState } from 'react';
+import { createContext, useContext, useEffect, useState } from 'react';
 import {
     CoinmarketTradeBuyType,
     CoinmarketTradeDetailMapProps,
@@ -18,8 +18,6 @@ import {
 import { useDispatch } from 'react-redux';
 import { SET_MODAL_CRYPTO_CURRENCY } from 'src/actions/wallet/constants/coinmarketCommonConstants';
 import { useServerEnvironment } from 'src/hooks/wallet/coinmarket/useServerEnviroment';
-import { CoinmarketFormContextValues } from 'src/types/coinmarket/coinmarketForm';
-import { getQuotesByRateType } from 'src/utils/wallet/coinmarket/exchangeUtils';
 
 export const isCoinmarketBuyOffers = (
     offersContext: CoinmarketOffersMapProps[keyof CoinmarketOffersMapProps],
@@ -89,21 +87,6 @@ export const useCoinmarketCommonOffers = <T extends CoinmarketTradeType>({
         setSelectedQuote,
         checkQuotesTimer,
     };
-};
-
-export const useFilteredQuotesByRateType = (
-    context: CoinmarketFormContextValues<CoinmarketTradeType>,
-) => {
-    const { quotes } = context;
-    const isExchange = isCoinmarketExchangeOffers(context);
-    const rateType = isExchange ? context.getValues().rateType : undefined;
-    const exchangeInfo = isExchange ? context.exchangeInfo : undefined;
-    const exchangeQuotes = isExchange ? context.quotes : undefined;
-
-    return useMemo(
-        () => (rateType ? getQuotesByRateType(rateType, exchangeQuotes, exchangeInfo) : quotes),
-        [quotes, exchangeQuotes, rateType, exchangeInfo],
-    );
 };
 
 export const CoinmarketOffersContext =

@@ -1,66 +1,31 @@
-import styled, { css, useTheme } from 'styled-components';
-import { borders, spacingsPx } from '@trezor/theme';
-import { variables } from '@trezor/components/src/config';
-import { Badge, Radio, Spinner, Text, Tooltip } from '@trezor/components';
+import styled, { useTheme } from 'styled-components';
+import {
+    borders,
+    Elevation,
+    mapElevationToBackground,
+    nativeTypography,
+    spacingsPx,
+} from '@trezor/theme';
+import { Spinner, Text, useElevation } from '@trezor/components';
 import { Translation } from 'src/components/suite';
-import { CoinmarketUtilsProvider } from 'src/views/wallet/coinmarket/common/CoinmarketUtils/CoinmarketUtilsProvider';
 import { ExchangeTrade } from 'invity-api';
 import {
     CoinmarketTradeDetailType,
     CoinmarketUtilsProvidersProps,
 } from 'src/types/coinmarket/coinmarket';
-import { useEffect, useMemo } from 'react';
-import { getQuotesByRateType } from 'src/utils/wallet/coinmarket/exchangeUtils';
-import { CoinmarketExchangeFormContextProps } from 'src/types/coinmarket/coinmarketForm';
+import { CoinmarketFormOffersSwitcherItem } from './CoinmarketFormOffersSwitcherItem';
 
-const BestOffers = styled.div`
+const BestOffers = styled.div<{ $elevation: Elevation }>`
     padding: ${spacingsPx.xxs};
     gap: ${spacingsPx.xxs};
     border-radius: ${borders.radii.md};
-    background-color: ${({ theme }) => theme.backgroundSurfaceElevation2};
-`;
-
-const Offer = styled.div<{ $isSelected: boolean }>`
-    padding: ${spacingsPx.md};
-    border-radius: ${borders.radii.sm};
-
-    /* full width radio label */
-    & > div > div:last-child {
-        width: 100%;
-    }
-
-    .content {
-        display: flex;
-        align-items: center;
-        width: 100%;
-        gap: ${spacingsPx.xs};
-    }
-
-    .exchange-type {
-        color: ${({ theme }) => theme.textPrimaryDefault};
-        margin-left: auto;
-    }
-
-    ${({ $isSelected }) =>
-        $isSelected
-            ? css`
-                  background-color: ${({ theme }) => theme.backgroundSurfaceElevation1};
-              `
-            : css`
-                  .name {
-                      color: ${({ theme }) => theme.textDisabled};
-                  }
-
-                  .exchange-type {
-                      color: ${({ theme }) => theme.textSubdued};
-                  }
-              `}
+    background-color: ${mapElevationToBackground};
 `;
 
 const ProviderNotFound = styled.div`
     text-align: center;
     padding: ${spacingsPx.md};
-    font-size: ${variables.FONT_SIZE.TINY};
+    font-size: ${nativeTypography.label.fontSize}px;
     color: ${({ theme }) => theme.textSubdued};
 `;
 
@@ -71,99 +36,37 @@ const NoOffers = styled.div`
     justify-content: center;
     gap: ${spacingsPx.xs};
     padding: ${spacingsPx.md};
-    font-size: ${variables.FONT_SIZE.TINY};
+    font-size: ${nativeTypography.label.fontSize}px;
 `;
 
-interface OfferItemProps {
-    isSelectable: boolean;
-    onSelect: (_quote: ExchangeTrade) => void;
-    quote: ExchangeTrade;
-    selectedQuote: ExchangeTrade | undefined;
-    providers: CoinmarketUtilsProvidersProps | undefined;
-    isBestRate?: boolean;
-}
-
-const OfferItem = ({
-    selectedQuote,
-    onSelect,
-    quote,
-    providers,
-    isBestRate,
-    isSelectable,
-}: OfferItemProps) => {
-    const exchangeType = quote.isDex ? 'DEX' : 'CEX';
-    const isSelected = selectedQuote?.isDex === quote.isDex;
-
-    const content = (
-        <div className="content">
-            <CoinmarketUtilsProvider providers={providers} exchange={quote.exchange} />
-            {isBestRate && (
-                <Badge variant="primary" size="small">
-                    <Translation id="TR_COINMARKET_BEST_RATE" />
-                </Badge>
-            )}
-            <div className="exchange-type">
-                <Tooltip content={<Translation id={`TR_COINMARKET_${exchangeType}_TOOLTIP`} />}>
-                    {exchangeType}
-                </Tooltip>
-            </div>
-        </div>
-    );
-
-    return (
-        <Offer $isSelected={isSelected}>
-            {isSelectable ? (
-                <Radio labelAlignment="left" isChecked={isSelected} onClick={() => onSelect(quote)}>
-                    {content}
-                </Radio>
-            ) : (
-                <div>{content}</div>
-            )}
-        </Offer>
-    );
-};
-
 interface CoinmarketFormOffersSwitcherProps {
-    context: CoinmarketExchangeFormContextProps;
     isFormLoading: boolean;
     isFormInvalid: boolean;
     providers: CoinmarketUtilsProvidersProps | undefined;
-    allQuotes: ExchangeTrade[] | undefined;
+    quotes: ExchangeTrade[] | undefined;
     selectedQuote: ExchangeTrade | undefined;
     setSelectedQuote: (quote: ExchangeTrade | undefined) => void;
     bestRatedQuote: CoinmarketTradeDetailType | undefined;
 }
 
-const CoinmarketFormOffersSwitcher = ({
-    context,
+export const CoinmarketFormOffersSwitcher = ({
     isFormLoading,
     isFormInvalid,
     providers,
-    allQuotes,
+    quotes,
     selectedQuote,
     setSelectedQuote,
     bestRatedQuote,
 }: CoinmarketFormOffersSwitcherProps) => {
     const theme = useTheme();
-    const { rateType } = context.getValues();
-    const { exchangeInfo } = context;
-    const filteredQuotes = useMemo(
-        () => getQuotesByRateType(rateType, allQuotes, exchangeInfo),
-        [allQuotes, rateType, exchangeInfo],
-    );
-    const cexQuote = filteredQuotes?.find(quote => !quote.isDex);
-    const dexQuote = filteredQuotes?.find(quote => quote.isDex);
+    const { elevation } = useElevation();
+    const cexQuote = quotes?.find(quote => !quote.isDex);
+    const dexQuote = quotes?.find(quote => quote.isDex);
     const hasSingleOption = !cexQuote !== !dexQuote;
-
-    useEffect(() => {
-        if (!filteredQuotes?.length) setSelectedQuote(undefined);
-        else if (!filteredQuotes.some(quote => quote.orderId === selectedQuote?.orderId))
-            setSelectedQuote(filteredQuotes[0]);
-    }, [filteredQuotes, selectedQuote, setSelectedQuote]);
 
     if (isFormLoading && !isFormInvalid) {
         return (
-            <BestOffers>
+            <BestOffers $elevation={elevation}>
                 <NoOffers>
                     <Spinner size={32} isGrey={false} />
                     <Text typographyStyle="hint" color={theme.textSubdued}>
@@ -176,7 +79,7 @@ const CoinmarketFormOffersSwitcher = ({
 
     if (!cexQuote && !dexQuote) {
         return (
-            <BestOffers>
+            <BestOffers $elevation={elevation}>
                 <NoOffers>
                     <Translation id="TR_COINMARKET_OFFER_NO_FOUND" />
                 </NoOffers>
@@ -185,9 +88,9 @@ const CoinmarketFormOffersSwitcher = ({
     }
 
     return (
-        <BestOffers>
+        <BestOffers $elevation={elevation}>
             {cexQuote ? (
-                <OfferItem
+                <CoinmarketFormOffersSwitcherItem
                     selectedQuote={selectedQuote}
                     isSelectable={!hasSingleOption}
                     onSelect={() => setSelectedQuote(cexQuote)}
@@ -201,7 +104,7 @@ const CoinmarketFormOffersSwitcher = ({
                 </ProviderNotFound>
             )}
             {dexQuote ? (
-                <OfferItem
+                <CoinmarketFormOffersSwitcherItem
                     selectedQuote={selectedQuote}
                     isSelectable={!hasSingleOption}
                     onSelect={() => setSelectedQuote(dexQuote)}
@@ -217,5 +120,3 @@ const CoinmarketFormOffersSwitcher = ({
         </BestOffers>
     );
 };
-
-export default CoinmarketFormOffersSwitcher;

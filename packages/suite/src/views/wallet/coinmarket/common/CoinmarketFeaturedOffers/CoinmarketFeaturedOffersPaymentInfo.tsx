@@ -15,7 +15,7 @@ const PaymentInfoWrapper = styled.div`
     gap: ${spacingsPx.xxs};
 `;
 
-const CoinmarketFeaturedOffersPaymentInfo = ({
+export const CoinmarketFeaturedOffersPaymentInfo = ({
     quote,
     type,
 }: {
@@ -36,5 +36,3 @@ const CoinmarketFeaturedOffersPaymentInfo = ({
         </PaymentInfoWrapper>
     );
 };
-
-export default CoinmarketFeaturedOffersPaymentInfo;

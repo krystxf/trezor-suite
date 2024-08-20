@@ -26,7 +26,7 @@ import {
 } from 'src/utils/wallet/coinmarket/coinmarketUtils';
 import CoinmarketFormOfferFiatAmount from 'src/views/wallet/coinmarket/common/CoinmarketForm/CoinmarketFormOfferFiatAmount';
 import { isCoinmarketExchangeOffers } from 'src/hooks/wallet/coinmarket/offers/useCoinmarketCommonOffers';
-import CoinmarketFormOffersSwitcher from './CoinmarketFormOffersSwitcher';
+import { CoinmarketFormOffersSwitcher } from './CoinmarketFormOffersSwitcher';
 import { ExchangeTrade } from 'invity-api';
 
 const CoinmarketFormOfferHeader = styled.div`
@@ -68,8 +68,9 @@ const CoinmarketFormOffer = () => {
     } = context;
     const providers = getProvidersInfoProps(context);
     const bestScoredQuote = quotes?.[0];
-    const [selectedExchangeQuote, setSelectedExchangeQuote] = useState<ExchangeTrade>();
-    const quote = isCoinmarketExchangeOffers(context) ? selectedExchangeQuote : bestScoredQuote;
+    const quote = isCoinmarketExchangeOffers(context)
+        ? context.selectedExchangeQuote
+        : bestScoredQuote;
     const bestRatedQuote = getBestRatedQuote(quotes, type);
     const bestScoredQuoteAmounts = getCryptoQuoteAmountProps(quote, context);
 
@@ -134,12 +135,11 @@ const CoinmarketFormOffer = () => {
                 <CoinmarketFormOffersSwitcher
                     isFormLoading={state.isFormLoading}
                     isFormInvalid={state.isFormInvalid}
-                    context={context}
                     providers={providers}
-                    allQuotes={quotes as ExchangeTrade[] | undefined}
+                    quotes={quotes as ExchangeTrade[] | undefined}
                     bestRatedQuote={bestRatedQuote}
-                    selectedQuote={selectedExchangeQuote}
-                    setSelectedQuote={setSelectedExchangeQuote}
+                    selectedQuote={context.selectedExchangeQuote}
+                    setSelectedQuote={context.setSelectedExchangeQuote}
                 />
             ) : (
                 <CoinmarketFormOfferItem

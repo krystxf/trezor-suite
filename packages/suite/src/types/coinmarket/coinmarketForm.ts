@@ -235,6 +235,8 @@ export interface CoinmarketExchangeFormContextProps
     sendTransaction: () => void;
     selectQuote: (quote: ExchangeTrade) => void;
     verifyAddress: (account: Account, address?: string, path?: string) => Promise<void>;
+    selectedExchangeQuote: ExchangeTrade | undefined;
+    setSelectedExchangeQuote: (quote: ExchangeTrade | undefined) => void;
 }
 
 export type CoinmarketFormMapProps = {

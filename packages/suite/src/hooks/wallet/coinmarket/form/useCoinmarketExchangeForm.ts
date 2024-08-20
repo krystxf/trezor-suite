@@ -1,4 +1,4 @@
-import { useCallback, useState, useEffect, useRef } from 'react';
+import { useCallback, useState, useEffect, useRef, useMemo } from 'react';
 import { useForm, useWatch } from 'react-hook-form';
 import type { ExchangeTrade, ExchangeTradeQuoteRequest } from 'invity-api';
 import useDebounce from 'react-use/lib/useDebounce';
@@ -20,6 +20,7 @@ import {
 } from 'src/utils/wallet/coinmarket/coinmarketUtils';
 import {
     getAmountLimits,
+    getQuotesByRateType,
     getSuccessQuotesOrdered,
 } from 'src/utils/wallet/coinmarket/exchangeUtils';
 import { useFormDraft } from 'src/hooks/wallet/useFormDraft';
@@ -99,6 +100,7 @@ export const useCoinmarketExchangeForm = ({
     const [innerQuotes, setInnerQuotes] = useState<ExchangeTrade[] | undefined>(
         getFilteredSuccessQuotes<CoinmarketTradeExchangeType>(quotes),
     );
+    const [selectedExchangeQuote, setSelectedExchangeQuote] = useState<ExchangeTrade>();
     const [receiveAccount, setReceiveAccount] = useState<Account | undefined>();
     const [suiteReceiveAccounts, setSuiteReceiveAccounts] =
         useState<
@@ -167,7 +169,7 @@ export const useCoinmarketExchangeForm = ({
     const { reset, register, getValues, handleSubmit, formState, control } = methods;
     const values = useWatch<CoinmarketExchangeFormProps>({ control });
     const previousValues = useRef<typeof values | null>(isNotFormPage ? draftUpdated : null);
-    const { outputs } = getValues();
+    const { outputs, rateType } = getValues();
     const token = outputs?.[0]?.token;
     const currency: Option | undefined = getValues(FORM_OUTPUT_CURRENCY);
     const fiatRateKey = getFiatRateKey(
@@ -655,6 +657,18 @@ export const useCoinmarketExchangeForm = ({
         };
     }, []);
 
+    const filteredQuotes = useMemo(
+        () => getQuotesByRateType(rateType, innerQuotes, exchangeInfo),
+        [innerQuotes, rateType, exchangeInfo],
+    );
+
+    // set new default selected quote if the current one is not in the filtered quotes
+    useEffect(() => {
+        if (!filteredQuotes?.length) setSelectedExchangeQuote(undefined);
+        else if (!filteredQuotes.some(quote => quote.orderId === selectedQuote?.orderId))
+            setSelectedExchangeQuote(filteredQuotes[0]);
+    }, [filteredQuotes, selectedQuote?.orderId, setSelectedExchangeQuote]);
+
     return {
         type,
         ...methods,
@@ -676,7 +690,7 @@ export const useCoinmarketExchangeForm = ({
         callInProgress,
         exchangeInfo,
         symbolsInfo,
-        quotes,
+        quotes: filteredQuotes,
         quotesRequest,
         composedLevels,
         defaultCurrency,
@@ -700,5 +714,7 @@ export const useCoinmarketExchangeForm = ({
         verifyAddress,
         selectQuote,
         confirmTrade,
+        selectedExchangeQuote,
+        setSelectedExchangeQuote,
     };
 };

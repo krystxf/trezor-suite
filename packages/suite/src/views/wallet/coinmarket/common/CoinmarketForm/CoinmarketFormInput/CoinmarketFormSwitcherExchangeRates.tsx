@@ -53,7 +53,7 @@ interface CoinmarketFormSwitcherExchangeRatesProps {
     setValue: UseFormSetValue<CoinmarketExchangeFormProps>;
 }
 
-const CoinmarketFormSwitcherExchangeRates = ({
+export const CoinmarketFormSwitcherExchangeRates = ({
     rateType,
     setValue,
 }: CoinmarketFormSwitcherExchangeRatesProps) => {
@@ -99,5 +99,3 @@ const CoinmarketFormSwitcherExchangeRates = ({
         </>
     );
 };
-
-export default CoinmarketFormSwitcherExchangeRates;

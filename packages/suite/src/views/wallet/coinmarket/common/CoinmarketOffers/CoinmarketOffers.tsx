@@ -4,14 +4,12 @@ import CoinmarketOffersItem from './CoinmarketOffersItem';
 import {
     isCoinmarketExchangeOffers,
     useCoinmarketOffersContext,
-    useFilteredQuotesByRateType,
 } from 'src/hooks/wallet/coinmarket/offers/useCoinmarketCommonOffers';
 import { getBestRatedQuote } from 'src/utils/wallet/coinmarket/coinmarketUtils';
 
 const CoinmarketOffers = () => {
     const context = useCoinmarketOffersContext();
-    const { type } = context;
-    const quotes = useFilteredQuotesByRateType(context);
+    const { type, quotes } = context;
     const hasLoadingFailed = !quotes;
     const noOffers = hasLoadingFailed || quotes.length === 0;
 
