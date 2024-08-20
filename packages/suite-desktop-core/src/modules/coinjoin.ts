@@ -2,7 +2,7 @@
  * Uses @trezor/coinjoin package in nodejs context
  */
 
-import { app, ipcMain } from 'electron';
+import { ipcMain } from 'electron';
 import { captureMessage, withScope } from '@sentry/electron';
 
 import { coinjoinReportTag, coinjoinNetworkTag } from '@suite-common/sentry';
@@ -207,7 +207,7 @@ export const init: Module = ({ mainWindow, store, mainThreadEmitter }) => {
         };
     };
 
-    const dispose = () => {
+    const dispose = async () => {
         backends.forEach(b => b.dispose());
         backends.splice(0, backends.length);
 
@@ -225,11 +225,14 @@ export const init: Module = ({ mainWindow, store, mainThreadEmitter }) => {
 
         unregisterProxies();
         logger.info(SERVICE_NAME, 'Stopping (app quit)');
-        synchronize(killCoinjoinProcess);
+        await synchronize(killCoinjoinProcess);
         powerSaveBlocker.stopBlockingPowerSave();
     };
 
-    app.on('before-quit', dispose);
+    mainThreadEmitter.on('module/quit-handler-request', async () => {
+        await dispose();
+        await mainThreadEmitter.emit('module/quit-handler-ack');
+    });
     mainWindow.webContents.on('did-start-loading', dispose);
     ipcMain.once('app/restart', dispose);
 

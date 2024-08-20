@@ -10,7 +10,7 @@ import type { Module } from './index';
 
 export const SERVICE_NAME = 'http-receiver';
 
-export const init: Module = ({ mainWindow }) => {
+export const init: Module = ({ mainWindow, mainThreadEmitter }) => {
     const { logger } = global;
     let httpReceiver: ReturnType<typeof createHttpReceiver> | null = null;
 
@@ -45,9 +45,10 @@ export const init: Module = ({ mainWindow }) => {
             });
         });
 
-        app.on('before-quit', () => {
+        mainThreadEmitter.on('module/quit-handler-request', async () => {
             logger.info(SERVICE_NAME, 'Stopping server (app quit)');
-            receiver.stop();
+            await receiver.stop();
+            await mainThreadEmitter.emit('module/quit-handler-ack');
         });
 
         // when httpReceiver was asked to provide current address for given pathname

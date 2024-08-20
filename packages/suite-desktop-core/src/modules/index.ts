@@ -34,6 +34,7 @@ import * as coinjoin from './coinjoin';
 import * as csp from './csp';
 import * as fileProtocol from './file-protocol';
 import * as autoStart from './auto-start';
+import * as quitHandler from './quit-handler';
 
 // General modules (both dev & prod)
 const MODULES = [
@@ -43,6 +44,7 @@ const MODULES = [
     eventLoggingApp,
     eventLoggingContents,
     // Standard modules
+    quitHandler,
     crashRecover,
     menu,
     shortcuts,
@@ -72,6 +74,9 @@ interface MainThreadMessages {
     'module/request-interceptor': InterceptedEvent;
     'module/reset-tor-circuits': Extract<InterceptedEvent, { type: 'CIRCUIT_MISBEHAVING' }>;
     'module/tor-status-update': TorStatus;
+    'module/quit-handler-register': void;
+    'module/quit-handler-request': void;
+    'module/quit-handler-ack': void;
 }
 export const mainThreadEmitter = new TypedEmitter<MainThreadMessages>();
 export type MainThreadEmitter = typeof mainThreadEmitter;

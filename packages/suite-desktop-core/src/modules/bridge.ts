@@ -97,13 +97,14 @@ const getBridgeInstance = (store: Dependencies['store']) => {
     });
 };
 
-const load = async ({ store }: Dependencies) => {
+const load = async ({ store, mainThreadEmitter }: Dependencies) => {
     const { logger } = global;
     const bridge = getBridgeInstance(store);
 
-    app.on('before-quit', () => {
+    mainThreadEmitter.on('module/quit-handler-request', async () => {
         logger.info(SERVICE_NAME, 'Stopping (app quit)');
         bridge.stop();
+        await mainThreadEmitter.emit('module/quit-handler-ack');
     });
 
     ipcMain.handle('bridge/toggle', async ipcEvent => {

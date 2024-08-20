@@ -158,11 +158,6 @@ const init = async () => {
         mainWindow.focus();
     });
 
-    app.on('before-quit', () => {
-        mainWindow.removeAllListeners();
-        logger.exit();
-    });
-
     // init modules
     const interceptor = createInterceptor();
     const loadModules = initModules({

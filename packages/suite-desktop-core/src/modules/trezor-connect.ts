@@ -1,4 +1,4 @@
-import { app, ipcMain } from 'electron';
+import { ipcMain } from 'electron';
 
 import TrezorConnect from '@trezor/connect';
 import { createIpcProxyHandler, IpcProxyHandlerOptions } from '@trezor/ipc-proxy';
@@ -7,7 +7,7 @@ import type { Module } from './index';
 
 export const SERVICE_NAME = '@trezor/connect';
 
-export const init: Module = ({ store }) => {
+export const init: Module = ({ store, mainThreadEmitter }) => {
     const { logger } = global;
     logger.info(SERVICE_NAME, `Starting service`);
 
@@ -48,9 +48,11 @@ export const init: Module = ({ store }) => {
 
     const unregisterProxy = createIpcProxyHandler(ipcMain, 'TrezorConnect', ipcProxyOptions);
 
-    app.on('before-quit', () => {
+    mainThreadEmitter.on('module/quit-handler-request', async () => {
+        logger.info(SERVICE_NAME, 'Stopping server (app quit)');
         unregisterProxy();
         TrezorConnect.dispose();
+        await mainThreadEmitter.emit('module/quit-handler-ack');
     });
 
     return () => {

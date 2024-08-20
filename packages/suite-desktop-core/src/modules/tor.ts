@@ -228,9 +228,10 @@ const load = async ({ mainWindow, store, mainThreadEmitter }: Dependencies) => {
         handleTorProcessStatus(status);
     });
 
-    app.on('before-quit', () => {
-        logger.info('tor', 'Stopping (app quit)');
-        tor.stop();
+    mainThreadEmitter.on('module/quit-handler-request', async () => {
+        logger.info('tor', 'Stopping server (app quit)');
+        await tor.stop();
+        await mainThreadEmitter.emit('module/quit-handler-ack');
     });
 
     if (app.commandLine.hasSwitch('tor')) {
