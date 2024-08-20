@@ -161,6 +161,10 @@ const run = async () => {
                 throw new Error('DebugLinkState missing: ' + state.error);
             }
 
+            if (state?.success) {
+                return; // stop test here
+            }
+
             // TODO: TrezorConnect.cancel();
             // await new Promise(resolve => setTimeout(resolve, 2000));
             // TrezorConnect.cancel();
