@@ -65,7 +65,7 @@ const validateSessionParams: ParamsValidatorHandler<{
 const validateProtocolMessageBody =
     (
         withData: boolean,
-        protocolMessages?: boolean,
+        protocolMessages: boolean,
     ): RequestHandler<string, ReturnType<typeof validateProtocolMessage>> =>
     (request, response, next) => {
         try {
@@ -98,7 +98,7 @@ export class TrezordNode {
     core: ReturnType<typeof createCore>;
     logger: Log;
     assetPrefix: string;
-    protocolMessages?: boolean;
+    protocolMessages: boolean;
     throttler = new Throttler(500);
 
     constructor({
@@ -123,7 +123,7 @@ export class TrezordNode {
         this.core = createCore(api, this.logger);
 
         this.assetPrefix = assetPrefix;
-        this.protocolMessages = protocolMessages;
+        this.protocolMessages = protocolMessages ?? true;
     }
 
     private resolveListenSubscriptions(descriptors: Descriptor[]) {

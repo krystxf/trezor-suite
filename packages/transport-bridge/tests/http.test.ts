@@ -115,13 +115,13 @@ describe('http', () => {
         const GET_FEATURES = '000000000000'; // GetFeatures message-in
         const FEATURES = '00110000000c1002180020006000aa010154'; // Features message-out
 
-        const setupTrezordNode = async () => {
+        const setupTrezordNode = async (params?: Parameters<typeof createTrezordNode>[0]) => {
             const trezordNode = createTrezordNode({
                 port: await getFreePort(),
-                protocolMessages: true,
+                ...params,
             });
             await trezordNode.start();
-            const url = trezordNode.server?.getRouteAddress('/');
+            const url = trezordNode.server?.getRouteAddress('/') || '/';
 
             await bridgeApiCall({
                 url: `${url}enumerate`,
@@ -135,9 +135,8 @@ describe('http', () => {
             return { trezordNode, url };
         };
 
-        it('POST / getInfo with protocolMessage flag', async () => {
-            const { trezordNode } = await setupTrezordNode();
-            const url = trezordNode.server!.getRouteAddress('/')!;
+        it('POST / getInfo with protocolMessage flag enabled', async () => {
+            const { trezordNode, url } = await setupTrezordNode();
             const response = await bridgeApiCall({
                 url,
                 method: 'POST',
@@ -148,6 +147,22 @@ describe('http', () => {
             expect(response.payload).toEqual({
                 version: trezordNode.version,
                 protocolMessages: true,
+            });
+            await trezordNode.stop();
+        });
+
+        it('POST / getInfo with protocolMessage flag disabled', async () => {
+            const { trezordNode, url } = await setupTrezordNode({ protocolMessages: false });
+            const response = await bridgeApiCall({
+                url,
+                method: 'POST',
+            });
+            if (!response.success) {
+                throw new Error(response.error + ' ' + response.message);
+            }
+            expect(response.payload).toEqual({
+                version: trezordNode.version,
+                protocolMessages: false,
             });
             await trezordNode.stop();
         });
@@ -440,7 +455,10 @@ describe('http', () => {
             if (!response.success) {
                 throw new Error(response.error);
             }
-            expect(response.payload).toEqual({ version: trezordNode.version });
+            expect(response.payload).toEqual({
+                version: trezordNode.version,
+                protocolMessages: true,
+            });
             await trezordNode.stop();
         });
 
