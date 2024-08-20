@@ -124,13 +124,14 @@ const DCALanding = (props: UseCoinmarketProps) => {
                     </Column>
                 </Column1>
                 <Column2>
+                    <Image image="COINMARKET_INVITY_ICON" width={48} height={48} />
                     <WrappedText>
                         <Paragraph typographyStyle="highlight">
                             <Translation id="TR_COINMARKET_DCA_DOWNLOAD" />
                         </Paragraph>
                     </WrappedText>
                     <TrezorLink href={COINMARKET_DOWNLOAD_INVITY_APP_URL}>
-                        <Image image="COINMARKET_DCA_INVITY_APP_QR" width={233} height={226} />
+                        <Image image="COINMARKET_DCA_INVITY_APP_QR" width={170} height={170} />
                     </TrezorLink>
                     <Row>
                         <TrezorLink href={COINMARKET_DOWNLOAD_INVITY_APP_URL}>
