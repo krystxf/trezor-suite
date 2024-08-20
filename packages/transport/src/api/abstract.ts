@@ -136,7 +136,7 @@ export abstract class AbstractApi extends TypedEmitter<{
         return error(payload);
     }
 
-    protected unknownError<E extends AnyError>(err: Error, expectedErrors: E[]) {
+    protected unknownError<E extends AnyError = never>(err: Error, expectedErrors: E[] = []) {
         this.logger?.error('transport: abstract api: unknown error', err);
 
         return unknownError(err, expectedErrors);
