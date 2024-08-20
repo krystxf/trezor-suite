@@ -1762,34 +1762,42 @@ export default defineMessages({
     TR_COINMARKET_DCA_FEATURE_1_SUBHEADING: {
         defaultMessage: 'Developed by SatoshiLabs',
         id: 'TR_COINMARKET_DCA_FEATURE_1_SUBHEADING',
+        dynamic: true,
     },
     TR_COINMARKET_DCA_FEATURE_1_DESCRIPTION: {
         defaultMessage: 'Safe & simple custodial DCA savings plan.',
         id: 'TR_COINMARKET_DCA_FEATURE_1_DESCRIPTION',
+        dynamic: true,
     },
     TR_COINMARKET_DCA_FEATURE_2_SUBHEADING: {
         defaultMessage: 'Free withdrawals',
         id: 'TR_COINMARKET_DCA_FEATURE_2_SUBHEADING',
+        dynamic: true,
     },
     TR_COINMARKET_DCA_FEATURE_2_DESCRIPTION: {
         defaultMessage: 'Withdraw to self-custody with no extra charge.',
         id: 'TR_COINMARKET_DCA_FEATURE_2_DESCRIPTION',
+        dynamic: true,
     },
     TR_COINMARKET_DCA_FEATURE_3_SUBHEADING: {
         defaultMessage: 'Easy to use',
         id: 'TR_COINMARKET_DCA_FEATURE_3_SUBHEADING',
+        dynamic: true,
     },
     TR_COINMARKET_DCA_FEATURE_3_DESCRIPTION: {
         defaultMessage: 'Quick, streamlined, user-friendly interface.',
         id: 'TR_COINMARKET_DCA_FEATURE_3_DESCRIPTION',
+        dynamic: true,
     },
     TR_COINMARKET_DCA_FEATURE_4_SUBHEADING: {
         defaultMessage: 'DCA Overview',
         id: 'TR_COINMARKET_DCA_FEATURE_4_SUBHEADING',
+        dynamic: true,
     },
     TR_COINMARKET_DCA_FEATURE_4_DESCRIPTION: {
         defaultMessage: 'Monitor your investment history, amount, and frequency.',
         id: 'TR_COINMARKET_DCA_FEATURE_4_DESCRIPTION',
+        dynamic: true,
     },
     TR_COINMARKET_DCA_DOWNLOAD: {
         defaultMessage: 'Download Invity mobile app to start saving in Bitcoin',
