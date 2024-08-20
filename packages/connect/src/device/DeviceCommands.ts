@@ -326,7 +326,7 @@ export class DeviceCommands {
             protocol: this.device.protocol,
         });
 
-        const res = await this.callPromise.promise;
+        const res = await this.callPromise;
 
         this.callPromise = undefined;
         if (!res.success) {
@@ -375,7 +375,7 @@ export class DeviceCommands {
             await this.transport.receive({
                 session: this.sessionId,
                 protocol: this.device.protocol,
-            }).promise;
+            });
             // throw error anyway, next call should be resolved properly
             throw error;
         }
@@ -650,7 +650,7 @@ export class DeviceCommands {
 
         if (!this._cancelableRequestBySend) {
             if (this.callPromise) {
-                await this.callPromise.promise;
+                await this.callPromise;
             }
 
             return;
@@ -672,10 +672,10 @@ export class DeviceCommands {
                 session: this.sessionId,
                 name: 'Cancel',
                 data: {},
-            }).promise;
+            });
 
             if (this.callPromise) {
-                await this.callPromise.promise;
+                await this.callPromise;
             }
             // if my observations are correct, it is not necessary to transport.receive after send
             // transport.call -> transport.send -> transport call returns Failure meaning it won't be

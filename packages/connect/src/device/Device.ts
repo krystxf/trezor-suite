@@ -198,7 +198,7 @@ export class Device extends TypedEmitter<DeviceEvents> {
                 previous: this.originalDescriptor.session,
             },
         });
-        const acquireResult = await this.acquirePromise.promise;
+        const acquireResult = await this.acquirePromise;
         this.acquirePromise = undefined;
         if (!acquireResult.success) {
             if (this.runPromise) {
@@ -233,7 +233,7 @@ export class Device extends TypedEmitter<DeviceEvents> {
             if (this.commands) {
                 this.commands.dispose();
                 if (this.commands.callPromise) {
-                    await this.commands.callPromise.promise;
+                    await this.commands.callPromise;
                 }
             }
 
@@ -242,7 +242,7 @@ export class Device extends TypedEmitter<DeviceEvents> {
                 path: this.originalDescriptor.path,
             });
 
-            const releaseResponse = await this.releasePromise.promise;
+            const releaseResponse = await this.releasePromise;
             this.releasePromise = undefined;
             if (releaseResponse.success) {
                 this.activitySessionID = null;
@@ -282,14 +282,14 @@ export class Device extends TypedEmitter<DeviceEvents> {
 
     async override(error: Error) {
         if (this.acquirePromise) {
-            await this.acquirePromise.promise;
+            await this.acquirePromise;
         }
 
         if (this.runPromise) {
             await this.interruptionFromUser(error);
         }
         if (this.releasePromise) {
-            await this.releasePromise.promise;
+            await this.releasePromise;
         }
     }
 
@@ -335,7 +335,7 @@ export class Device extends TypedEmitter<DeviceEvents> {
         // note: I am tempted to do this check at the beginning of device.acquire but on the other hand I would like
         // to have methods as atomic as possible and shift responsibility for deciding when to call them on the caller
         if (this.releasePromise) {
-            await this.releasePromise.promise;
+            await this.releasePromise;
         }
 
         if (!this.isUsedHere() || this.commands?.disposed || !this.getExternalState()) {
