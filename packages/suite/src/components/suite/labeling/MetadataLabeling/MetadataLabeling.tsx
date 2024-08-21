@@ -1,7 +1,7 @@
 import { useEffect, useState, useMemo, useRef } from 'react';
 import styled from 'styled-components';
 
-import { Button, DropdownMenuItemProps } from '@trezor/components';
+import { Badge, Button, DropdownMenuItemProps, Row } from '@trezor/components';
 import { useDiscovery, useDispatch, useSelector } from 'src/hooks/suite';
 import { addMetadata, init, setEditing } from 'src/actions/suite/metadataLabelingActions';
 import { MetadataAddPayload } from 'src/types/suite/metadata';
@@ -14,6 +14,8 @@ import {
     selectIsLabelingInitPossible,
 } from 'src/reducers/suite/metadataReducer';
 import type { Timeout } from '@trezor/type-utils';
+import { spacings } from '@trezor/theme';
+import { UppercaseAccountType } from '@suite-common/wallet-types';
 
 const LabelValue = styled.div`
     overflow: hidden;
@@ -169,15 +171,34 @@ const TextLikeLabel = ({
 }: ExtendedProps) => {
     const EditableLabel = useMemo(() => withEditable(RelativeLabel), []);
 
+    let accountTypeUppercase: UppercaseAccountType | undefined;
+
+    if (payload.type === 'accountLabel') {
+        accountTypeUppercase = payload?.accountType.toUpperCase() as UppercaseAccountType;
+    }
+
+    const AccountTypeBadge = payload.type === 'accountLabel' &&
+        payload.accountType != 'normal' &&
+        accountTypeUppercase && (
+            <Row margin={{ left: spacings.sm }}>
+                <Badge>
+                    <Translation id={`TR_${accountTypeUppercase}`} />
+                </Badge>
+            </Row>
+        );
+
     if (editActive) {
         return (
-            <EditableLabel
-                data-testid={dataTest}
-                originalValue={payload.value ?? defaultEditableValue}
-                onSubmit={onSubmit}
-                onBlur={onBlur}
-                updateFlag={updateFlag}
-            />
+            <>
+                <EditableLabel
+                    data-testid={dataTest}
+                    originalValue={payload.value ?? defaultEditableValue}
+                    onSubmit={onSubmit}
+                    onBlur={onBlur}
+                    updateFlag={updateFlag}
+                />
+                {AccountTypeBadge}
+            </>
         );
     }
 
@@ -185,6 +206,7 @@ const TextLikeLabel = ({
         return (
             <Label data-testid={dataTest}>
                 <LabelValue>{payload.value}</LabelValue>
+                {AccountTypeBadge}
             </Label>
         );
     }

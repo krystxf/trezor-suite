@@ -101,6 +101,7 @@ export const AccountDetails = ({ selectedAccount, isBalanceShown }: AccountDetai
                 <MetadataLabeling
                     defaultVisibleValue={
                         <AccountLabel
+                            showAccountTypeBadge
                             accountLabel={selectedAccountLabels.accountLabel}
                             accountType={accountType}
                             symbol={selectedAccount.symbol}
@@ -110,6 +111,7 @@ export const AccountDetails = ({ selectedAccount, isBalanceShown }: AccountDetai
                     payload={{
                         type: 'accountLabel',
                         entityKey: key,
+                        accountType,
                         defaultValue: path,
                         value: selectedAccountLabels.accountLabel,
                     }}

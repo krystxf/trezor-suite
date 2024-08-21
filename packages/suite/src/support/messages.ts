@@ -2669,6 +2669,42 @@ export default defineMessages({
         defaultMessage: 'Legacy accounts',
         id: 'TR_LEGACY_ACCOUNTS',
     },
+    TR_LEGACY: {
+        defaultMessage: 'Legacy',
+        id: 'TR_LEGACY',
+        dynamic: true,
+    },
+    TR_TAPROOT: {
+        defaultMessage: 'Taproot',
+        id: 'TR_TAPROOT',
+        dynamic: true,
+    },
+    TR_COINJOIN: {
+        defaultMessage: 'Coinjoin',
+        id: 'TR_COINJOIN',
+        dynamic: true,
+    },
+    TR_LEDGER: {
+        defaultMessage: 'Ledger',
+        id: 'TR_LEDGER',
+        dynamic: true,
+    },
+    TR_IMPORTED: {
+        defaultMessage: 'Imported',
+        id: 'TR_IMPORTED',
+        dynamic: true,
+    },
+    TR_NORMAL: {
+        defaultMessage: 'Normal',
+        id: 'TR_NORMAL',
+        dynamic: true,
+    },
+    TR_SEGWIT: {
+        defaultMessage: 'SegWit',
+        id: 'TR_SEGWIT',
+        dynamic: true,
+    },
+
     TR_CARDANO_LEDGER_ACCOUNTS: {
         defaultMessage: 'Ledger accounts',
         id: 'TR_CARDANO_LEDGER_ACCOUNTS',

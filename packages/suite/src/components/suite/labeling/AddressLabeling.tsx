@@ -22,5 +22,11 @@ export const AddressLabeling = ({ networkSymbol, address, knownOnly }: AddressLa
         return !knownOnly ? <span>{address}</span> : null;
     }
 
-    return <AccountLabeling account={relevantAccounts[0]} />;
+    return (
+        <AccountLabeling
+            account={relevantAccounts[0]}
+            accountTypeBadgeSize="tiny"
+            showAccountTypeBadge
+        />
+    );
 };
