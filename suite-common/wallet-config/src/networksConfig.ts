@@ -646,6 +646,21 @@ export const getTestnetSymbols = () => getTestnets().map(n => n.symbol);
 export const isBlockbookBasedNetwork = (symbol: NetworkSymbol) =>
     networks[symbol]?.customBackends.some(backend => backend === 'blockbook');
 
+export const isDebugOnlyAccountType = (
+    accountType: AccountType,
+    symbol?: NetworkSymbol,
+): boolean => {
+    if (!symbol) return false;
+
+    const network = networks?.[symbol];
+
+    if (!network) return false;
+
+    const accountTypeInfo = (network.accountTypes as Record<AccountType, Network>)[accountType];
+
+    return !!accountTypeInfo?.isDebugOnlyAccountType;
+};
+
 export const getNetworkType = (symbol: NetworkSymbol) => networks[symbol]?.networkType;
 
 // takes into account just network features, not features for specific accountTypes

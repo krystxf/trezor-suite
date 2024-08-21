@@ -1,4 +1,4 @@
-import { networksCompatibility } from '@suite-common/wallet-config';
+import { isDebugOnlyAccountType, networksCompatibility } from '@suite-common/wallet-config';
 import { selectDevice } from '@suite-common/wallet-core';
 import { useEffect, useState } from 'react';
 import { useForm } from 'react-hook-form';
@@ -81,6 +81,8 @@ const getSuiteReceiveAccounts = ({
                 a =>
                     a.deviceState === device?.state &&
                     a.symbol === receiveNetwork &&
+                    ((isDebugOnlyAccountType(a.accountType, a.symbol) && isDebug) ||
+                        !isDebugOnlyAccountType(a.accountType, a.symbol)) &&
                     (!a.empty || a.visible || (a.accountType === 'normal' && a.index === 0)),
             );
         }
