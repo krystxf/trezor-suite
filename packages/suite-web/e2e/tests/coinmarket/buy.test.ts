@@ -15,7 +15,7 @@ function setupAndAssertBuy(selectOffer: () => void) {
     // Tests set currencies are EUR and BTC
     cy.getTestElement('@coinmarket/form/fiat-currency-select/input').should('contain.text', 'EUR');
 
-    cy.getTestElement('@coinmarket/form/account-select/input').should('contain.text', 'BTC');
+    cy.getTestElement('@coinmarket/form/select-crypto/input').should('contain.text', 'BTC');
 
     // Fills out the form
     cy.getTestElement('@coinmarket/form/fiat-input').type(testData.fiatInput, {
@@ -31,11 +31,11 @@ function setupAndAssertBuy(selectOffer: () => void) {
     cy.task('pressYes');
 
     // Verifies amounts, currencies and providers
-    cy.get('[class*="CoinmarketSelectedOfferInfo__Info"]')
+    cy.get('[class*="CoinmarketRightWrapper"]')
         .should('exist')
         .then(wrapper => {
             cy.wrap(wrapper)
-                .find('[class*="CoinmarketSelectedOfferInfo__Dark"]')
+                .find('div:nth-child(1)')
                 .first()
                 .invoke('text')
                 .should('match', new RegExp(`€${testData.fiatInput}.[0-9][0-9]`));

@@ -36,7 +36,7 @@ export const CoinmarketSelectedOfferInfo = ({
     const amountLabels = coinmarketGetAmountLabels({ type, amountInCrypto: true });
 
     return (
-        <Column gap={spacings.xl} alignItems="stretch" data-testid="@coinmarket/offer/info">
+        <Column gap={spacings.xl} alignItems="stretch">
             {type !== 'exchange' && (
                 <CoinmarketInfoHeader receiveCurrency={quoteAmounts?.receiveCurrency} />
             )}

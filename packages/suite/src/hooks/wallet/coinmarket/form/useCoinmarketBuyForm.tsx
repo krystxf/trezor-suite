@@ -39,7 +39,6 @@ import { useBitcoinAmountUnit } from 'src/hooks/wallet/useBitcoinAmountUnit';
 import { useCoinmarketNavigation } from 'src/hooks/wallet/useCoinmarketNavigation';
 import {
     FORM_CRYPTO_INPUT,
-    FORM_DEFAULT_PAYMENT_METHOD,
     FORM_FIAT_INPUT,
     FORM_PAYMENT_METHOD_SELECT,
 } from 'src/constants/wallet/coinmarket/form';
@@ -255,8 +254,7 @@ const useCoinmarketBuyForm = ({
                 const bestQuotePaymentMethod = bestQuote?.paymentMethod;
                 const bestQuotePaymentMethodName =
                     bestQuote?.paymentMethodName ?? bestQuotePaymentMethod;
-                const paymentMethodSelected =
-                    values.paymentMethod?.value ?? FORM_DEFAULT_PAYMENT_METHOD;
+                const paymentMethodSelected = values.paymentMethod?.value;
                 const paymentMethodsFromQuotes = getPaymentMethods(quotesSuccess);
                 const isSelectedPaymentMethodAvailable =
                     paymentMethodsFromQuotes.find(item => item.value === paymentMethodSelected) !==
