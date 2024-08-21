@@ -47,6 +47,7 @@ export const useCoinEnablingInitialCheck = () => {
             !isPortfolioTrackerDevice &&
             !wasInitScreenShown.current
         ) {
+            let timeoutId: ReturnType<typeof setTimeout>;
             //if btc only device, just run discovery and do not show the UI
             if (isBitcoinOnlyDevice) {
                 dispatch(setIsCoinEnablingInitFinished(true));
@@ -59,8 +60,17 @@ export const useCoinEnablingInitialCheck = () => {
                         setEnabledDiscoveryNetworkSymbols(viewOnlyDevicesAccountsNetworkSymbols),
                     );
                 }
-                setTimeout(() => navigation.navigate(RootStackRoutes.CoinEnablingInit), 4000);
+                timeoutId = setTimeout(
+                    () => navigation.navigate(RootStackRoutes.CoinEnablingInit),
+                    4000,
+                );
             }
+
+            return () => {
+                if (timeoutId) {
+                    clearTimeout(timeoutId);
+                }
+            };
         }
     }, [
         applyDiscoveryChanges,

@@ -1,4 +1,5 @@
 import { memoize, memoizeWithArgs } from 'proxy-memoize';
+import { pipe, A, F } from '@mobily/ts-belt';
 
 import {
     AccountsRootState,
@@ -78,20 +79,17 @@ export const selectDeviceTotalFiatBalanceNative = memoizeWithArgs(
 // Unique symbols for all accounts that are on view only devices (excluding portfolio tracker)
 export const selectViewOnlyDevicesAccountsNetworkSymbols = memoize(
     (state: DeviceRootState & AccountsRootState) => {
-        const rememberedDevices = selectDevices(state).filter(
-            d => d.remember && d.id !== PORTFOLIO_TRACKER_DEVICE_ID && d.state,
-        );
+        const devices = selectDevices(state);
 
-        return Array.from(
-            new Set(
-                rememberedDevices
-                    .map(d =>
-                        selectAccountsByDeviceState(state, d.state!)
-                            .filter(a => a.visible)
-                            .map(a => a.symbol),
-                    )
-                    .flat(),
-            ),
+        return pipe(
+            devices,
+            A.filter(d => !!d.remember && d.id !== PORTFOLIO_TRACKER_DEVICE_ID && !!d.state),
+            A.map(d => selectAccountsByDeviceState(state, d.state!)),
+            A.flat,
+            A.filter(a => a.visible),
+            A.map(a => a.symbol),
+            A.uniq,
+            F.toMutable,
         );
     },
 );

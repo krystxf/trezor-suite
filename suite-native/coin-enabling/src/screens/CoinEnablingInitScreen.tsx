@@ -1,6 +1,7 @@
 import { useSafeAreaInsets } from 'react-native-safe-area-context';
 import { useDispatch } from 'react-redux';
 import { useEffect } from 'react';
+import Animated, { SlideInDown, SlideOutDown } from 'react-native-reanimated';
 
 import { A } from '@mobily/ts-belt';
 import { useNavigation } from '@react-navigation/native';
@@ -57,9 +58,11 @@ export const CoinEnablingInitScreen = () => {
             </Screen>
             <Box style={applyStyle(buttonStyle, { bottomInset })}>
                 {A.isNotEmpty(enabledNetworkSymbols) && (
-                    <Button onPress={handleSaveTap}>
-                        <Translation id="moduleHome.coinEnabling.button" />
-                    </Button>
+                    <Animated.View entering={SlideInDown} exiting={SlideOutDown}>
+                        <Button onPress={handleSaveTap}>
+                            <Translation id="moduleHome.coinEnabling.button" />
+                        </Button>
+                    </Animated.View>
                 )}
             </Box>
         </>
