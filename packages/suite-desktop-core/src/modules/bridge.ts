@@ -1,15 +1,14 @@
 /**
  * Bridge runner
  */
-import { TrezordNode } from '@trezor/transport-bridge';
 import { isDevEnv } from '@suite-common/suite-utils';
 import { validateIpcMessage } from '@trezor/ipc-proxy';
 
 import { app, ipcMain } from '../typed-electron';
 import { BridgeProcess } from '../libs/processes/BridgeProcess';
 import { b2t } from '../libs/utils';
-import { Logger } from '../libs/logger';
-import { convertILoggerToLog } from '../utils/IloggerToLog';
+import { ThreadProxy } from '../libs/thread-proxy';
+import type { TrezordNodeThread } from '../threads/bridge';
 
 import type { Module, Dependencies } from './index';
 
@@ -24,7 +23,34 @@ const skipNewBridgeRollout = app.commandLine.hasSwitch('skip-new-bridge-rollout'
 
 export const SERVICE_NAME = 'bridge';
 
-const handleBridgeStatus = async (bridge: BridgeProcess | TrezordNode) => {
+/**
+ * Wrapper around TrezordNodeProxy that exposes a friendly API to the emitter
+ */
+export class TrezordNodeProxyClient {
+    private proxy: ThreadProxy<TrezordNodeThread>;
+
+    constructor(proxy: ThreadProxy<TrezordNodeThread>) {
+        this.proxy = proxy;
+    }
+
+    start() {
+        this.proxy.request('start', []);
+    }
+    startDev() {
+        this.proxy.request('startDev', []);
+    }
+    startTest() {
+        this.proxy.request('startTest', []);
+    }
+    stop() {
+        this.proxy.request('stop', []);
+    }
+    status() {
+        return this.proxy.request('status', []);
+    }
+}
+
+const handleBridgeStatus = async (bridge: BridgeProcess | TrezordNodeProxyClient) => {
     const { logger } = global;
 
     logger.info('bridge', `Getting status`);
@@ -36,7 +62,7 @@ const handleBridgeStatus = async (bridge: BridgeProcess | TrezordNode) => {
     return status;
 };
 
-const start = async (bridge: BridgeProcess | TrezordNode) => {
+const start = async (bridge: BridgeProcess | TrezordNodeProxyClient) => {
     if (bridgeLegacy) {
         await bridge.start();
     } else if (bridgeLegacyDev) {
@@ -48,7 +74,7 @@ const start = async (bridge: BridgeProcess | TrezordNode) => {
     }
 };
 
-const getBridgeInstance = (store: Dependencies['store']) => {
+const getBridgeInstance = async (store: Dependencies['store']) => {
     const legacyRequestedBySettings = store.getBridgeSettings().legacy;
     const { allowPrerelease } = store.getUpdateSettings();
 
@@ -71,35 +97,24 @@ const getBridgeInstance = (store: Dependencies['store']) => {
         legacyBridgeReasonRollout ||
         !allowPrerelease
     ) {
-        return new BridgeProcess();
+        //return new BridgeProcess();
     }
 
-    /**
-     * We need a different instance from the global logger instance. Because we want to save bridge logs to memory
-     * to make them available from bridge status page.
-     */
-    const bridgeLogger = new Logger('debug', {
-        writeToDisk: false,
-        writeToMemory: true,
-        // by default, bridge logs are not printed to console to avoid too much noise. The other reason why this is set to false
-        // is that global logger has logic of turning it on and off depending on 'debug' mode (see logger/config message) and we don't have this implemented here
-        // it would require putting bridgeLogger to the global scope which might be perceived as controversial
-        writeToConsole: false,
-        dedupeTimeout: 0,
+    const threadProxy = new ThreadProxy<TrezordNodeThread>({
+        name: 'bridge',
+        keepAlive: true,
     });
-
-    return new TrezordNode({
+    await threadProxy.run({
         port: 21325,
         api: bridgeDev || bridgeTest ? 'udp' : 'usb',
-        assetPrefix: '../build/node-bridge',
-        // passing down ILogger where Log is expected.
-        logger: convertILoggerToLog(bridgeLogger, { serviceName: 'trezord-node' }),
     });
+
+    return new TrezordNodeProxyClient(threadProxy);
 };
 
 const load = async ({ store }: Dependencies) => {
     const { logger } = global;
-    const bridge = getBridgeInstance(store);
+    const bridge = await getBridgeInstance(store);
 
     app.on('before-quit', () => {
         logger.info(SERVICE_NAME, 'Stopping (app quit)');
