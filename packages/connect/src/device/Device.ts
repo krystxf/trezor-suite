@@ -2,7 +2,7 @@
 import { versionUtils, createDeferred, Deferred, TypedEmitter } from '@trezor/utils';
 import { Session } from '@trezor/transport';
 import { TransportProtocol, v1 as v1Protocol, bridge as bridgeProtocol } from '@trezor/protocol';
-import { DeviceCommands, PassphrasePromptResponse } from './DeviceCommands';
+import { DeviceCommands } from './DeviceCommands';
 import { PROTO, ERRORS, NETWORK } from '../constants';
 import { DEVICE, DeviceButtonRequestPayload, UI } from '../events';
 import { getAllNetworks } from '../data/coinInfo';
@@ -30,6 +30,7 @@ import {
 import { models } from '../data/models';
 import { getLanguage } from '../data/getLanguage';
 import { checkFirmwareRevision } from './checkFirmwareRevision';
+import { PromptCallback, PromptPassphraseResponse } from './prompts';
 
 // custom log
 const _log = initLog('Device');
@@ -66,17 +67,17 @@ const parseRunOptions = (options?: RunOptions): RunOptions => {
 export interface DeviceEvents {
     [DEVICE.PIN]: (
         device: Device,
-        b: PROTO.PinMatrixRequestType | undefined,
-        callback: (err: any, pin: string) => void,
+        type: PROTO.PinMatrixRequestType | undefined,
+        callback: PromptCallback<string>,
     ) => void;
     [DEVICE.WORD]: (
         device: Device,
-        b: PROTO.WordRequestType,
-        callback: (err: any, word: string) => void,
+        type: PROTO.WordRequestType,
+        callback: PromptCallback<string>,
     ) => void;
     [DEVICE.PASSPHRASE]: (
         device: Device,
-        callback: (response: PassphrasePromptResponse) => void,
+        callback: PromptCallback<PromptPassphraseResponse>,
     ) => void;
     [DEVICE.PASSPHRASE_ON_DEVICE]: () => void;
     [DEVICE.BUTTON]: (device: Device, payload: DeviceButtonRequestPayload) => void;
@@ -293,8 +294,15 @@ export class Device extends TypedEmitter<DeviceEvents> {
         }
     }
 
+    private cancelableRequest?: (err?: Error) => Promise<void>;
+    setCancelableRequest(req?: typeof this.cancelableRequest) {
+        this.cancelableRequest = req;
+    }
+
     async interruptionFromUser(error: Error) {
         _log.debug('interruptionFromUser');
+
+        await this.cancelableRequest?.(error);
 
         if (this.runPromise) {
             // reject inner defer

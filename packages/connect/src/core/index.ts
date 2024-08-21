@@ -819,9 +819,12 @@ const onDevicePinHandler =
             createUiMessage(UI.REQUEST_PIN, { device: device.toMessageObject(), type }),
         );
         // wait for pin
-        const uiResp = await uiPromise.promise;
-        // callback.apply(null, [null, pin]);
-        callback(null, uiResp.payload);
+        try {
+            const uiResp = await uiPromise.promise;
+            callback(uiResp.payload);
+        } catch (error) {
+            callback(null, error);
+        }
     };
 
 const onDeviceWordHandler =
@@ -836,8 +839,12 @@ const onDeviceWordHandler =
             createUiMessage(UI.REQUEST_WORD, { device: device.toMessageObject(), type }),
         );
         // wait for word
-        const uiResp = await uiPromise.promise;
-        callback(null, uiResp.payload);
+        try {
+            const uiResp = await uiPromise.promise;
+            callback(uiResp.payload);
+        } catch (error) {
+            callback(null, error);
+        }
     };
 
 /**
@@ -860,14 +867,18 @@ const onDevicePassphraseHandler =
             createUiMessage(UI.REQUEST_PASSPHRASE, { device: device.toMessageObject() }),
         );
         // wait for passphrase
-        const uiResp = await uiPromise.promise;
-        const { value, passphraseOnDevice, save } = uiResp.payload;
-        // send as PassphrasePromptResponse
-        callback({
-            passphrase: value.normalize('NFKD'),
-            passphraseOnDevice,
-            cache: save,
-        });
+        try {
+            const uiResp = await uiPromise.promise;
+            const { value, passphraseOnDevice, save } = uiResp.payload;
+            // send as PassphrasePromptResponse
+            callback({
+                passphrase: value.normalize('NFKD'),
+                passphraseOnDevice,
+                cache: save,
+            });
+        } catch (error) {
+            callback(null, error);
+        }
     };
 
 /**
