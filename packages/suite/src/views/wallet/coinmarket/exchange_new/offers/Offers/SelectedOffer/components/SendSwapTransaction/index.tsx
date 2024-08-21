@@ -10,6 +10,8 @@ import { TranslationKey } from '@suite-common/intl-types';
 import { spacingsPx } from '@trezor/theme';
 import { useCoinmarketOffersContext } from 'src/hooks/wallet/coinmarket/offers/useCoinmarketCommonOffers';
 import { CoinmarketTradeExchangeType } from 'src/types/coinmarket/coinmarket';
+import { Icon as IconNew } from '@suite-common/icons/src/webComponents';
+import { getInputStateTextColor } from '@trezor/components';
 
 const Wrapper = styled.div`
     display: flex;
@@ -305,7 +307,16 @@ const SendSwapTransactionComponent = () => {
                         )}
                     </PaddedColumns>
                     {customSlippageError?.message ? (
-                        <BottomText inputState={customSlippageError && 'error'}>
+                        <BottomText
+                            inputState={customSlippageError && 'error'}
+                            iconComponent={
+                                <IconNew
+                                    name="warningCircle"
+                                    size="medium"
+                                    color={getInputStateTextColor('error', theme)}
+                                />
+                            }
+                        >
                             <Translation id={customSlippageError?.message} />
                         </BottomText>
                     ) : null}

@@ -1,7 +1,16 @@
 import { useState, ChangeEvent, MouseEventHandler } from 'react';
 import styled, { useTheme } from 'styled-components';
 import { Translation, AccountLabeling, FormattedCryptoAmount } from 'src/components/suite';
-import { Button, Icon, Input, Paragraph, SelectBar, Tooltip, variables } from '@trezor/components';
+import {
+    Button,
+    getInputStateTextColor,
+    Icon,
+    Input,
+    Paragraph,
+    SelectBar,
+    Tooltip,
+    variables,
+} from '@trezor/components';
 import useDebounce from 'react-use/lib/useDebounce';
 import { BigNumber } from '@trezor/utils/src/bigNumber';
 import { FieldError } from 'react-hook-form';
@@ -10,6 +19,7 @@ import { TranslationKey } from '@suite-common/intl-types';
 import { spacingsPx } from '@trezor/theme';
 import { useCoinmarketOffersContext } from 'src/hooks/wallet/coinmarket/offers/useCoinmarketCommonOffers';
 import { CoinmarketTradeExchangeType } from 'src/types/coinmarket/coinmarket';
+import { Icon as IconNew } from '@suite-common/icons/src/webComponents';
 
 const Wrapper = styled.div`
     display: flex;
@@ -305,7 +315,16 @@ const SendSwapTransactionComponent = () => {
                         )}
                     </PaddedColumns>
                     {customSlippageError?.message ? (
-                        <BottomText inputState={customSlippageError && 'error'}>
+                        <BottomText
+                            inputState={customSlippageError && 'error'}
+                            iconComponent={
+                                <IconNew
+                                    name="warningCircle"
+                                    size="medium"
+                                    color={getInputStateTextColor('error', theme)}
+                                />
+                            }
+                        >
                             <Translation id={customSlippageError?.message} />
                         </BottomText>
                     ) : null}

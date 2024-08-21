@@ -1,8 +1,9 @@
 import { useCallback, useState } from 'react';
 import { checkAddressCheckSum, toChecksumAddress } from 'web3-utils';
-import styled from 'styled-components';
+import styled, { useTheme } from 'styled-components';
 
-import { Input, Button, IconButton } from '@trezor/components';
+import { Input, Button, IconButton, CoinLogo, getInputStateTextColor } from '@trezor/components';
+import { Icon } from '@suite-common/icons/src/webComponents';
 import { capitalizeFirstLetter } from '@trezor/utils';
 import * as URLS from '@trezor/urls';
 import { notificationsActions } from '@suite-common/toast-notifications';
@@ -89,6 +90,7 @@ export const Address = ({ output, outputId, outputsCount }: AddressProps) => {
     const options = getDefaultValue('options', []);
     const broadcastEnabled = options.includes('broadcast');
     const isOnline = useSelector(state => state.suite.online);
+    const theme = useTheme();
     const getInputErrorState = () => {
         if (hasAddressChecksummed) {
             return 'primary';
@@ -301,9 +303,23 @@ export const Address = ({ output, outputId, outputsCount }: AddressProps) => {
         return addressBottomText;
     };
 
-    const getBottomTextIcon = () => {
+    const getBottomTextIconComponent = () => {
         if (hasAddressChecksummed) {
-            return 'check';
+            return <Icon name="check" size="medium" color="iconDisabled" />;
+        }
+
+        if (isAddressWithLabel) {
+            return <CoinLogo symbol={symbol} size={16} />;
+        }
+
+        if (addressError) {
+            return (
+                <Icon
+                    name="warningCircle"
+                    size="medium"
+                    color={getInputStateTextColor('error', theme)}
+                />
+            );
         }
 
         return undefined;
@@ -375,7 +391,7 @@ export const Address = ({ output, outputId, outputsCount }: AddressProps) => {
                     ) : undefined
                 }
                 bottomText={getBottomText()}
-                bottomTextIcon={getBottomTextIcon()}
+                bottomTextIconComponent={getBottomTextIconComponent()}
                 data-testid={inputName}
                 defaultValue={addressValue}
                 maxLength={formInputsMaxLength.address}
