@@ -6,8 +6,10 @@ import type { BridgeProtocolMessage } from '../types';
 // - empty string (legacy bridge /write result, withMessage == false)
 // - json string (protocol message)
 // - parsed json string (parsed protocol message)
-export function validateProtocolMessage(body: unknown, withData = true) {
+export function validateProtocolMessage(body: unknown, withData = true): BridgeProtocolMessage {
     const isHex = (s: string) => /^[0-9A-Fa-f]+$/g.test(s); // TODO: trezor/utils accepts 0x prefix (eth)
+    const isValidProtocol = (s: any): s is BridgeProtocolMessage['protocol'] =>
+        s === 'v1' || s === 'bridge';
 
     // Legacy bridge results
     if (typeof body === 'string') {
@@ -34,7 +36,7 @@ export function validateProtocolMessage(body: unknown, withData = true) {
     }
 
     // validate BridgeProtocolMessage['protocol']
-    if (typeof json.protocol !== 'string' || !/^(bridge|v1)$/.test(json.protocol)) {
+    if (typeof json.protocol !== 'string' || !isValidProtocol(json.protocol)) {
         throw new Error('Invalid BridgeProtocolMessage protocol');
     }
     // optionally validate BridgeProtocolMessage['data]
@@ -45,7 +47,7 @@ export function validateProtocolMessage(body: unknown, withData = true) {
     return {
         protocol: json.protocol,
         data: json.data,
-    } as BridgeProtocolMessage;
+    };
 }
 
 export function createProtocolMessage(
