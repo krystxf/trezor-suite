@@ -1,6 +1,6 @@
 import { networksCompatibility } from '@suite-common/wallet-config';
 import { selectDevice } from '@suite-common/wallet-core';
-import { useEffect, useState } from 'react';
+import { useEffect, useMemo, useState } from 'react';
 import { useForm } from 'react-hook-form';
 import { useDispatch, useSelector } from 'src/hooks/suite';
 import { selectIsDebugModeActive } from 'src/reducers/suite/suiteReducer';
@@ -108,14 +108,21 @@ const useCoinmarketVerifyAccount = ({
     >();
 
     const receiveNetwork = currency && cryptoToNetworkSymbol(currency);
-    const suiteReceiveAccounts = getSuiteReceiveAccounts({
-        currency,
-        device,
-        receiveNetwork,
-        isDebug,
-        accounts,
-    });
-    const selectAccountOptions = getSelectAccountOptions(suiteReceiveAccounts, device);
+    const suiteReceiveAccounts = useMemo(
+        () =>
+            getSuiteReceiveAccounts({
+                currency,
+                device,
+                receiveNetwork,
+                isDebug,
+                accounts,
+            }),
+        [accounts, currency, device, isDebug, receiveNetwork],
+    );
+    const selectAccountOptions = useMemo(
+        () => getSelectAccountOptions(suiteReceiveAccounts, device),
+        [device, suiteReceiveAccounts],
+    );
     const preselectedAccount =
         selectAccountOptions.find(
             accountOption =>
