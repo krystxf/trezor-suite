@@ -63,6 +63,12 @@ const CoinmarketFormOfferHeaderButton = styled(TextButton)`
     }
 `;
 
+const CoinmarketFormOfferChain = styled.div`
+    margin-top: ${spacingsPx.xs};
+    ${typography.label}
+    color: ${({ theme }) => theme.textSubdued};
+`;
+
 const getSelectedQuote = (
     context: CoinmarketFormContextValues<CoinmarketTradeType>,
     bestScoredQuote: CoinmarketTradeDetailType | undefined,
@@ -137,8 +143,16 @@ const CoinmarketFormOffer = () => {
             )}
             {isCoinmarketExchangeOffers(context) &&
                 networkSymbol &&
-                networks[networkSymbol].name &&
-                `On ${networks[networkSymbol].name} chain`}
+                networks[networkSymbol].name && (
+                    <CoinmarketFormOfferChain>
+                        <Translation
+                            id="TR_COINMARKET_ON_NETWORK_CHAIN"
+                            values={{
+                                networkName: networks[networkSymbol].name,
+                            }}
+                        />
+                    </CoinmarketFormOfferChain>
+                )}
             <CoinmarketFormOfferHeader>
                 <CoinmarketFormOfferHeaderText>
                     <Translation id="TR_COINMARKET_YOUR_BEST_OFFER" />

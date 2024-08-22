@@ -548,6 +548,7 @@
   "TR_COINMARKET_YOU_WILL_GET": "You'll get",
   "TR_COINMARKET_YOU_WILL_PAY": "You'll pay",
   "TR_COINMARKET_YOU_RECEIVE": "You receive",
+  "TR_COINMARKET_ON_NETWORK_CHAIN": "On {networkName} chain",
   "TR_COINS": "Coins",
   "TR_COIN_CONTROL": "Coin control",
   "TR_COIN_CONTROL_TOOLTIP": "Coin control enables manual selection of UTXOs to be used as inputs for a transaction.",

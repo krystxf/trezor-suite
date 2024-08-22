@@ -1526,6 +1526,10 @@ export default defineMessages({
         defaultMessage: 'Exchange',
         id: 'TR_COINMARKET_EXCHANGE',
     },
+    TR_COINMARKET_ON_NETWORK_CHAIN: {
+        defaultMessage: 'On {networkName} chain',
+        id: 'TR_COINMARKET_ON_NETWORK_CHAIN',
+    },
     TR_ADDRESS_MODAL_CLIPBOARD: {
         defaultMessage: 'Copy address',
         id: 'TR_ADDRESS_MODAL_CLIPBOARD',
