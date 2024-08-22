@@ -1,8 +1,8 @@
 import { CoinmarketSelectedOfferInfo } from 'src/views/wallet/coinmarket/common/CoinmarketSelectedOffer/CoinmarketSelectedOfferInfo';
 import { CoinmarketVerify } from 'src/views/wallet/coinmarket/common/CoinmarketSelectedOffer/CoinmarketVerify/CoinmarketVerify';
-import { CoinmarketLeftWrapper, CoinmarketRightWrapper } from 'src/views/wallet/coinmarket';
 import { CoinmarketOfferBuyProps } from 'src/types/coinmarket/coinmarketForm';
 import useCoinmarketVerifyAccount from 'src/hooks/wallet/coinmarket/form/useCoinmarketVerifyAccount';
+import { CoinmarketSelectedOfferWrapper } from 'src/views/wallet/coinmarket/common/CoinmarketSelectedOffer/CoinmarketSelectedOfferWrapper';
 
 export const CoinmarketOfferBuy = ({
     account,
@@ -17,16 +17,16 @@ export const CoinmarketOfferBuy = ({
     const coinmarketVerifyAccount = useCoinmarketVerifyAccount({ currency });
 
     return (
-        <>
-            <CoinmarketLeftWrapper>
-                {currency && (
+        <CoinmarketSelectedOfferWrapper
+            leftChildren={
+                currency && (
                     <CoinmarketVerify
                         coinmarketVerifyAccount={coinmarketVerifyAccount}
                         currency={currency}
                     />
-                )}
-            </CoinmarketLeftWrapper>
-            <CoinmarketRightWrapper>
+                )
+            }
+            rightChildren={
                 <CoinmarketSelectedOfferInfo
                     account={account}
                     selectedAccount={coinmarketVerifyAccount.selectedAccountOption?.account}
@@ -37,7 +37,7 @@ export const CoinmarketOfferBuy = ({
                     paymentMethod={paymentMethod}
                     paymentMethodName={paymentMethodName}
                 />
-            </CoinmarketRightWrapper>
-        </>
+            }
+        />
     );
 };

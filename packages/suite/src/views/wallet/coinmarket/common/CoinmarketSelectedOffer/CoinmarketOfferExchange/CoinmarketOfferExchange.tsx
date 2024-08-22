@@ -1,6 +1,5 @@
 import { CoinmarketSelectedOfferInfo } from 'src/views/wallet/coinmarket/common/CoinmarketSelectedOffer/CoinmarketSelectedOfferInfo';
 import { CoinmarketVerify } from 'src/views/wallet/coinmarket/common/CoinmarketSelectedOffer/CoinmarketVerify/CoinmarketVerify';
-import { CoinmarketLeftWrapper, CoinmarketRightWrapper } from 'src/views/wallet/coinmarket';
 import { CoinmarketOfferExchangeProps } from 'src/types/coinmarket/coinmarketForm';
 import { useCoinmarketFormContext } from 'src/hooks/wallet/coinmarket/form/useCoinmarketCommonForm';
 import useCoinmarketVerifyAccount from 'src/hooks/wallet/coinmarket/form/useCoinmarketVerifyAccount';
@@ -13,6 +12,7 @@ import { CoinmarketTradeExchangeType } from 'src/types/coinmarket/coinmarket';
 import { CoinmarketOfferExchangeSend } from 'src/views/wallet/coinmarket/common/CoinmarketSelectedOffer/CoinmarketOfferExchange/CoinmarketOfferExchangeSend';
 import { CoinmarketOfferExchangeSendSwap } from 'src/views/wallet/coinmarket/common/CoinmarketSelectedOffer/CoinmarketOfferExchange/CoinmarketOfferExchangeSendSwap';
 import { CoinmarketOfferExchangeSendApproval } from 'src/views/wallet/coinmarket/common/CoinmarketSelectedOffer/CoinmarketOfferExchange/CoinmarketOfferExchangeSendApproval';
+import { CoinmarketSelectedOfferWrapper } from 'src/views/wallet/coinmarket/common/CoinmarketSelectedOffer/CoinmarketSelectedOfferWrapper';
 
 export const CoinmarketOfferExchange = ({
     account,
@@ -60,14 +60,16 @@ export const CoinmarketOfferExchange = ({
     ];
 
     return (
-        <>
-            <CoinmarketLeftWrapper>
-                <CoinmarketSelectedOfferStepper steps={steps} />
-                {steps.map((step, index) => (
-                    <Fragment key={index}>{step.isActive && step.component}</Fragment>
-                ))}
-            </CoinmarketLeftWrapper>
-            <CoinmarketRightWrapper>
+        <CoinmarketSelectedOfferWrapper
+            leftChildren={
+                <>
+                    <CoinmarketSelectedOfferStepper steps={steps} />
+                    {steps.map((step, index) => (
+                        <Fragment key={index}>{step.isActive && step.component}</Fragment>
+                    ))}
+                </>
+            }
+            rightChildren={
                 <CoinmarketSelectedOfferInfo
                     account={account}
                     selectedAccount={coinmarketVerifyAccount.selectedAccountOption?.account}
@@ -76,7 +78,7 @@ export const CoinmarketOfferExchange = ({
                     type={type}
                     quoteAmounts={quoteAmounts}
                 />
-            </CoinmarketRightWrapper>
-        </>
+            }
+        />
     );
 };

@@ -25,8 +25,9 @@ export const CoinmarketWrapper = `
 `;
 
 // eslint-disable-next-line local-rules/no-override-ds-component
-export const CoinmarketLeftWrapper = styled(Card)`
-    padding: ${spacingsPx.xl} ${spacingsPx.xl} ${spacingsPx.lg};
+export const CoinmarketLeftWrapper = styled(Card)<{ $isWithoutPadding?: boolean }>`
+    padding: ${({ $isWithoutPadding }) =>
+        $isWithoutPadding ? 0 : `${spacingsPx.xl} ${spacingsPx.xl} ${spacingsPx.lg}`};
     width: 60%;
 
     ${SCREEN_QUERY.BELOW_DESKTOP} {

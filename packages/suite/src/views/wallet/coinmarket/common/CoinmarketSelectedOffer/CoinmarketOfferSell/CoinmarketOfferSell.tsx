@@ -2,7 +2,6 @@ import { Fragment } from 'react';
 import { useCoinmarketFormContext } from 'src/hooks/wallet/coinmarket/form/useCoinmarketCommonForm';
 import { CoinmarketTradeSellType } from 'src/types/coinmarket/coinmarket';
 import { CoinmarketOfferCommonProps } from 'src/types/coinmarket/coinmarketForm';
-import { CoinmarketLeftWrapper, CoinmarketRightWrapper } from 'src/views/wallet/coinmarket';
 import { CoinmarketOfferSellBankAccount } from 'src/views/wallet/coinmarket/common/CoinmarketSelectedOffer/CoinmarketOfferSell/CoinmarketOfferSellBankAccount';
 import { CoinmarketSelectedOfferSellTransaction } from 'src/views/wallet/coinmarket/common/CoinmarketSelectedOffer/CoinmarketOfferSell/CoinmarketOfferSellTransaction';
 import { CoinmarketSelectedOfferInfo } from 'src/views/wallet/coinmarket/common/CoinmarketSelectedOffer/CoinmarketSelectedOfferInfo';
@@ -10,6 +9,7 @@ import {
     CoinmarketSelectedOfferStepper,
     CoinmarketSelectedOfferStepperItemProps,
 } from 'src/views/wallet/coinmarket/common/CoinmarketSelectedOffer/CoinmarketSelectedOfferStepper';
+import { CoinmarketSelectedOfferWrapper } from 'src/views/wallet/coinmarket/common/CoinmarketSelectedOffer/CoinmarketSelectedOfferWrapper';
 
 export const CoinmarketOfferSell = (props: CoinmarketOfferCommonProps) => {
     const { sellStep } = useCoinmarketFormContext<CoinmarketTradeSellType>();
@@ -32,16 +32,16 @@ export const CoinmarketOfferSell = (props: CoinmarketOfferCommonProps) => {
     ];
 
     return (
-        <>
-            <CoinmarketLeftWrapper>
-                <CoinmarketSelectedOfferStepper steps={steps} />
-                {steps.map((step, index) => (
-                    <Fragment key={index}>{step.isActive && step.component}</Fragment>
-                ))}
-            </CoinmarketLeftWrapper>
-            <CoinmarketRightWrapper>
-                <CoinmarketSelectedOfferInfo {...props} />
-            </CoinmarketRightWrapper>
-        </>
+        <CoinmarketSelectedOfferWrapper
+            leftChildren={
+                <>
+                    <CoinmarketSelectedOfferStepper steps={steps} />
+                    {steps.map((step, index) => (
+                        <Fragment key={index}>{step.isActive && step.component}</Fragment>
+                    ))}
+                </>
+            }
+            rightChildren={<CoinmarketSelectedOfferInfo {...props} />}
+        />
     );
 };
