@@ -26,8 +26,6 @@ import { useCoinmarketNavigation } from 'src/hooks/wallet/useCoinmarketNavigatio
 import { useBitcoinAmountUnit } from 'src/hooks/wallet/useBitcoinAmountUnit';
 import { CryptoAmountLimits } from 'src/types/wallet/coinmarketCommonTypes';
 import { Account } from '@suite-common/wallet-types';
-import { selectIsDebugModeActive } from 'src/reducers/suite/suiteReducer';
-import { cryptoToNetworkSymbol } from 'src/utils/wallet/coinmarket/cryptoSymbolUtils';
 import {
     CoinmarketTradeExchangeType,
     UseCoinmarketFormProps,
@@ -46,20 +44,17 @@ import {
     getFilteredSuccessQuotes,
     useCoinmarketCommonOffers,
 } from 'src/hooks/wallet/coinmarket/offers/useCoinmarketCommonOffers';
-import {
-    CoinmarketExchangeStepType,
-    CoinmarketOffersContextValues,
-} from 'src/types/coinmarket/coinmarketOffers';
 import * as coinmarketExchangeActions from 'src/actions/wallet/coinmarketExchangeActions';
 import { notificationsActions } from '@suite-common/toast-notifications';
 import { useCoinmarketRecomposeAndSign } from 'src/hooks/wallet/useCoinmarketRecomposeAndSign';
-import { Network, networksCompatibility } from '@suite-common/wallet-config';
+import { Network } from '@suite-common/wallet-config';
 import { SET_MODAL_CRYPTO_CURRENCY } from 'src/actions/wallet/constants/coinmarketCommonConstants';
 import { useCoinmarketLoadData } from 'src/hooks/wallet/coinmarket/useCoinmarketLoadData';
 import { useCoinmarketComposeTransaction } from 'src/hooks/wallet/coinmarket/form/common/useCoinmarketComposeTransaction';
 import { useCoinmarketFormActions } from 'src/hooks/wallet/coinmarket/form/common/useCoinmarketFormActions';
 import { useCoinmarketCurrencySwitcher } from 'src/hooks/wallet/coinmarket/form/common/useCoinmarketCurrencySwitcher';
 import { useCoinmarketFiatValues } from './common/useCoinmarketFiatValues';
+import { CoinmarketExchangeStepType } from 'src/types/coinmarket/coinmarketOffers';
 
 export const useCoinmarketExchangeForm = ({
     selectedAccount,
@@ -87,7 +82,6 @@ export const useCoinmarketExchangeForm = ({
     const { callInProgress, timer, device, setCallInProgress, checkQuotesTimer } =
         useCoinmarketCommonOffers<CoinmarketTradeExchangeType>({ selectedAccount, type });
 
-    const accounts = useSelector(state => state.wallet.accounts);
     const { symbolsInfo } = useSelector(state => state.wallet.coinmarket.info);
     const dispatch = useDispatch();
     const { recomposeAndSign } = useCoinmarketRecomposeAndSign();
@@ -98,10 +92,7 @@ export const useCoinmarketExchangeForm = ({
         getFilteredSuccessQuotes<CoinmarketTradeExchangeType>(quotes),
     );
     const [receiveAccount, setReceiveAccount] = useState<Account | undefined>();
-    const [suiteReceiveAccounts, setSuiteReceiveAccounts] =
-        useState<
-            CoinmarketOffersContextValues<CoinmarketTradeExchangeType>['suiteReceiveAccounts']
-        >();
+
     const [isSubmittingHelper, setIsSubmittingHelper] = useState(false);
     const abortControllerRef = useRef<AbortController | null>(null);
 
@@ -113,8 +104,6 @@ export const useCoinmarketExchangeForm = ({
         navigateToExchangeOffers,
         navigateToExchangeConfirm,
     } = useCoinmarketNavigation(account);
-    const isDebug = useSelector(selectIsDebugModeActive);
-    const receiveNetwork = selectedQuote?.receive && cryptoToNetworkSymbol(selectedQuote?.receive);
 
     const {
         saveTrade,
@@ -605,35 +594,6 @@ export const useCoinmarketExchangeForm = ({
     }, [reset, isDraft, defaultValues]);
 
     useEffect(() => {
-        if (selectedQuote && exchangeStep === 'RECEIVING_ADDRESS') {
-            const unavailableCapabilities = device?.unavailableCapabilities ?? {};
-            // is the symbol supported by the suite and the device natively
-            const receiveNetworks = networksCompatibility.filter(
-                n =>
-                    n.symbol === receiveNetwork &&
-                    !unavailableCapabilities[n.symbol] &&
-                    ((n.isDebugOnlyNetwork && isDebug) || !n.isDebugOnlyNetwork),
-            );
-            if (receiveNetworks.length > 0) {
-                // get accounts of the current symbol belonging to the current device
-                setSuiteReceiveAccounts(
-                    accounts.filter(
-                        a =>
-                            a.deviceState === device?.state &&
-                            a.symbol === receiveNetwork &&
-                            (!a.empty ||
-                                a.visible ||
-                                (a.accountType === 'normal' && a.index === 0)),
-                    ),
-                );
-
-                return;
-            }
-        }
-        setSuiteReceiveAccounts(undefined);
-    }, [accounts, device, exchangeStep, isDebug, receiveNetwork, selectedQuote]);
-
-    useEffect(() => {
         if (!quotesRequest && isNotFormPage) {
             navigateToExchangeForm();
 
@@ -697,7 +657,6 @@ export const useCoinmarketExchangeForm = ({
         amountLimits,
         network,
         exchangeStep,
-        suiteReceiveAccounts,
         receiveAccount,
         selectedQuote,
         addressVerified,

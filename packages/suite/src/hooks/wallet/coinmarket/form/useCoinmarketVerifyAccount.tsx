@@ -65,7 +65,6 @@ const getSuiteReceiveAccounts = ({
     isDebug,
     accounts,
 }: CoinmarketGetSuiteReceiveAccountsProps): Account[] | undefined => {
-    // exchangeStep === 'RECEIVING_ADDRESS'
     if (currency) {
         const unavailableCapabilities = device?.unavailableCapabilities ?? {};
         // is the symbol supported by the suite and the device natively
