@@ -61,8 +61,8 @@ export const CoinmarketFormInputAccount = <
                         value={value}
                         options={optionGroups}
                         onChange={(selected: CoinmarketAccountOptionsGroupOptionProps) => {
+                            onCryptoCurrencyChange(selected); // order matters, this has to be called before onChange
                             onChange(selected);
-                            onCryptoCurrencyChange(selected);
                         }}
                         filterOption={createFilter<CoinmarketCryptoListProps>({
                             stringify: option => `${option.value} ${option.data.cryptoName}`,

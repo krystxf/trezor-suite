@@ -77,9 +77,16 @@ export const useCoinmarketFormActions = <T extends CoinmarketSellExchangeFormPro
     const onCryptoCurrencyChange = useCallback(
         (selected: CoinmarketAccountOptionsGroupOptionProps) => {
             const networkSymbol = cryptoToNetworkSymbol(selected.value);
-            const account = accountsSorted.find(item => item.descriptor === selected.descriptor);
+            const cryptoSelectedCurrent = getValues(inputNames.cryptoSelect);
+            const isSameCryptoSelected =
+                cryptoSelectedCurrent &&
+                cryptoSelectedCurrent.descriptor === selected.descriptor &&
+                cryptoToNetworkSymbol(cryptoSelectedCurrent.value) === networkSymbol;
+            const account = accountsSorted.find(
+                item => item.descriptor === selected.descriptor && item.symbol === networkSymbol,
+            );
 
-            if (!account) return;
+            if (!account || isSameCryptoSelected) return;
 
             setValue(FORM_OUTPUT_ADDRESS, '');
             setValue(FORM_OUTPUT_AMOUNT, '');
@@ -104,9 +111,11 @@ export const useCoinmarketFormActions = <T extends CoinmarketSellExchangeFormPro
             changeFeeLevel('normal'); // reset fee level
         },
         [
-            accountsSorted,
+            getValues,
+            inputNames.cryptoSelect,
             inputNames.cryptoInput,
             inputNames.fiatInput,
+            accountsSorted,
             setValue,
             setAmountLimits,
             setAccountOnChange,

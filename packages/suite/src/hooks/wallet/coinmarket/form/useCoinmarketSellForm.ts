@@ -26,6 +26,7 @@ import {
 import { useCoinmarketSellFormDefaultValues } from 'src/hooks/wallet/coinmarket/form/useCoinmarketSellFormDefaultValues';
 import useCoinmarketPaymentMethod from 'src/hooks/wallet/coinmarket/form/useCoinmarketPaymentMethod';
 import {
+    FORM_CRYPTO_CURRENCY_SELECT,
     FORM_CRYPTO_INPUT,
     FORM_FIAT_CURRENCY_SELECT,
     FORM_FIAT_INPUT,
@@ -190,6 +191,7 @@ export const useCoinmarketSellForm = ({
             currency: FORM_FIAT_CURRENCY_SELECT,
             cryptoInput: FORM_CRYPTO_INPUT,
             fiatInput: FORM_FIAT_INPUT,
+            cryptoSelect: FORM_CRYPTO_CURRENCY_SELECT,
         },
         setAmountLimits,
         changeFeeLevel,
