@@ -1,21 +1,41 @@
+import { SetupEmu } from '@trezor/trezor-user-env-link';
 import TrezorConnect from '../../../src';
 
 const { getController, setup, initTrezorConnect } = global.Trezor;
 
+const getAddress = async (showOnTrezor: boolean) => {
+    return TrezorConnect.getAddress({
+        path: "m/44'/1'/0'/0/0",
+        showOnTrezor,
+    });
+};
+
+const passphraseHandler = (value: string) => () => {
+    TrezorConnect.uiResponse({
+        type: 'ui-receive_passphrase',
+        payload: {
+            passphraseOnDevice: false,
+            value,
+        },
+    });
+    TrezorConnect.removeAllListeners('ui-request_passphrase');
+};
+
+const assertGetAddressWorks = async () => {
+    // validate that further communication is possible without any glitch
+    TrezorConnect.on('ui-request_passphrase', passphraseHandler('a'));
+    const getAddressResponse = await getAddress(false);
+    expect(getAddressResponse.success).toEqual(true);
+};
+
 describe('TrezorConnect.cancel', () => {
     const controller = getController();
 
-    beforeAll(async () => {
-        await setup(controller, {
-            mnemonic: 'mnemonic_all',
-        });
-    });
-
-    beforeEach(async () => {
-        // restart connect for each test (working with event listeners)
+    const setupTest = async ({ setupParams }: { setupParams: SetupEmu }) => {
+        await setup(controller, setupParams);
         await TrezorConnect.dispose();
         await initTrezorConnect(controller, { debug: false });
-    });
+    };
 
     afterAll(async () => {
         controller.dispose();
@@ -24,11 +44,14 @@ describe('TrezorConnect.cancel', () => {
 
     // the goal is to run this test couple of times to uncover possible race conditions/flakiness
     [0, 1, 10, 100, 300].forEach(delay => {
-        test('ButtonRequest - Cancel after ButtonRequest_Address', async () => {
-            const getAddressCall = TrezorConnect.getAddress({
-                path: "m/44'/1'/0'/0/0",
-                showOnTrezor: true,
+        test(`GetAddress - ButtonRequest_Address - delay ${delay}ms - Cancel `, async () => {
+            await setupTest({
+                setupParams: {
+                    mnemonic: 'mnemonic_all',
+                },
             });
+
+            const getAddressCall = getAddress(true);
             await new Promise(resolve => {
                 TrezorConnect.on('button', event => {
                     if (event.code === 'ButtonRequest_Address') {
@@ -52,56 +75,60 @@ describe('TrezorConnect.cancel', () => {
                 },
             });
 
-            // validate that further communication is possible without any glitch
-            const getAddressResponse = await TrezorConnect.getAddress({
-                path: "m/44'/1'/0'/0/0",
-                showOnTrezor: false,
-            });
-
-            console.log('getAddressResponse,', getAddressResponse);
             // TODO: this sometimes fails with, probably a race condition
             //   success: false,
             //   payload: {
             //     error: 'Initialize failed: Unexpected message, code: Failure_UnexpectedMessage',
             //     code: 'Device_InitializeFailed'
             //   }
-
-            expect(getAddressResponse.success).toEqual(true);
+            await assertGetAddressWorks();
         });
     });
 
-    // is such test doable?
-    test('ButtonRequest - Cancel before ButtonRequest_Address', async () => {
-        const getAddressCall = TrezorConnect.getAddress({
-            path: "m/44'/1'/0'/0/0",
-            showOnTrezor: true,
+    test('Synchronous Cancel', async () => {
+        await setupTest({
+            setupParams: {
+                mnemonic: 'mnemonic_all',
+            },
         });
 
-        let getAddressCallResolved = false;
+        const getAddressCall = getAddress(true);
 
-        TrezorConnect.on('button', event => {
-            if (event.code === 'ButtonRequest_Address') {
-                if (getAddressCallResolved) {
-                    // this should not happen
-                    throw new Error('ButtonRequest_Address should not be called after cancel');
-                }
-            }
-        });
-
-        TrezorConnect.cancel('my custom message');
+        TrezorConnect.cancel();
 
         const response = await getAddressCall;
 
-        // this appears to be wrong maybe? cancel was fired too early and did not take effect.
+        // This looks like a bug. there was showOnTrezor: true but we bypassed it by sending cancel?
         expect(response).toMatchObject({
             success: true,
             payload: {
                 address: 'mvbu1Gdy8SUjTenqerxUaZyYjmveZvt33q',
             },
         });
-
-        getAddressCallResolved = true;
     });
 
-    // test('Pin request - Cancel', async () => {});
+    test('Passphrase request - Cancel', async () => {
+        await setupTest({
+            setupParams: {
+                mnemonic: 'mnemonic_all',
+                passphrase_protection: true,
+            },
+        });
+
+        const getAddressCall = getAddress(true);
+        await new Promise(resolve => {
+            TrezorConnect.on('UI_EVENT', event => {
+                if (event.type === 'ui-request_passphrase') {
+                    resolve(undefined);
+                }
+            });
+        });
+        TrezorConnect.cancel();
+
+        const response = await getAddressCall;
+
+        expect(response.success).toEqual(false);
+
+        await assertGetAddressWorks();
+    });
 });
