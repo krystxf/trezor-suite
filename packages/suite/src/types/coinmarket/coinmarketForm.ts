@@ -42,7 +42,6 @@ import {
     FormState,
     PrecomposedLevels,
     PrecomposedLevelsCardano,
-    Rate,
 } from '@suite-common/wallet-types';
 import { FeeLevel } from '@trezor/connect';
 import { SendContextValues } from 'src/types/wallet/sendForm';
@@ -221,8 +220,7 @@ export interface CoinmarketExchangeFormContextProps
     defaultCurrency: Option;
     amountLimits?: CryptoAmountLimits;
     composedLevels?: PrecomposedLevels | PrecomposedLevelsCardano;
-    fiatRate?: Rate; // TODO: ??
-    quotes: ExchangeTrade[] | undefined; // CEX quotes
+    quotes: ExchangeTrade[] | undefined;
     dexQuotes: ExchangeTrade[] | undefined;
     quotesRequest: ExchangeTradeQuoteRequest | undefined;
     receiveAccount?: Account;
@@ -299,9 +297,10 @@ export interface CoinmarketFormInputFiatCryptoWrapProps<TFieldValues extends Fie
     currencySelectLabel?: string;
 }
 
-export interface CoinmarketFormInputAccountProps<TFieldValues extends FieldValues>
-    extends CoinmarketFormInputLabelProps {
+export interface CoinmarketFormInputAccountProps<TFieldValues extends FieldValues> {
+    label?: ExtendedMessageDescriptor['id'];
     accountSelectName: FieldPath<TFieldValues>;
+    methods: UseFormReturn<TFieldValues>;
 }
 
 export interface CoinmarketFormInputCurrencyProps extends CoinmarketFormInputCommonProps {
@@ -327,7 +326,6 @@ export interface CoinmarketUseFormActionsProps<T extends CoinmarketSellExchangeF
 
 export interface CoinmarketUseFormActionsReturnProps {
     isBalanceZero: boolean;
-    fiatRate: Rate | undefined;
 
     onCryptoAmountChange: (amount: string) => void;
     onFiatAmountChange: (amount: string) => void;

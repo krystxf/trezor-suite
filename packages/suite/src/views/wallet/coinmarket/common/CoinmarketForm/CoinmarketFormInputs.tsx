@@ -22,7 +22,7 @@ import {
 import { CoinmarketFormInput } from 'src/views/wallet/coinmarket';
 import { CoinmarketFractionButtons } from 'src/views/wallet/coinmarket/common';
 import { CoinmarketFormInputCryptoSelect } from 'src/views/wallet/coinmarket/common/CoinmarketForm/CoinmarketFormInput/CoinmarketFormInputCryptoSelect';
-import CoinmarketFormInputAccount from 'src/views/wallet/coinmarket/common/CoinmarketForm/CoinmarketFormInput/CoinmarketFormInputAccount';
+import { CoinmarketFormInputAccount } from 'src/views/wallet/coinmarket/common/CoinmarketForm/CoinmarketFormInput/CoinmarketFormInputAccount';
 import CoinmarketFormInputCountry from 'src/views/wallet/coinmarket/common/CoinmarketForm/CoinmarketFormInput/CoinmarketFormInputCountry';
 import CoinmarketFormInputPaymentMethod from 'src/views/wallet/coinmarket/common/CoinmarketForm/CoinmarketFormInput/CoinmarketFormInputPaymentMethod';
 import styled from 'styled-components';
@@ -61,6 +61,7 @@ export const CoinmarketFormInputs = () => {
                     <CoinmarketFormInputAccount<CoinmarketSellFormProps>
                         accountSelectName={FORM_CRYPTO_CURRENCY_SELECT}
                         label="TR_COINMARKET_YOU_SELL"
+                        methods={{ ...context }}
                     />
                 </CoinmarketFormInput>
                 <CoinmarketFormInput>
@@ -127,6 +128,7 @@ export const CoinmarketFormInputs = () => {
                     <CoinmarketFormInputAccount<CoinmarketExchangeFormProps>
                         accountSelectName={FORM_SEND_CRYPTO_CURRENCY_SELECT}
                         label="TR_FROM"
+                        methods={{ ...context }}
                     />
                 </CoinmarketFormInput>
                 <CoinmarketFormInput>

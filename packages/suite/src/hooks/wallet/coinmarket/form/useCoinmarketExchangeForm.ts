@@ -5,12 +5,10 @@ import useDebounce from 'react-use/lib/useDebounce';
 import {
     amountToSatoshi,
     formatAmount,
-    getFiatRateKey,
     getNetwork,
     toFiatCurrency,
 } from '@suite-common/wallet-utils';
 import { isChanged } from '@suite-common/suite-utils';
-import { selectFiatRatesByFiatRateKey } from '@suite-common/wallet-core';
 import { useActions, useDispatch, useSelector } from 'src/hooks/suite';
 import invityAPI from 'src/services/suite/invityAPI';
 import { saveQuoteRequest, saveQuotes } from 'src/actions/wallet/coinmarketExchangeActions';
@@ -26,12 +24,10 @@ import {
 import { useFormDraft } from 'src/hooks/wallet/useFormDraft';
 import { useCoinmarketNavigation } from 'src/hooks/wallet/useCoinmarketNavigation';
 import { useBitcoinAmountUnit } from 'src/hooks/wallet/useBitcoinAmountUnit';
-import { CryptoAmountLimits, Option } from 'src/types/wallet/coinmarketCommonTypes';
+import { CryptoAmountLimits } from 'src/types/wallet/coinmarketCommonTypes';
 import { Account } from '@suite-common/wallet-types';
 import { selectIsDebugModeActive } from 'src/reducers/suite/suiteReducer';
 import { cryptoToNetworkSymbol } from 'src/utils/wallet/coinmarket/cryptoSymbolUtils';
-import { FiatCurrencyCode } from '@suite-common/suite-config';
-import { TokenAddress } from '@suite-common/wallet-types';
 import {
     CoinmarketTradeExchangeType,
     UseCoinmarketFormProps,
@@ -63,6 +59,7 @@ import { useCoinmarketLoadData } from 'src/hooks/wallet/coinmarket/useCoinmarket
 import { useCoinmarketComposeTransaction } from 'src/hooks/wallet/coinmarket/form/common/useCoinmarketComposeTransaction';
 import { useCoinmarketFormActions } from 'src/hooks/wallet/coinmarket/form/common/useCoinmarketFormActions';
 import { useCoinmarketCurrencySwitcher } from 'src/hooks/wallet/coinmarket/form/common/useCoinmarketCurrencySwitcher';
+import { useCoinmarketFiatValues } from './common/useCoinmarketFiatValues';
 
 export const useCoinmarketExchangeForm = ({
     selectedAccount,
@@ -169,17 +166,14 @@ export const useCoinmarketExchangeForm = ({
     const { reset, register, getValues, setValue, handleSubmit, formState, control } = methods;
     const values = useWatch<CoinmarketExchangeFormProps>({ control });
     const previousValues = useRef<typeof values | null>(isNotFormPage ? draftUpdated : null);
-    const { outputs, rateType, exchangeType } = getValues();
-    const token = outputs?.[0]?.token;
-    const currency: Option | undefined = getValues(FORM_OUTPUT_CURRENCY);
-    const fiatRateKey = getFiatRateKey(
-        symbol,
-        currency?.value as FiatCurrencyCode,
-        token as TokenAddress,
-    );
-    const fiatRate = useSelector(state => selectFiatRatesByFiatRateKey(state, fiatRateKey));
+    const { rateType, exchangeType } = getValues();
+    const fiatValues = useCoinmarketFiatValues({
+        accountBalance: account.formattedBalance,
+        cryptoSymbol: values?.sendCryptoSelect?.value,
+        tokenAddress: values.outputs?.[0]?.token,
+    });
     const fiatOfBestScoredQuote = innerQuotes?.[0]?.sendStringAmount
-        ? toFiatCurrency(innerQuotes?.[0]?.sendStringAmount, fiatRate?.rate, 2)
+        ? toFiatCurrency(innerQuotes?.[0]?.sendStringAmount, fiatValues?.fiatRate?.rate, 2)
         : null;
 
     const formIsValid = Object.keys(formState.errors).length === 0;
@@ -700,7 +694,6 @@ export const useCoinmarketExchangeForm = ({
         composedLevels,
         defaultCurrency,
         feeInfo,
-        fiatRate,
         amountLimits,
         network,
         exchangeStep,

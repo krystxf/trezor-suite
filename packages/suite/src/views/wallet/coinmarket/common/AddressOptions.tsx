@@ -4,33 +4,26 @@ import type { MenuPlacement } from 'react-select';
 import styled from 'styled-components';
 
 import type { AccountAddress } from '@trezor/connect';
-import { Translation, FiatValue, FormattedCryptoAmount } from 'src/components/suite';
+import { Translation } from 'src/components/suite';
 import { variables, Select } from '@trezor/components';
-import { formatNetworkAmount } from '@suite-common/wallet-utils';
-import type { Account } from 'src/types/wallet';
+import type { Account, NetworkSymbol } from 'src/types/wallet';
 import { useAccountAddressDictionary } from 'src/hooks/wallet/useAccounts';
 import { selectLabelingDataForAccount } from 'src/reducers/suite/metadataReducer';
 import { useSelector } from 'src/hooks/suite';
 import { CoinmarketBuyAddressOptionsType } from 'src/types/coinmarket/coinmarketOffers';
+import { CoinmarketBalance } from 'src/views/wallet/coinmarket/common/CoinmarketBalance';
+import { spacingsPx, typography } from '@trezor/theme';
 
 const AddressWrapper = styled.div`
     display: flex;
     flex-direction: column;
 `;
 
-const FiatWrapper = styled.div`
-    padding: 0 0 0 3px;
-`;
-
-const PathWrapper = styled.div`
-    padding: 0 3px;
-`;
-
 const Amount = styled.div`
     display: flex;
-    font-size: ${variables.FONT_SIZE.TINY};
-    color: ${({ theme }) => theme.TYPE_LIGHT_GREY};
-    font-weight: ${variables.FONT_WEIGHT.MEDIUM};
+    gap: ${spacingsPx.xxs};
+    ${typography.label}
+    color: ${({ theme }) => theme.textSubdued};
 `;
 
 const Address = styled.div`
@@ -41,10 +34,6 @@ const Address = styled.div`
 const Option = styled.div`
     display: flex;
     align-items: center;
-`;
-
-const CryptoWrapper = styled.div`
-    padding-right: 3px;
 `;
 
 const buildOptions = (addresses: Account['addresses']) => {
@@ -93,6 +82,7 @@ export const AddressOptions = <TFieldValues extends CoinmarketBuyAddressOptionsT
     const accountMetadata = useSelector(state =>
         selectLabelingDataForAccount(state, account?.key || ''),
     );
+    const receiveSymbolTyped = receiveSymbol as NetworkSymbol;
 
     useEffect(() => {
         if (!address && addresses) {
@@ -114,10 +104,6 @@ export const AddressOptions = <TFieldValues extends CoinmarketBuyAddressOptionsT
                     menuPlacement={menuPlacement}
                     formatOptionLabel={(accountAddress: AccountAddress) => {
                         if (!accountAddress) return null;
-                        const formattedCryptoAmount = formatNetworkAmount(
-                            accountAddress.balance || '0',
-                            receiveSymbol as Account['symbol'],
-                        );
 
                         return (
                             <Option>
@@ -127,19 +113,13 @@ export const AddressOptions = <TFieldValues extends CoinmarketBuyAddressOptionsT
                                             accountAddress.address}
                                     </Address>
                                     <Amount>
-                                        <CryptoWrapper>
-                                            <FormattedCryptoAmount
-                                                value={formattedCryptoAmount}
-                                                symbol={receiveSymbol}
-                                            />
-                                        </CryptoWrapper>
-                                        • <PathWrapper>{accountAddress.path}</PathWrapper> •
-                                        <FiatWrapper>
-                                            <FiatValue
-                                                amount={formattedCryptoAmount}
-                                                symbol={receiveSymbol || ''}
-                                            />
-                                        </FiatWrapper>
+                                        <CoinmarketBalance
+                                            balance={accountAddress.balance}
+                                            cryptoSymbolLabel={receiveSymbolTyped.toLocaleUpperCase()}
+                                            networkSymbol={receiveSymbolTyped}
+                                        />
+                                        <span>•</span>
+                                        <span>{accountAddress.path}</span>
                                     </Amount>
                                 </AddressWrapper>
                             </Option>

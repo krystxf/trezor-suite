@@ -1,16 +1,6 @@
-import {
-    selectAccounts,
-    selectDevice,
-    selectFiatRatesByFiatRateKey,
-} from '@suite-common/wallet-core';
-import {
-    amountToSatoshi,
-    getFiatRateKey,
-    isEthereumAccountSymbol,
-    isZero,
-} from '@suite-common/wallet-utils';
+import { selectAccounts, selectDevice } from '@suite-common/wallet-core';
+import { amountToSatoshi, isEthereumAccountSymbol, isZero } from '@suite-common/wallet-utils';
 import { BigNumber } from '@trezor/utils';
-import { FiatCurrencyCode } from 'invity-api';
 import { useCallback } from 'react';
 import { UseFormReturn } from 'react-hook-form';
 import {
@@ -26,11 +16,7 @@ import {
     CoinmarketUseFormActionsProps,
     CoinmarketUseFormActionsReturnProps,
 } from 'src/types/coinmarket/coinmarketForm';
-import { Option } from 'src/types/wallet/coinmarketCommonTypes';
-import {
-    coinmarketGetSortedAccounts,
-    mapTestnetSymbol,
-} from 'src/utils/wallet/coinmarket/coinmarketUtils';
+import { coinmarketGetSortedAccounts } from 'src/utils/wallet/coinmarket/coinmarketUtils';
 import { cryptoToNetworkSymbol } from 'src/utils/wallet/coinmarket/cryptoSymbolUtils';
 
 /**
@@ -64,11 +50,6 @@ export const useCoinmarketFormActions = <T extends CoinmarketSellExchangeFormPro
     const isBalanceZero = tokenData
         ? isZero(tokenData.balance || '0')
         : isZero(account.formattedBalance);
-    const symbolForFiat = mapTestnetSymbol(symbol);
-
-    const currency: Option | undefined = getValues(inputNames.currency);
-    const fiatRateKey = getFiatRateKey(symbolForFiat, currency?.value as FiatCurrencyCode);
-    const fiatRate = useSelector(state => selectFiatRatesByFiatRateKey(state, fiatRateKey));
 
     // watch change in crypto amount and recalculate fees on change
     const onCryptoAmountChange = useCallback(
@@ -175,7 +156,6 @@ export const useCoinmarketFormActions = <T extends CoinmarketSellExchangeFormPro
 
     return {
         isBalanceZero,
-        fiatRate,
 
         onCryptoAmountChange,
         onFiatAmountChange,

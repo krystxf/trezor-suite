@@ -11,7 +11,11 @@ import {
 import { useState } from 'react';
 import { SCREEN_QUERY } from '@trezor/components/src/config/variables';
 import { Translation } from 'src/components/suite';
-import { cryptoToCoinSymbol } from 'src/utils/wallet/coinmarket/cryptoSymbolUtils';
+import {
+    cryptoToCoinSymbol,
+    cryptoToNetworkSymbol,
+    isCryptoSymbolToken,
+} from 'src/utils/wallet/coinmarket/cryptoSymbolUtils';
 import CoinmarketFormOfferItem from 'src/views/wallet/coinmarket/common/CoinmarketForm/CoinmarketFormOfferItem';
 import {
     CoinmarketFormInputLabelText,
@@ -30,6 +34,7 @@ import { CoinmarketFormOffersSwitcher } from './CoinmarketFormOffersSwitcher';
 import { ExchangeTrade } from 'invity-api';
 import { CoinmarketTradeDetailType, CoinmarketTradeType } from 'src/types/coinmarket/coinmarket';
 import { CoinmarketFormContextValues } from 'src/types/coinmarket/coinmarketForm';
+import { networks } from '@suite-common/wallet-config';
 
 const CoinmarketFormOfferHeader = styled.div`
     display: flex;
@@ -100,6 +105,10 @@ const CoinmarketFormOffer = () => {
 
     const selectQuote = getSelectQuoteTyped(context);
     const shouldDisplayFiatAmount = isCoinmarketExchangeOffers(context) ? false : amountInCrypto;
+    const networkSymbol =
+        selectedCrypto && isCryptoSymbolToken(selectedCrypto.value)
+            ? cryptoToNetworkSymbol(selectedCrypto.value)
+            : null;
 
     return (
         <>
@@ -126,6 +135,10 @@ const CoinmarketFormOffer = () => {
                     }
                 />
             )}
+            {isCoinmarketExchangeOffers(context) &&
+                networkSymbol &&
+                networks[networkSymbol].name &&
+                `On ${networks[networkSymbol].name} chain`}
             <CoinmarketFormOfferHeader>
                 <CoinmarketFormOfferHeaderText>
                     <Translation id="TR_COINMARKET_YOUR_BEST_OFFER" />

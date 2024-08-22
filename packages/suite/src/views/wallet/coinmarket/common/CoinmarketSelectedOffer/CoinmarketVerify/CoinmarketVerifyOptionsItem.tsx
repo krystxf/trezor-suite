@@ -1,12 +1,8 @@
 import { CoinLogo, Column, Icon, Row, variables } from '@trezor/components';
-import { spacingsPx, typography } from '@trezor/theme';
-import {
-    AccountLabeling,
-    FiatValue,
-    FormattedCryptoAmount,
-    Translation,
-} from 'src/components/suite';
+import { spacingsPx } from '@trezor/theme';
+import { AccountLabeling, Translation } from 'src/components/suite';
 import { CoinmarketVerifyOptionsItemProps } from 'src/types/coinmarket/coinmarketVerify';
+import { CoinmarketBalance } from 'src/views/wallet/coinmarket/common/CoinmarketBalance';
 import styled, { useTheme } from 'styled-components';
 
 const LogoWrapper = styled.div`
@@ -15,20 +11,6 @@ const LogoWrapper = styled.div`
 
 const AccountWrapper = styled.div`
     padding: 0 0 0 ${spacingsPx.md};
-`;
-
-const CryptoWrapper = styled.div`
-    padding-right: ${spacingsPx.xxs};
-`;
-
-const FiatWrapper = styled.div`
-    padding: 0 0 0 ${spacingsPx.xxs};
-`;
-
-const Amount = styled.div`
-    display: flex;
-    color: ${({ theme }) => theme.TYPE_LIGHT_GREY};
-    ${typography.label}
 `;
 
 const AccountName = styled.div`
@@ -70,15 +52,11 @@ export const CoinmarketVerifyOptionsItem = ({
                                     : ''}
                             </AccountType>
                         </AccountName>
-                        <Amount>
-                            <CryptoWrapper>
-                                <FormattedCryptoAmount value={formattedBalance} symbol={symbol} />
-                            </CryptoWrapper>
-                            •
-                            <FiatWrapper>
-                                <FiatValue amount={formattedBalance} symbol={symbol} />
-                            </FiatWrapper>
-                        </Amount>
+                        <CoinmarketBalance
+                            balance={formattedBalance}
+                            cryptoSymbolLabel={symbol.toLocaleUpperCase()}
+                            networkSymbol={symbol}
+                        />
                     </Column>
                 </AccountWrapper>
             </Row>

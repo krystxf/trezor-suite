@@ -3,7 +3,10 @@ import { amountToSatoshi, getNetwork } from '@suite-common/wallet-utils';
 import { useElevation } from '@trezor/components';
 import { HiddenPlaceholder } from 'src/components/suite';
 import { useBitcoinAmountUnit } from 'src/hooks/wallet/useBitcoinAmountUnit';
-import { CoinmarketAccountOptionsGroupOptionProps } from 'src/types/coinmarket/coinmarket';
+import {
+    CoinmarketAccountOptionsGroupOptionProps,
+    CoinmarketAccountsOptionsGroupProps,
+} from 'src/types/coinmarket/coinmarket';
 import { coinmarketGetAccountLabel } from 'src/utils/wallet/coinmarket/coinmarketUtils';
 import {
     cryptoToNetworkSymbol,
@@ -19,10 +22,14 @@ import { CoinmarketFormOptionIcon } from 'src/views/wallet/coinmarket/common/Coi
 
 interface CoinmarketFormInputAccountOptionProps {
     option: CoinmarketAccountOptionsGroupOptionProps;
+    optionGroups: CoinmarketAccountsOptionsGroupProps[];
+    isSelected: boolean;
 }
 
 export const CoinmarketFormInputAccountOption = ({
     option,
+    optionGroups,
+    isSelected,
 }: CoinmarketFormInputAccountOptionProps) => {
     const networkSymbol = cryptoToNetworkSymbol(option.value);
     const network = getNetwork(networkSymbol ?? 'btc');
@@ -33,6 +40,12 @@ export const CoinmarketFormInputAccountOption = ({
     const balance = shouldSendInSats
         ? amountToSatoshi(option.balance, network?.decimals ?? 8)
         : option.balance;
+    const accountType = optionGroups.find(group =>
+        group.options.find(
+            groupOption =>
+                groupOption.descriptor === option.descriptor && groupOption.value === option.value,
+        ),
+    )?.label;
 
     return (
         <CoinmarketFormOption>
@@ -40,9 +53,13 @@ export const CoinmarketFormInputAccountOption = ({
             <CoinmarketFormOptionLabel>{option.label}</CoinmarketFormOptionLabel>
             <CoinmarketFormOptionLabelLong>{option.cryptoName}</CoinmarketFormOptionLabelLong>
             <CoinmarketFormOptionLabelLong>
-                <HiddenPlaceholder>
-                    ({balance} {balanceLabel})
-                </HiddenPlaceholder>
+                {!isSelected ? (
+                    <HiddenPlaceholder>
+                        ({balance} {balanceLabel})
+                    </HiddenPlaceholder>
+                ) : (
+                    accountType && `(${accountType})`
+                )}
             </CoinmarketFormOptionLabelLong>
             {option.value && isCryptoSymbolToken(option.value) && networkSymbol && (
                 <CoinmarketFormOptionNetwork $elevation={elevation}>

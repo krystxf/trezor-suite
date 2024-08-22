@@ -1,4 +1,4 @@
-import { Control, Controller } from 'react-hook-form';
+import { Controller } from 'react-hook-form';
 import { Select } from '@trezor/components';
 import { useCoinmarketFormContext } from 'src/hooks/wallet/coinmarket/form/useCoinmarketCommonForm';
 import {
@@ -11,18 +11,26 @@ import CoinmarketFormInputLabel from 'src/views/wallet/coinmarket/common/Coinmar
 import {
     CoinmarketExchangeFormProps,
     CoinmarketFormInputAccountProps,
-    CoinmarketSellExchangeFormProps,
     CoinmarketSellFormProps,
 } from 'src/types/coinmarket/coinmarketForm';
 import { createFilter } from 'react-select';
 import { useCoinmarketBuildAccountGroups } from 'src/hooks/wallet/coinmarket/form/useCoinmarketSellFormDefaultValues';
 import { CoinmarketFormInputAccountOption } from 'src/views/wallet/coinmarket/common/CoinmarketForm/CoinmarketFormInput/CoinmarketFormInputAccountOption';
+import { useCoinmarketFiatValues } from 'src/hooks/wallet/coinmarket/form/common/useCoinmarketFiatValues';
+import { CoinmarketBalance } from 'src/views/wallet/coinmarket/common/CoinmarketBalance';
+import styled from 'styled-components';
+import { spacingsPx } from '@trezor/theme';
 
-const CoinmarketFormInputAccount = <
+const CoinmarketBalanceWrapper = styled.div`
+    padding: ${spacingsPx.xs} ${spacingsPx.sm} 0;
+`;
+
+export const CoinmarketFormInputAccount = <
     TFieldValues extends CoinmarketSellFormProps | CoinmarketExchangeFormProps,
 >({
     label,
     accountSelectName,
+    methods,
 }: CoinmarketFormInputAccountProps<TFieldValues>) => {
     const {
         type,
@@ -30,15 +38,24 @@ const CoinmarketFormInputAccount = <
             helpers: { onCryptoCurrencyChange },
         },
     } = useCoinmarketFormContext<CoinmarketTradeSellExchangeType>();
-    const { control } = useCoinmarketFormContext();
     const optionGroups = useCoinmarketBuildAccountGroups(type);
+
+    const { control, getValues } = methods;
+    const selectedOption = getValues(accountSelectName) as
+        | CoinmarketAccountOptionsGroupOptionProps
+        | undefined;
+    const fiatValues = useCoinmarketFiatValues({
+        accountBalance: selectedOption?.balance,
+        cryptoSymbol: selectedOption?.value,
+        tokenAddress: selectedOption?.contractAddress,
+    });
 
     return (
         <>
             <CoinmarketFormInputLabel label={label} />
             <Controller
                 name={accountSelectName}
-                control={control as Control<CoinmarketSellExchangeFormProps>}
+                control={control}
                 render={({ field: { onChange, value } }) => (
                     <Select
                         value={value}
@@ -55,8 +72,15 @@ const CoinmarketFormInputAccount = <
                                 {group.label}
                             </CoinmarketFormOptionGroupLabel>
                         )}
-                        formatOptionLabel={option => (
-                            <CoinmarketFormInputAccountOption option={option} />
+                        formatOptionLabel={(
+                            option: CoinmarketAccountOptionsGroupOptionProps,
+                            { context },
+                        ) => (
+                            <CoinmarketFormInputAccountOption
+                                option={option}
+                                optionGroups={optionGroups}
+                                isSelected={context === 'value'}
+                            />
                         )}
                         data-testid="@coinmarket/form/select-account"
                         isClearable={false}
@@ -64,8 +88,11 @@ const CoinmarketFormInputAccount = <
                     />
                 )}
             />
+            {fiatValues && (
+                <CoinmarketBalanceWrapper>
+                    <CoinmarketBalance {...fiatValues} cryptoSymbolLabel={selectedOption?.label} />
+                </CoinmarketBalanceWrapper>
+            )}
         </>
     );
 };
-
-export default CoinmarketFormInputAccount;
