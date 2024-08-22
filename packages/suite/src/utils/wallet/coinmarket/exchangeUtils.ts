@@ -53,24 +53,36 @@ export const isQuoteError = (quote: ExchangeTrade): boolean => {
     return false;
 };
 
-export const fixedRateQuotes = (quotes: ExchangeTrade[], exchangeInfo: ExchangeInfo | undefined) =>
+export const fixedRateCexQuotes = (
+    quotes: ExchangeTrade[],
+    exchangeInfo: ExchangeInfo | undefined,
+) =>
     quotes.filter(
-        q => exchangeInfo?.providerInfos[q.exchange || '']?.isFixedRate && !isQuoteError(q),
+        q =>
+            exchangeInfo?.providerInfos[q.exchange || '']?.isFixedRate &&
+            !q.isDex &&
+            !isQuoteError(q),
     );
 
-export const floatRateQuotes = (quotes: ExchangeTrade[], exchangeInfo: ExchangeInfo | undefined) =>
+export const floatRateCexQuotes = (
+    quotes: ExchangeTrade[],
+    exchangeInfo: ExchangeInfo | undefined,
+) =>
     quotes.filter(
-        q => !exchangeInfo?.providerInfos[q.exchange || '']?.isFixedRate && !isQuoteError(q),
+        q =>
+            !exchangeInfo?.providerInfos[q.exchange || '']?.isFixedRate &&
+            !q.isDex &&
+            !isQuoteError(q),
     );
 
-export const getQuotesByRateType = (
+export const getCexQuotesByRateType = (
     rateType: RateType,
     quotes: ExchangeTrade[] | undefined,
     exchangeInfo: ExchangeInfo | undefined,
 ) => {
     if (!quotes) return undefined;
-    if (rateType === 'fixed') return fixedRateQuotes(quotes, exchangeInfo);
-    if (rateType === 'floating') return floatRateQuotes(quotes, exchangeInfo);
+    if (rateType === 'fixed') return fixedRateCexQuotes(quotes, exchangeInfo);
+    if (rateType === 'floating') return floatRateCexQuotes(quotes, exchangeInfo);
     else return quotes;
 };
 
@@ -78,18 +90,9 @@ export const getSuccessQuotesOrdered = (
     quotes: ExchangeTrade[],
     exchangeInfo: ExchangeInfo | undefined,
 ): ExchangeTrade[] => {
-    const { dex, cex } = quotes.reduce<Record<'cex' | 'dex', ExchangeTrade[]>>(
-        (acc, q) => {
-            if (isQuoteError(q)) return acc;
-            if (q.isDex) acc.dex.push(q);
-            else acc.cex.push(q);
-
-            return acc;
-        },
-        { cex: [], dex: [] },
-    );
-    const fixed = fixedRateQuotes(cex, exchangeInfo);
-    const float = floatRateQuotes(cex, exchangeInfo);
+    const fixed = fixedRateCexQuotes(quotes, exchangeInfo) ?? [];
+    const float = floatRateCexQuotes(quotes, exchangeInfo) ?? [];
+    const dex = quotes.filter(q => q.isDex && !isQuoteError(q)) ?? [];
 
     return [...dex, ...fixed, ...float];
 };

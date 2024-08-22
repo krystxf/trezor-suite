@@ -20,7 +20,7 @@ import {
 } from 'src/utils/wallet/coinmarket/coinmarketUtils';
 import {
     getAmountLimits,
-    getQuotesByRateType,
+    getCexQuotesByRateType,
     getSuccessQuotesOrdered,
 } from 'src/utils/wallet/coinmarket/exchangeUtils';
 import { useFormDraft } from 'src/hooks/wallet/useFormDraft';
@@ -100,7 +100,6 @@ export const useCoinmarketExchangeForm = ({
     const [innerQuotes, setInnerQuotes] = useState<ExchangeTrade[] | undefined>(
         getFilteredSuccessQuotes<CoinmarketTradeExchangeType>(quotes),
     );
-    const [selectedExchangeQuote, setSelectedExchangeQuote] = useState<ExchangeTrade>();
     const [receiveAccount, setReceiveAccount] = useState<Account | undefined>();
     const [suiteReceiveAccounts, setSuiteReceiveAccounts] =
         useState<
@@ -160,16 +159,17 @@ export const useCoinmarketExchangeForm = ({
                   amountInCrypto: draft.amountInCrypto,
                   receiveCryptoSelect: draft.receiveCryptoSelect,
                   rateType: draft.rateType,
+                  exchangeType: draft.exchangeType,
               }
         : null;
     const methods = useForm({
         mode: 'onChange',
         defaultValues: draftUpdated ? draftUpdated : defaultValues,
     });
-    const { reset, register, getValues, handleSubmit, formState, control } = methods;
+    const { reset, register, getValues, setValue, handleSubmit, formState, control } = methods;
     const values = useWatch<CoinmarketExchangeFormProps>({ control });
     const previousValues = useRef<typeof values | null>(isNotFormPage ? draftUpdated : null);
-    const { outputs, rateType } = getValues();
+    const { outputs, rateType, exchangeType } = getValues();
     const token = outputs?.[0]?.token;
     const currency: Option | undefined = getValues(FORM_OUTPUT_CURRENCY);
     const fiatRateKey = getFiatRateKey(
@@ -657,17 +657,21 @@ export const useCoinmarketExchangeForm = ({
         };
     }, []);
 
-    const filteredQuotes = useMemo(
-        () => getQuotesByRateType(rateType, innerQuotes, exchangeInfo),
-        [innerQuotes, rateType, exchangeInfo],
+    const filteredCexQuotes = useMemo(
+        () => getCexQuotesByRateType(rateType, innerQuotes, exchangeInfo),
+        [rateType, innerQuotes, exchangeInfo],
     );
 
-    // set new default selected quote if the current one is not in the filtered quotes
+    const dexQuotes = useMemo(() => innerQuotes?.filter(q => q.isDex), [innerQuotes]);
+
+    // handle edge case when there are no longer quotes of selected exchange type
     useEffect(() => {
-        if (!filteredQuotes?.length) setSelectedExchangeQuote(undefined);
-        else if (!filteredQuotes.some(quote => quote.orderId === selectedQuote?.orderId))
-            setSelectedExchangeQuote(filteredQuotes[0]);
-    }, [filteredQuotes, selectedQuote?.orderId, setSelectedExchangeQuote]);
+        if (exchangeType === 'DEX' && !dexQuotes?.length && filteredCexQuotes?.length) {
+            setValue('exchangeType', 'CEX');
+        } else if (exchangeType === 'CEX' && !filteredCexQuotes?.length && dexQuotes?.length) {
+            setValue('exchangeType', 'DEX');
+        }
+    }, [dexQuotes, exchangeType, filteredCexQuotes, setValue]);
 
     return {
         type,
@@ -690,7 +694,8 @@ export const useCoinmarketExchangeForm = ({
         callInProgress,
         exchangeInfo,
         symbolsInfo,
-        quotes: filteredQuotes,
+        quotes: filteredCexQuotes,
+        dexQuotes,
         quotesRequest,
         composedLevels,
         defaultCurrency,
@@ -714,7 +719,5 @@ export const useCoinmarketExchangeForm = ({
         verifyAddress,
         selectQuote,
         confirmTrade,
-        selectedExchangeQuote,
-        setSelectedExchangeQuote,
     };
 };

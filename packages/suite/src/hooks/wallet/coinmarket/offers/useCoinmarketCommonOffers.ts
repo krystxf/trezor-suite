@@ -1,7 +1,7 @@
 import { useTimer } from '@trezor/react-utils';
 import { useDevice } from 'src/hooks/suite';
 import { InvityAPIReloadQuotesAfterSeconds } from 'src/constants/wallet/coinmarket/metadata';
-import { createContext, useContext, useEffect, useState } from 'react';
+import { createContext, useContext, useEffect, useMemo, useState } from 'react';
 import {
     CoinmarketTradeBuyType,
     CoinmarketTradeDetailMapProps,
@@ -18,6 +18,7 @@ import {
 import { useDispatch } from 'react-redux';
 import { SET_MODAL_CRYPTO_CURRENCY } from 'src/actions/wallet/constants/coinmarketCommonConstants';
 import { useServerEnvironment } from 'src/hooks/wallet/coinmarket/useServerEnviroment';
+import { CoinmarketFormContextValues } from 'src/types/coinmarket/coinmarketForm';
 
 export const isCoinmarketBuyOffers = (
     offersContext: CoinmarketOffersMapProps[keyof CoinmarketOffersMapProps],
@@ -87,6 +88,20 @@ export const useCoinmarketCommonOffers = <T extends CoinmarketTradeType>({
         setSelectedQuote,
         checkQuotesTimer,
     };
+};
+
+export const useFilteredQuotesByRateTypeAndExchangeType = (
+    context: CoinmarketFormContextValues<CoinmarketTradeType>,
+) => {
+    const { quotes } = context;
+    const isExchange = isCoinmarketExchangeOffers(context);
+    const exchangeType = isExchange ? context.getValues('exchangeType') : undefined;
+    const dexQuotes = isExchange ? context.dexQuotes : undefined;
+
+    return useMemo(
+        () => (exchangeType === 'DEX' ? dexQuotes : quotes),
+        [dexQuotes, quotes, exchangeType],
+    );
 };
 
 export const CoinmarketOffersContext =

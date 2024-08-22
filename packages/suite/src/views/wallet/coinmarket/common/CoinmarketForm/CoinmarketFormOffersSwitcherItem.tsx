@@ -5,6 +5,7 @@ import { CoinmarketUtilsProvider } from '../CoinmarketUtils/CoinmarketUtilsProvi
 import { Translation } from 'src/components/suite';
 import styled, { css } from 'styled-components';
 import { borders, spacingsPx } from '@trezor/theme';
+import { ExchangeType } from 'src/types/coinmarket/coinmarketForm';
 
 const Offer = styled.div<{ $isSelected: boolean }>`
     padding: ${spacingsPx.md};
@@ -47,13 +48,13 @@ interface CoinmarketFormOffersSwitcherItemProps {
     isSelectable: boolean;
     onSelect: (_quote: ExchangeTrade) => void;
     quote: ExchangeTrade;
-    selectedQuote: ExchangeTrade | undefined;
+    selectedExchangeType: ExchangeType;
     providers: CoinmarketUtilsProvidersProps | undefined;
     isBestRate?: boolean;
 }
 
 export const CoinmarketFormOffersSwitcherItem = ({
-    selectedQuote,
+    selectedExchangeType,
     onSelect,
     quote,
     providers,
@@ -61,7 +62,7 @@ export const CoinmarketFormOffersSwitcherItem = ({
     isSelectable,
 }: CoinmarketFormOffersSwitcherItemProps) => {
     const exchangeType = quote.isDex ? 'DEX' : 'CEX';
-    const isSelected = selectedQuote?.isDex === quote.isDex;
+    const isSelected = Boolean(selectedExchangeType === exchangeType);
 
     const content = (
         <div className="content">

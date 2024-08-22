@@ -38,6 +38,7 @@ export const useCoinmarketExchangeFormDefaultValues = (
                       ],
                       selectedUtxos: [],
                       rateType: 'fixed',
+                      exchangeType: 'CEX',
                       // TODO: remove type casting (options string[])
                   } as ExchangeFormState)
                 : undefined,

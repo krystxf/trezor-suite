@@ -117,7 +117,7 @@ export const CoinmarketFormInputs = () => {
             getValues,
             changeFeeLevel,
         } = context;
-        const { amountInCrypto, rateType, sendCryptoSelect } = getValues();
+        const { amountInCrypto, rateType, sendCryptoSelect, exchangeType } = getValues();
         const currencySelect = getValues().outputs[0].currency;
         const supportedCryptoCurrencies = exchangeInfo?.buySymbols;
 
@@ -167,7 +167,9 @@ export const CoinmarketFormInputs = () => {
                         changeFeeLevel={changeFeeLevel}
                     />
                 </CoinmarketFeesWrapper>
-                <CoinmarketFormSwitcherExchangeRates rateType={rateType} setValue={setValue} />
+                {exchangeType === 'CEX' && (
+                    <CoinmarketFormSwitcherExchangeRates rateType={rateType} setValue={setValue} />
+                )}
             </div>
         );
     }

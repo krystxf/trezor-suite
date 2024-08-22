@@ -88,12 +88,14 @@ export interface CoinmarketSellFormProps
 }
 
 export type RateType = 'fixed' | 'floating';
+export type ExchangeType = 'CEX' | 'DEX';
 
 export interface CoinmarketExchangeFormProps extends FormState {
     receiveCryptoSelect: CoinmarketCryptoListProps | null;
     sendCryptoSelect: CoinmarketAccountOptionsGroupOptionProps | undefined;
     amountInCrypto: boolean;
     rateType: RateType;
+    exchangeType: ExchangeType;
 }
 
 export type CoinmarketBuySellFormProps = CoinmarketBuyFormProps | CoinmarketSellFormProps;
@@ -220,7 +222,8 @@ export interface CoinmarketExchangeFormContextProps
     amountLimits?: CryptoAmountLimits;
     composedLevels?: PrecomposedLevels | PrecomposedLevelsCardano;
     fiatRate?: Rate; // TODO: ??
-    quotes: ExchangeTrade[] | undefined;
+    quotes: ExchangeTrade[] | undefined; // CEX quotes
+    dexQuotes: ExchangeTrade[] | undefined;
     quotesRequest: ExchangeTradeQuoteRequest | undefined;
     receiveAccount?: Account;
     addressVerified: string | undefined;
@@ -235,8 +238,6 @@ export interface CoinmarketExchangeFormContextProps
     sendTransaction: () => void;
     selectQuote: (quote: ExchangeTrade) => void;
     verifyAddress: (account: Account, address?: string, path?: string) => Promise<void>;
-    selectedExchangeQuote: ExchangeTrade | undefined;
-    setSelectedExchangeQuote: (quote: ExchangeTrade | undefined) => void;
 }
 
 export type CoinmarketFormMapProps = {

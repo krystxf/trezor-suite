@@ -6,6 +6,7 @@ import { selectLocalCurrency } from 'src/reducers/wallet/settingsReducer';
 import { useSelector } from 'src/hooks/suite';
 import {
     CoinmarketExchangeFormDefaultValuesProps,
+    ExchangeType,
     RateType,
 } from 'src/types/coinmarket/coinmarketForm';
 import { FormState, Output } from '@suite-common/wallet-types';
@@ -52,6 +53,7 @@ export const useCoinmarketExchangeFormDefaultValues = (
             sendCryptoSelect: defaultSendCryptoSelect,
             receiveCryptoSelect: null,
             rateType: 'fixed' as RateType,
+            exchangeType: 'CEX' as ExchangeType,
         }),
         [defaultFormState, defaultSendCryptoSelect],
     );

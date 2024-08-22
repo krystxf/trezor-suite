@@ -14,6 +14,7 @@ import {
     CoinmarketUtilsProvidersProps,
 } from 'src/types/coinmarket/coinmarket';
 import { CoinmarketFormOffersSwitcherItem } from './CoinmarketFormOffersSwitcherItem';
+import { CoinmarketExchangeFormContextProps } from 'src/types/coinmarket/coinmarketForm';
 
 const BestOffers = styled.div<{ $elevation: Elevation }>`
     padding: ${spacingsPx.xxs};
@@ -40,28 +41,28 @@ const NoOffers = styled.div`
 `;
 
 interface CoinmarketFormOffersSwitcherProps {
+    context: CoinmarketExchangeFormContextProps;
     isFormLoading: boolean;
     isFormInvalid: boolean;
     providers: CoinmarketUtilsProvidersProps | undefined;
     quotes: ExchangeTrade[] | undefined;
-    selectedQuote: ExchangeTrade | undefined;
-    setSelectedQuote: (quote: ExchangeTrade | undefined) => void;
     bestRatedQuote: CoinmarketTradeDetailType | undefined;
 }
 
 export const CoinmarketFormOffersSwitcher = ({
+    context,
     isFormLoading,
     isFormInvalid,
     providers,
     quotes,
-    selectedQuote,
-    setSelectedQuote,
     bestRatedQuote,
 }: CoinmarketFormOffersSwitcherProps) => {
     const theme = useTheme();
+    const { setValue, getValues, dexQuotes } = context;
+    const exchangeType = getValues('exchangeType');
     const { elevation } = useElevation();
-    const cexQuote = quotes?.find(quote => !quote.isDex);
-    const dexQuote = quotes?.find(quote => quote.isDex);
+    const cexQuote = quotes?.[0];
+    const dexQuote = dexQuotes?.[0];
     const hasSingleOption = !cexQuote !== !dexQuote;
 
     if (isFormLoading && !isFormInvalid) {
@@ -91,9 +92,9 @@ export const CoinmarketFormOffersSwitcher = ({
         <BestOffers $elevation={elevation}>
             {cexQuote ? (
                 <CoinmarketFormOffersSwitcherItem
-                    selectedQuote={selectedQuote}
+                    selectedExchangeType={exchangeType}
                     isSelectable={!hasSingleOption}
-                    onSelect={() => setSelectedQuote(cexQuote)}
+                    onSelect={() => setValue('exchangeType', 'CEX')}
                     providers={providers}
                     quote={cexQuote}
                     isBestRate={bestRatedQuote?.orderId === cexQuote?.orderId}
@@ -105,9 +106,9 @@ export const CoinmarketFormOffersSwitcher = ({
             )}
             {dexQuote ? (
                 <CoinmarketFormOffersSwitcherItem
-                    selectedQuote={selectedQuote}
+                    selectedExchangeType={exchangeType}
                     isSelectable={!hasSingleOption}
-                    onSelect={() => setSelectedQuote(dexQuote)}
+                    onSelect={() => setValue('exchangeType', 'DEX')}
                     providers={providers}
                     quote={dexQuote}
                     isBestRate={bestRatedQuote?.orderId === dexQuote?.orderId}
