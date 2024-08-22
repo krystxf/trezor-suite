@@ -115,14 +115,13 @@ export class Device extends TypedEmitter<DeviceEvents> {
 
     acquirePromise?: ReturnType<Transport['acquire']> = undefined;
     releasePromise?: ReturnType<Transport['release']> = undefined;
-
+    firstRunPromise: Deferred<boolean>;
     runPromise?: Deferred<void>;
+    private cancelableWorkflow?: (err?: Error) => Promise<void>;
 
     loaded = false;
 
     inconsistent = false;
-
-    firstRunPromise: Deferred<boolean>;
 
     activitySessionID?: Session | null;
 
@@ -294,15 +293,18 @@ export class Device extends TypedEmitter<DeviceEvents> {
         }
     }
 
-    private cancelableRequest?: (err?: Error) => Promise<void>;
-    setCancelableRequest(req?: typeof this.cancelableRequest) {
-        this.cancelableRequest = req;
+    setCancelableWorkflow(req: typeof this.cancelableWorkflow) {
+        this.cancelableWorkflow = req;
+    }
+
+    clearCancelableWorkflow() {
+        this.cancelableWorkflow = undefined;
     }
 
     async interruptionFromUser(error: Error) {
         _log.debug('interruptionFromUser');
 
-        await this.cancelableRequest?.(error);
+        await this.cancelableWorkflow?.(error);
 
         if (this.runPromise) {
             // reject inner defer

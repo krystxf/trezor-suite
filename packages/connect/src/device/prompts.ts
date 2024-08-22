@@ -27,6 +27,7 @@ type DeviceEventCallback<K extends keyof DeviceEvents> = DeviceEvents[K] extends
 
 const cancelPrompt = (device: Device) => {
     if (!device.activitySessionID) {
+        // device disconnected or acquired by someone else
         return Promise.resolve({
             success: false,
             error: TRANSPORT_ERROR.SESSION_NOT_FOUND,
@@ -57,14 +58,14 @@ const prompt = <E extends PromptEvents>(event: E, ...[device, ...args]: DeviceEv
             );
 
         if (device.listenerCount(event) > 0) {
-            device.setCancelableRequest(error => {
-                device.setCancelableRequest();
+            device.setCancelableWorkflow(error => {
+                device.clearCancelableWorkflow();
 
                 return cancelAndReject(error);
             });
 
             const callback = (...[response, error]: Parameters<DeviceEventCallback<E>>) => {
-                device.setCancelableRequest();
+                device.clearCancelableWorkflow();
                 if (error || response == null) {
                     cancelAndReject(error);
                 } else {
