@@ -640,11 +640,19 @@ export const getAccountFiatBalance = ({
     return totalBalance.toFixed();
 };
 
-export const getTotalFiatBalance = (
-    deviceAccounts: Account[],
-    localCurrency: FiatCurrencyCode,
-    rates?: RatesByKey,
-) => {
+export const getTotalFiatBalance = ({
+    deviceAccounts,
+    localCurrency,
+    rates,
+    shouldIncludeTokens = true,
+    shouldIncludeStaking = true,
+}: {
+    deviceAccounts: Account[];
+    localCurrency: FiatCurrencyCode;
+    rates?: RatesByKey;
+    shouldIncludeTokens?: boolean;
+    shouldIncludeStaking?: boolean;
+}) => {
     let instanceBalance = new BigNumber(0);
     deviceAccounts.forEach(a => {
         const accountFiatBalance =
@@ -652,6 +660,8 @@ export const getTotalFiatBalance = (
                 account: a,
                 localCurrency,
                 rates,
+                shouldIncludeTokens,
+                shouldIncludeStaking,
             }) ?? '0';
         instanceBalance = instanceBalance.plus(accountFiatBalance);
     });
