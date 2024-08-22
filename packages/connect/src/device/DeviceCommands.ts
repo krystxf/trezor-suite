@@ -387,6 +387,7 @@ export class DeviceCommands {
 
     _filterCommonTypes(res: DefaultMessageResponse): Promise<DefaultMessageResponse> {
         this._cancelableRequestBySend = false;
+        this.device.clearCancelableWorkflow();
 
         if (res.type === 'Failure') {
             const { code } = res.message;
@@ -418,7 +419,16 @@ export class DeviceCommands {
         }
 
         if (res.type === 'ButtonRequest') {
-            this._cancelableRequestBySend = true;
+            // this._cancelableRequestBySend = true;
+
+            this.device.setCancelableWorkflow(async () => {
+                await this.transport.send({
+                    protocol: this.device.protocol,
+                    session: this.sessionId,
+                    name: 'Cancel',
+                    data: {},
+                }).promise;
+            });
 
             if (res.message.code === 'ButtonRequest_PassphraseEntry') {
                 this.device.emit(DEVICE.PASSPHRASE_ON_DEVICE);
