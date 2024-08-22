@@ -36,7 +36,7 @@
         "@trezor/styles": "workspace:*",
         "@trezor/utils": "workspace:*",
         "react": "18.2.0",
-        "react-hook-form": "^7.50.1",
+        "react-hook-form": "^7.52.2",
         "react-native": "0.74.1",
         "react-redux": "8.0.7"
     }
