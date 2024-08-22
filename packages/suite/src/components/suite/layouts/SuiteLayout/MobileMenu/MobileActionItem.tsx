@@ -1,6 +1,6 @@
 import { useMemo, ReactNode, HTMLAttributes } from 'react';
 import styled, { useTheme } from 'styled-components';
-import { Icon, IconProps, variables } from '@trezor/components';
+import { IconLegacy, IconProps, variables } from '@trezor/components';
 import { FADE_IN } from '@trezor/components/src/config/animations';
 
 const MobileWrapper = styled.div`
@@ -112,7 +112,7 @@ export const MobileActionItem = ({
     const IconComponent = useMemo(
         () =>
             icon ? (
-                <Icon
+                <IconLegacy
                     color={isActive ? theme.textDefault : theme.textSubdued}
                     size={24}
                     icon={icon}
@@ -134,7 +134,7 @@ export const MobileActionItem = ({
                 )}
                 {indicator === 'check' && (
                     <Indicator>
-                        <Icon icon="CHECK" size={10} color={theme.TYPE_GREEN} />
+                        <IconLegacy icon="CHECK" size={10} color={theme.TYPE_GREEN} />
                     </Indicator>
                 )}
             </>

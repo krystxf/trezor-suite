@@ -1,6 +1,6 @@
 import { ReactNode, MouseEvent } from 'react';
 import styled, { css, useTheme } from 'styled-components';
-import { Icon, IconProps } from '../../Icon/Icon';
+import { IconLegacy, IconProps } from '../../Icon/IconLegacy';
 import { TypographyStyle, spacingsPx, typography, typographyStylesBase } from '@trezor/theme';
 
 type AProps = {
@@ -95,7 +95,7 @@ const Link = ({
         >
             {children}
             {icon && (
-                <Icon
+                <IconLegacy
                     size={iconSize}
                     icon={icon}
                     {...(variant !== undefined

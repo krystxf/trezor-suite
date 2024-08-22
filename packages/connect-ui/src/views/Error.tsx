@@ -3,7 +3,14 @@ import { ReactNode } from 'react';
 
 import styled from 'styled-components';
 
-import { Button, CollapsibleBox, colors, Icon, IconProps, variables } from '@trezor/components';
+import {
+    Button,
+    CollapsibleBox,
+    colors,
+    IconLegacy,
+    IconProps,
+    variables,
+} from '@trezor/components';
 import { isFirefox } from '@trezor/env-utils';
 
 const WhiteCollapsibleBox = styled(CollapsibleBox)`
@@ -218,7 +225,7 @@ const TipsContainer = styled.div`
     margin-bottom: 20px;
 `;
 
-const StyledIcon = styled(Icon)`
+const StyledIcon = styled(IconLegacy)`
     width: 40px;
     height: 40px;
     border-radius: 20px;
