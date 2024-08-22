@@ -182,12 +182,12 @@ export class TrezordNode {
                     ) {
                         next(req, res);
                     } else {
-                        allowOrigins(['https://sldev.cz', 'https://trezor.io', 'http://localhost'])(
-                            req,
-                            res,
-                            next,
-                            context,
-                        );
+                        allowOrigins([
+                            'https://sldev.cz',
+                            'https://trezor.io',
+                            'http://localhost',
+                            'http://suite.trezoriovpjcahpzkrewelclulmszwbqpzmzgub37gbcjlvluxtruqad.onion/web',
+                        ])(req, res, next, context);
                     }
                 },
             ]);
