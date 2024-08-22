@@ -4,12 +4,6 @@ import { ERRORS } from '../constants';
 import { DEVICE } from '../events';
 import type { Device, DeviceEvents } from './Device';
 
-export type PromptPassphraseResponse = {
-    passphrase?: string;
-    passphraseOnDevice?: boolean;
-    cache?: boolean;
-};
-
 export type PromptCallback<T> = (response: T | null, error?: Error) => void;
 
 type PromptEvents = typeof DEVICE.PIN | typeof DEVICE.PASSPHRASE | typeof DEVICE.WORD;

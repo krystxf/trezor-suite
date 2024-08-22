@@ -869,13 +869,7 @@ const onDevicePassphraseHandler =
         // wait for passphrase
         try {
             const uiResp = await uiPromise.promise;
-            const { value, passphraseOnDevice, save } = uiResp.payload;
-            // send as PassphrasePromptResponse
-            callback({
-                passphrase: value.normalize('NFKD'),
-                passphraseOnDevice,
-                cache: save,
-            });
+            callback(uiResp.payload);
         } catch (error) {
             callback(null, error);
         }
@@ -891,8 +885,7 @@ const onDevicePassphraseHandler =
 const onEmptyPassphraseHandler =
     (): DeviceEvents['passphrase'] =>
     (...[_, callback]) => {
-        // send as PassphrasePromptResponse
-        callback({ passphrase: '' });
+        callback({ value: '' });
     };
 
 /**

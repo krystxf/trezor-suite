@@ -4,7 +4,14 @@ import { Session } from '@trezor/transport';
 import { TransportProtocol, v1 as v1Protocol, bridge as bridgeProtocol } from '@trezor/protocol';
 import { DeviceCommands } from './DeviceCommands';
 import { PROTO, ERRORS, NETWORK } from '../constants';
-import { DEVICE, DeviceButtonRequestPayload, UI } from '../events';
+import {
+    DEVICE,
+    DeviceButtonRequestPayload,
+    UI,
+    UiResponsePin,
+    UiResponsePassphrase,
+    UiResponseWord,
+} from '../events';
 import { getAllNetworks } from '../data/coinInfo';
 import { DataManager } from '../data/DataManager';
 import { getFirmwareStatus, getRelease, getReleases } from '../data/firmwareInfo';
@@ -30,7 +37,7 @@ import {
 import { models } from '../data/models';
 import { getLanguage } from '../data/getLanguage';
 import { checkFirmwareRevision } from './checkFirmwareRevision';
-import { PromptCallback, PromptPassphraseResponse } from './prompts';
+import type { PromptCallback } from './prompts';
 
 // custom log
 const _log = initLog('Device');
@@ -68,16 +75,16 @@ export interface DeviceEvents {
     [DEVICE.PIN]: (
         device: Device,
         type: PROTO.PinMatrixRequestType | undefined,
-        callback: PromptCallback<string>,
+        callback: PromptCallback<UiResponsePin['payload']>,
     ) => void;
     [DEVICE.WORD]: (
         device: Device,
         type: PROTO.WordRequestType,
-        callback: PromptCallback<string>,
+        callback: PromptCallback<UiResponseWord['payload']>,
     ) => void;
     [DEVICE.PASSPHRASE]: (
         device: Device,
-        callback: PromptCallback<PromptPassphraseResponse>,
+        callback: PromptCallback<UiResponsePassphrase['payload']>,
     ) => void;
     [DEVICE.PASSPHRASE_ON_DEVICE]: () => void;
     [DEVICE.BUTTON]: (device: Device, payload: DeviceButtonRequestPayload) => void;
