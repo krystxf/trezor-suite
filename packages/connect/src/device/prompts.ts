@@ -12,6 +12,19 @@ export type PromptPassphraseResponse = {
 
 export type PromptCallback<T> = (response: T | null, error?: Error) => void;
 
+type PromptEvents = typeof DEVICE.PIN | typeof DEVICE.PASSPHRASE | typeof DEVICE.WORD;
+// infer all args of Device.emit but one (callback)
+type PromptArgs<T extends unknown[]> = T extends readonly [...infer Args, any] ? Args : never;
+// infer last arg of Device.emit (callback)
+type CallbackArgFn<T extends unknown[]> = T extends readonly [...unknown[], infer Cb] ? Cb : never;
+type AnyFn = (...args: any[]) => any;
+type DeviceEventArgs<K extends keyof DeviceEvents> = DeviceEvents[K] extends AnyFn
+    ? PromptArgs<Parameters<DeviceEvents[K]>>
+    : never;
+type DeviceEventCallback<K extends keyof DeviceEvents> = DeviceEvents[K] extends AnyFn
+    ? CallbackArgFn<Parameters<DeviceEvents[K]>>
+    : never;
+
 const cancelPrompt = (device: Device) => {
     if (!device.activitySessionID) {
         return Promise.resolve({
@@ -28,25 +41,9 @@ const cancelPrompt = (device: Device) => {
     }).promise;
 };
 
-type PromptEvents = typeof DEVICE.PIN | typeof DEVICE.PASSPHRASE | typeof DEVICE.WORD;
-// infer all args but one (callback)
-type PromptArgs<T extends unknown[]> = T extends readonly [...infer A, any] ? A : never;
-type DeviceEventCallback<K extends keyof DeviceEvents> = DeviceEvents[K];
-type AnyFn = (...args: any[]) => any;
-// callback fn is either 2nd or 3rd param, find it and use it as return type of prompt promise
-type PromptReturnType<K extends keyof DeviceEvents> = DeviceEvents[K] extends AnyFn
-    ? Parameters<DeviceEvents[K]>[1] extends AnyFn
-        ? NonNullable<Parameters<Parameters<DeviceEvents[K]>[1]>[0]>
-        : Parameters<DeviceEvents[K]>[2] extends AnyFn
-          ? NonNullable<Parameters<Parameters<DeviceEvents[K]>[2]>[0]>
-          : never
-    : never;
-
-const prompt = <E extends PromptEvents>(
-    event: E,
-    ...[device, ...args]: PromptArgs<Parameters<DeviceEventCallback<E>>>
-) => {
-    return new Promise<PromptReturnType<E>>((resolve, reject) => {
+const prompt = <E extends PromptEvents>(event: E, ...[device, ...args]: DeviceEventArgs<E>) => {
+    // return non nullable first arg of PromptCallback<E>
+    return new Promise<NonNullable<Parameters<DeviceEventCallback<E>>[0]>>((resolve, reject) => {
         const cancelAndReject = (error?: Error) =>
             cancelPrompt(device).then(onCancel =>
                 reject(
@@ -66,7 +63,7 @@ const prompt = <E extends PromptEvents>(
                 return cancelAndReject(error);
             });
 
-            const callback: PromptCallback<PromptReturnType<E>> = (response, error) => {
+            const callback = (...[response, error]: Parameters<DeviceEventCallback<E>>) => {
                 device.setCancelableRequest();
                 if (error || response == null) {
                     cancelAndReject(error);

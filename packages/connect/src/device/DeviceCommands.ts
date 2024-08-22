@@ -561,8 +561,6 @@ export class DeviceCommands {
         }
         this.dispose();
 
-        console.warn('DeviceCommands cancel', this._cancelableRequestBySend, this.callPromise);
-
         if (!this._cancelableRequestBySend) {
             if (this.callPromise) {
                 await this.callPromise.promise;
