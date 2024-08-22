@@ -17,6 +17,7 @@
         "@suite-common/suite-types": "workspace:*",
         "@suite-common/wallet-types": "workspace:*",
         "@trezor/connect": "workspace:*",
+        "@trezor/theme": "workspace:*",
         "@trezor/urls": "workspace:*",
         "date-fns": "^2.30.0"
     }

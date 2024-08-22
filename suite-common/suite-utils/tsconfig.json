@@ -6,6 +6,7 @@
         { "path": "../suite-types" },
         { "path": "../wallet-types" },
         { "path": "../../packages/connect" },
+        { "path": "../../packages/theme" },
         { "path": "../../packages/urls" }
     ]
 }
